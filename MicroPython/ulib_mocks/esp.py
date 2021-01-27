@@ -1,0 +1,4 @@
+
+
+def osdebug(state):
+    pass

@@ -1,0 +1,9 @@
+boto3
+botocore
+jmespath
+pkg-resources
+python-dateutil
+s3transfer
+six
+urllib3
+awscli

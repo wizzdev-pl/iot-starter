@@ -1,0 +1,30 @@
+# terraform temps
+terraform/.tmp/**
+terraform/.terraform/*
+
+# terraform bin
+terraform/terraform
+
+#JSON aws configuration file
+MicroPython/src/aws_config.json
+
+# Python cache files
+*.pyc
+venv/
+.idea/
+
+
+Misc files
+*.info
+
+#Flash setup
+sdkconfig
+
+
+# Hash of last commit
+commit_hash.txt
+
+
+#*moc*
+*.backup*
+*LOCAL*

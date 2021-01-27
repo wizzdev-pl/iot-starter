@@ -1,0 +1,4 @@
+-r ./db_access/requirements.txt
+-r ./lambda_iot_core_to_dynamodb/requirements.txt
+-r ./aws_architecture/requirements.txt
+-r ./MicroPython/requirements.txt

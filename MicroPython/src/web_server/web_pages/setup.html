@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title> WizzDev Mobile IoT </title>
+    <meta name="robots" content="noindex"/>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32-1.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="form.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <span class="header__title">
+            <a href="index.html">
+                Wizzdev Mobile IoT
+            </a>
+        </span>
+        <nav class="header__nav">
+            <a class="header__nav__link" href="setup.html">Device Setup</a>
+            <a class="header__nav__link" href="server_info.html">System Information</a>
+        </nav>
+    </div>
+
+    <!-- Body -->
+    <div class="hero hero--padding">
+        <div class="centralize">
+            <div class="readings">
+                <strong class="readings__title">Registered Devices:</strong>
+                <div class="readings__devices">
+                    <div id="reading_div">
+                        Loading
+                        <span class="readings__loading_dots">.</span>
+                        <script>
+                            var index = 1;
+                            var elem = document.getElementsByClassName("readings__loading_dots");
+                            setInterval(function () {
+                                elem[0].innerHTML = ".".repeat(index++ % 3 + 1)
+                            }, 1500)
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup_form">
+                <strong class="setup_form_title">Register new device:</strong>
+                <div class="setup_form__entry">
+                    <label for="formSsid">SSID:</label>
+                    <input type="text" id="formSsid" name="formSsid">
+                </div>
+                <div class="setup_form__entry">
+                    <label for="formPassword">Password:</label>
+                    <input type="password" id="formPassword" name="formPassword">
+                </div>
+                <input type="submit" value="Submit" class="setup_form__submit" onclick="sendWiFiConfiguration()">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <small>Wizzdev © Copyright
+        <script>document.write(new Date().getUTCFullYear());</script>
+    </small>
+</footer>
+
+</body>
+
+</html>
