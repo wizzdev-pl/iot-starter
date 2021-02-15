@@ -20,9 +20,10 @@ export default {
     },
     actions: {
         loadDeviceShadow: async (context, deviceID) => {
-            return DeviceShadowActions.apiHelper.getOne(context, "ADD_ONE_ITEM", deviceID, {
+            return 1
+            /*DeviceShadowActions.apiHelper.getOne(context, "ADD_ONE_ITEM", deviceID, {
                 suffix: deviceID + "/shadow", skipError: true
-            })
+            })*/
         }
     }
 }

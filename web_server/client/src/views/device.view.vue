@@ -16,12 +16,14 @@
                         </md-button>
                     </router-link>
 
+<!--
                     <router-link :to="'/devices/' + deviceId + '/configuration'">
                         <md-button id="btn-configuration">
                             <md-icon class="mb-1 mr-1">settings</md-icon>
                             Configuration
                         </md-button>
                     </router-link>
+-->
 
                 </div>
             </div>
