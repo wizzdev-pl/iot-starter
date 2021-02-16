@@ -9,21 +9,20 @@ The board was programmed using MicroPython, which is a Python implementation
 for embedded devices.
 
 
-## Cloning repository
-To clone repository use following lines:
-```bash
-    git@gitlab.com:wizzdev/internal-projects/iot-starter.git
-    cd iot-starter
-    git submodule init
-    git submodule update --init --recursive
-```
-
 ## Prerequisites
 
 Before compiling there are some packages required to install on the PC. Run the following command to install them:
-
 ```
-sudo apt-get install git wget bison gperf python python-pip python-setuptools python-serial python-click python-cryptography python-future python-pyparsing python-pyelftools ninja-build libssl-dev
+sudo apt-get install git wget bison gperf python python-pip python3-virtualenv python-setuptools python-serial python-click python-cryptography python-future python-pyparsing python-pyelftools ninja-build libssl-dev
+```
+
+## Cloning repository
+To clone repository use following lines:
+```bash
+git clone https://github.com/wizzdev-pl/iot-starter.git
+cd iot-starter
+git submodule init
+git submodule update --init --recursive
 ```
 
 To flash and debug device it is required to add user to dialout group:
@@ -41,11 +40,11 @@ sudo usermod -a -G dialout $USER
 ## Installing
 ### AWS configuration 
 AWS's configuration is handled using terraform. Detailed description of this 
-procedure is available in the ".terraform" directory.
+procedure is available in the "terraform" directory [here](terraform/README.md).
 
 ### Flashing the board 
 A dedicated Python script was prepared for this procedure. For more information,
-please go to the "MicroPython" directory.
+please go to the "MicroPython" directory [here](MicroPython/README.md).
 
 ## Working with configured device
 After all these steps, the board should send data from the sensor into AWS.

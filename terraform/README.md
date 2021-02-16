@@ -12,30 +12,39 @@ _(via: https://www.terraform.io/intro/index.html)_
 #### Terraform
 You can download terraform binary from this website: https://www.terraform.io/downloads.html
 Downloaded file should be placed in this directory (iot-starter/terraform). You can check your installation with this command:
-```
-    terraform --version
+```bash
+terraform --version
 ```
  
 #### Python 3, PIP 
 Python can be downloaded from this website: https://www.python.org/downloads/
 Please follow installation instructions from their website. 
 After installation, you can check if it is installed correctly by typing the following commands in your terminal:
-```
-    python3 --version
-    pip3 --version
+```bash
+python3 --version
+pip3 --version
 ```
 
 #### Node.js, npm
 These requirements are needed to build and bundle visualization. Nodejs can be installed from this website:
 https://nodejs.org/en/download/. Npm should be installed automatically along with nodejs.
 You can check if installation succeed with these commands:
-```
-    node --version
-    npm --version
+```bash
+node --version
+npm --version
 ```
 Project requires to install node.js in version >= 10.0.
-## Installation
+To update npm to the latest version
+```bash
+npm install -g npm@latest
+```
+or to update to the most recent release:
+```bash
+npm install -g npm@next
+```
 
+
+## Installation
 
 ##### 1. Create virtual environment:
 First, you need to create virtual environment
@@ -74,6 +83,9 @@ in this website: https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-b
 Next, you should change "_bucket_" value to the name of the created bucket
 for s3 backend in main.tf in this directory. 
 (AWS policy says that s3 bucket name should be unique in the world).
+Value "_region_" refers to one of AWS regions. Remember to change "_region_" according to region 
+where you have set your s3 bucket.
+
 ```
 terraform {
   backend "s3" {
@@ -108,7 +120,7 @@ ESP_HARD_PASSWORD = "TopSecretPassword"
 ESP_HARD_LOGIN = "TopSecretLogin"
 ```
 
-##### 6. Initialize terraform, from directory ./.terraform run following commands:
+##### 6. Initialize terraform, from directory ./terraform run following commands:
 ```
 ./terraform init
 ./terraform workspace new production
@@ -157,7 +169,8 @@ Another solution to deal with errors is to destroy terraform and build again.
 ### Obtaining `ACCESS_CODE` and `SECRET_CODE` from the AWS
 You need to gain programmatic access to your AWS account from computer if you want to automatically build your infrastructure with terraform.
 To do that:
-1. Go to: https://aws.amazon.com/console/ > IAM service (Identity and Access Management) > Users
+1. Go to: https://aws.amazon.com/console/ > IAM service (Identity and Access Management) > Users.
 2. Find your name and click on it. You should be redirected to details view of your account.
-3. Switch to "Security credentials tabs"
-4. Click on "Create access key" button
+3. Switch to "Security credentials tabs".
+4. Click on "Create access key" button.
+5. Remember both keys because secret key will not be able to get the secret key from AWS system.

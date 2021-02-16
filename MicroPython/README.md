@@ -9,7 +9,7 @@
 ### To develop in PyCharm:
 1. Create and activate virtual environment with Python 3.6 using PyCharm GUI
 or do it manually.
-````
+````bash
 cd Micropython
 virtualenv venv
 pip3 install -r requirements.txt
@@ -19,7 +19,7 @@ pip3 install -r requirements.txt
 
 ### AWS and terraform 
 Make sure that your AWS cloud is configured. For more information please go to 
-ReadMe in ".terraform" directory.
+ReadMe in "terraform" directory [here](../terraform/README.md).
 
 If you already have configured AWS infrastructure, make sure that:
 - terraform binaries (https://www.terraform.io/downloads.html) are in ".terraform" directory.
@@ -31,7 +31,7 @@ Make sure that your AWS cloud is configured, and your computer has AWS credentia
 
 #### Creating virtual environment 
 If you already have made virtual environment, you can skip this step.
-```
+```bash
 cd Micropython
 python3 -m venv venv
 ```
@@ -39,24 +39,24 @@ python3 -m venv venv
 #### Activating virtual environment
 This step is platform dependent
 ###### Windows
-```
+```bash
 venv/Scripts/activate.bat
 ```
 
 ###### Linux/ Mac OS
-```
+```bash
 source venv/bin/activate
 ```
 
 #### Install requirements
-```
+```bash
 pip3 install -r requirements.txt
 ```
 
 #### Flashing the board
 Make sure that your board is connected to computer. Check the port number.
 
-```
+```bash
 source venv/bin/activate
 python3 scripts/upload_all.py -p <port>
 ```
@@ -88,7 +88,7 @@ communication with board. We recommend you programs listed below.
 
 #### Linux
 On Linux you can use picocom:
-```
+```bash
 sudo apt-get install picocom
 picocom port_name --baud 115200
 ```
