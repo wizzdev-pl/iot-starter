@@ -53,6 +53,13 @@ def delete_thing_if_exist(thing_name: str):
 def get_thing_certificates(thing_name: str):
     certs_handler = CertificatesHandler(thing_client)
     certs = certs_handler.get_certificates()
+    remove_old_thing_certificates(thing_name)
     thing_client.attach_thing_principal(thingName=thing_name, principal=certs_handler.cert_arn)
     thing_client.attach_principal_policy(principal=certs_handler.cert_arn, policyName=config.AWS_BASE_THING_POLICY)
     return certs
+
+
+def remove_old_thing_certificates(thing_name: str):
+    old_certs = thing_client.list_thing_principals(thingName=thing_name)
+    for principal in old_certs.get('principals'):
+        thing_client.detach_thing_principal(thingName=thing_name, principal=principal)
