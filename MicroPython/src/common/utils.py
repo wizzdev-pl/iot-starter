@@ -61,6 +61,7 @@ def check_if_file_exists(path_to_file: str):
     try:
         return uos.stat(path_to_file)[6]
     except OSError:
+        logging.error("No setup file: {}".format(path_to_file))
         return False
 
 
