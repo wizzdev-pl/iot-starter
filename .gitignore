@@ -28,3 +28,4 @@ commit_hash.txt
 #*moc*
 *.backup*
 *LOCAL*
+!locals.tf
