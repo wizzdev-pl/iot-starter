@@ -26,7 +26,7 @@ def authorization_request() -> str:
         logging.info("Failed to authorize in API {}".format(e))
         return None
 
-    if response.status_code != '200': #and response.status_code != 200:
+    if response.status_code != '200' and response.status_code != 200:
         logging.error(response.text)
         return None
 
