@@ -1,5 +1,5 @@
-from machine import Pin, reset
-from esp32 import wake_on_ext0
+from machine import Pin, reset, SLEEP, DEEPSLEEP
+from esp32 import wake_on_ext0, WAKEUP_ALL_LOW, WAKEUP_ANY_HIGH
 from lib.logging import debug, info
 from data_upload.handlers_container import HandlerContainer
 from communication.wirerless_connection_controller import get_mac_address_as_string
@@ -170,8 +170,17 @@ class ESPConfig:
 # Below functions as static methods to config class?
 # Interrput on pin 0
 def button_irq(p):
+    debug("=== RESET BUTTON PRESSED ===")
+    save()
+    reset()
+
+
+def reset_config(p):
     debug("=== CONFIG BUTTON PRESSED ===")
+    global cfg
     cfg.ap_config_done = False
+    cfg.ssid = DEFAULT_SSID
+    cfg.password = DEFAULT_PASSWORD
     save()
     reset()
 
@@ -187,6 +196,10 @@ def init():
     button = Pin(0, Pin.IN, Pin.PULL_UP)
     button.irq(trigger=Pin.IRQ_FALLING, handler=button_irq)
     wake_on_ext0(pin=button, level=False)
+
+    button2 = Pin(32, Pin.IN, Pin.PULL_UP)
+    button2.irq(trigger=Pin.IRQ_FALLING, handler=reset_config)
+    wake_on_ext0(pin=button2, level=WAKEUP_ALL_LOW)
 
     debug("Configuration loaded")
 

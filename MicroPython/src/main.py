@@ -1,3 +1,5 @@
+import time
+
 from machine import Pin, reset, reset_cause, wake_reason, HARD_RESET, PWRON_RESET, SOFT_RESET, PIN_WAKE
 from logging import debug
 import _thread
@@ -24,7 +26,6 @@ def configuration_access_point():
 def main():
     debug("=== MAIN START ===")
 
-    # TODO: Czy to potrzebne?
     # Increase stack size per thread this increases micropython recursion depth
     _thread.stack_size(8192*2)
     
@@ -33,7 +34,13 @@ def main():
 
     # Check if configuration via access point has to be started
     if not config.cfg.ap_config_done or wake_reason() == PIN_WAKE:
-        configuration_access_point()
+        debug("AP_DONE: {}, wake_reason: {}".format(config.cfg.ap_config_done, wake_reason()))
+        debug("SSID: {}, Password: {}".format(config.cfg.ssid, config.cfg.password))
+        if config.cfg.ssid != 'ssid' and config.cfg.password != 'password':
+            debug("SSID and password aren't default. Try to connect")
+            pass
+        else:
+            configuration_access_point()
 
     debug("Main loop")
     # If the device is powered on, then actual time from NTP server must be downloaded
@@ -51,7 +58,6 @@ def main():
 
     # Good night!
     power_save(config.cfg.data_publishing_period_in_ms)
-
 
 if __name__ == '__main__':
     main()
