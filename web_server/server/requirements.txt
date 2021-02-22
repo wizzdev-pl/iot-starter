@@ -10,3 +10,4 @@ flask-lambda-support==0.1.5
 flask_jwt_extended==3.25.0
 sentry_sdk==0.17.4
 werkzeug
+
