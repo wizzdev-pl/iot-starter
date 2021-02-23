@@ -6,7 +6,7 @@ from data_acquisition import data_acquisitor
 DEFAULT_TEST_SAMPLING_INTERVAL_MS = 2000
 
 
-def schedule_test_mode(_data_acquisitor: data_acquisitor.DataAcquisitor):
+def schedule_test_mode(_data_acquisitor: data_acquisitor.DataAcquisitor) -> (bool, str):
     wireless_controller = None
     try:
         number_measurement_to_acquire = 10  # DO NOT CHANGE IT TO LESS NUMBER

@@ -23,12 +23,12 @@ def time_print() -> None:
     logging.info("Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4], time[5]))
 
 
-def sync_time_with_ntp_server() -> bool:
+def get_ntp_time() -> bool:
     """
     Get actual time via NTP.
     :return: Error code (True -> OK, False -> Error).
     """
-    logging.debug("utils.py/sync_time_with_ntpserver()")
+    logging.debug("utils.py/get_ntp_time()")
     ntptime.host = "3.pl.pool.ntp.org"
     time_before = get_current_timestamp_ms()
 
@@ -51,7 +51,7 @@ def synchronize_time() -> bool:
     logging.debug("utils.py/synchronize_time()")
     i = 0
     while i < NUMBER_OF_NTP_SYNCHRONIZATION_ATTEMPTS:
-        result = sync_time_with_ntp_server()
+        result = get_ntp_time()
         if result:
             return True
         i += 1
@@ -115,7 +115,6 @@ def restore_ap_mode() -> None:
             return
         else:
             utime.sleep(0.1)
-    print("Reseting to AP mode!")
     set_ap_config_done(False)
     led = machine.Pin(2, machine.Pin.OUT)
     led.on()
@@ -123,7 +122,7 @@ def restore_ap_mode() -> None:
     led.off()
 
 
-def read_from_file(file_path) -> (bool, str):
+def read_from_file(file_path: str) -> (bool, str):
     """
     Return content of given file.
     :param file_path: Path to file to read from.
@@ -151,7 +150,7 @@ def create_mqtt_communicator_from_config() -> MQTTCommunicator:
                             timeout=config.cfg.mqtt_timeout)
 
 
-def get_wifi_and_aws_handlers(sync_time=False) -> (bool, str, WirelessConnectionController, MQTTCommunicator):
+def get_wifi_and_aws_handlers(sync_time: bool = False) -> (bool, str, WirelessConnectionController, MQTTCommunicator):
     """
     Creates and returns connection handler to wifi and AWS.
     :param sync_time: flag if time is synchronized.
@@ -182,7 +181,7 @@ def get_wifi_and_aws_handlers(sync_time=False) -> (bool, str, WirelessConnection
     return True, "", wireless_controller, mqtt_communicator
 
 
-def connect_to_wifi(wireless_controller, sync_time=False) -> (bool, str):
+def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time: bool = False) -> (bool, str):
     """
     Connects ESP to wifi.
     :param wireless_controller: Wifi handler

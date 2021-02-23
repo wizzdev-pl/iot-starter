@@ -14,7 +14,7 @@ class WirelessConnectionController:
     WIFI_CONNECTION_CHECK_SLEEP_TIME_S = 5
     WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES = 10
 
-    def __init__(self, sta_ssid="", sta_password=""):
+    def __init__(self, sta_ssid: str = "", sta_password: str = ""):
         """
         Constructor of WirelessConnectionController class.
         :param sta_ssid: Wifi ssid.
@@ -25,7 +25,7 @@ class WirelessConnectionController:
         self.sta_password = sta_password
         self.ap_handler = None
 
-    def configure_access_point(self, ssid, password) -> bool:
+    def configure_access_point(self, ssid: str, password: str) -> bool:
         """
         Configure Access Point with given ssid and password
         :param ssid: AP ssid.
@@ -54,7 +54,7 @@ class WirelessConnectionController:
             logging.debug("Disabling AP")
             self.ap_handler.active(False)
 
-    def setup_station(self, ssid, password) -> None:
+    def setup_station(self, ssid: str, password: str) -> None:
         """
         Change default ssid and password to given ones.
         :param ssid: New ssid.

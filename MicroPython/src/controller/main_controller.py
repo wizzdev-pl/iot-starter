@@ -5,6 +5,7 @@ from data_acquisition import data_acquisitor
 from data_acquisition import run_test_data_acquisition
 from common import config, utils
 from communication.API_communication import authorization_request, configuration_request
+from typing import Any
 
 
 import logging
@@ -55,7 +56,7 @@ class MainController():
         self.events_queue.append(event)
         self.lock.release()
 
-    def perform(self):
+    def perform(self) -> None:
         while True:
             self.lock.acquire()
             if len(self.events_queue) != 0:
@@ -65,7 +66,7 @@ class MainController():
             self.lock.release()
             utime.sleep_ms(500)
 
-    def process_event(self, event: MainControllerEvent):
+    def process_event(self, event: MainControllerEvent) -> None:
         if event.event_type == MainControllerEventType.CONFIGURE_ACCESS_POINT:
             logging.debug("Processing configure access point event")
             access_point_name = "{}_{}".format(ACCESS_POINT_BASE_NAME, config.cfg.device_uid)
@@ -105,24 +106,19 @@ class MainController():
         elif event.event_type == MainControllerEventType.ERROR_OCCURRED:
             logging.debug("Processing event error occurred")
             print(event.data)
-            self.event_handler(event.data)
             self.send_callback(event, True)
-
         else:
             quit(-1)
 
-    def event_handler(self, *event_data):
-        pass
-
     @staticmethod
-    def send_callback(event, data):
+    def send_callback(event: MainControllerEvent, data: Any) -> None:
         if event.callback:
             event.callback(data)
 
-    def get_measurement(self):
+    def get_measurement(self) -> None:
         return self.data_acquisitor.get_single_measurement()
 
-    def device_configuration(self, data):
+    def device_configuration(self, data: dict) -> int:
         ssid = data['ssid']
         password = data['password']
         config.cfg.password = password
@@ -140,12 +136,14 @@ class MainController():
             logging.error("Exception catched: {}".format(e))
             event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
             self.add_event(event)
-            return None
+            return 1
 
         event = MainControllerEvent(MainControllerEventType.START_DATA_ACQUISITION, None)
         self.add_event(event)
 
-    def configure_aws_thing(self):
+        return 0
+
+    def configure_aws_thing(self) -> bool:
         logging.info("Allocated bytes on heap before gc {}".format(gc.mem_alloc()))
         gc.collect()
         logging.info("Allocated bytes on heap after gc {}".format(gc.mem_alloc()))
@@ -164,7 +162,7 @@ class MainController():
             self.add_event(event)
             return False
 
-    def configure_data_from_terraform(self):
+    def configure_data_from_terraform(self) -> None:
         logging.debug("configure_data_from_terraform")
         aws_configuration = config.cfg.load_aws_config_from_file()
         if 'aws_iot_endpoint' in aws_configuration.keys():
@@ -184,7 +182,7 @@ class MainController():
 
         logging.debug("Configure data from terraform ends")
 
-    def configure_sensor(self, sensor_configuration):
+    def configure_sensor(self, sensor_configuration: dict) -> None:
         logging.debug("Configure sensor")
         print(sensor_configuration)
         if 'acquisition_period_ms' in sensor_configuration.keys():
@@ -196,7 +194,7 @@ class MainController():
         if 'blink_led' in sensor_configuration.keys():
             config.cfg.blink_led = sensor_configuration['blink_led']
 
-    def get_status(self):
+    def get_status(self) -> dict:
         status = {}
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
@@ -209,11 +207,11 @@ class MainController():
 
         return status
 
-    def start_test_data_acquisition_hook(self):
+    def start_test_data_acquisition_hook(self) -> None:
         event = MainControllerEvent(MainControllerEventType.START_TEST_DATA_ACQUISITION, None)
         self.add_event(event)
 
-    def start_data_acquisition_hook(self):
+    def start_data_acquisition_hook(self) -> None:
         event = MainControllerEvent(MainControllerEventType.START_DATA_ACQUISITION, None)
         self.add_event(event)
 

@@ -16,7 +16,6 @@ DEFAULT_LOCAL_ENDPOINT = ''
 DEFAULT_AWS_ENDPOINT = 'topic/data'
 DEFAULT_AWS_CLIENT_ID = 'default_id'
 DEFAULT_AWS_TOPIC = 'topic/data'
-DEFAULT_DATA_ACQUISTION_PERIOD_MS = 30000
 DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
 DEFAULT_USE_DHT = True
 DEFAULT_USE_AWS = True
@@ -26,19 +25,15 @@ DEFAULT_DHT_TYPE = "DHT22"
 DEFAULT_WIFI_TIMEOUT = 5000
 DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_PORT_SSL = 8883
-DEFAULT_MQTT_TIMEOUT = 4000
+DEFAULT_MQTT_TIMEOUT = 400
 DEFAULT_AP_CONFIG_DONE = False
 DEFAULT_NTP_SYNCHRONIZED = False
 DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE = False
 DEFAULT_DEVICE_UID = ''
 DEFAULT_QOS = 1
-DEFAULT_LED_PIN = 2
-DEFAULT_BLINK_LED = False
 DEFAULT_API_URL = ""
 DEFAULT_API_LOGIN = ""
 DEFAULT_API_PASSWORD = ""
-FAILED_TO_SYNCHRONIZE_TIME_TIMEOUT_IN_MS = 10 * 60 * 1000  # 10minutes
-FAILED_TO_MOUNT_SD_DEEPSLEEP_TIME_MS = 10 * 60 * 1000  # 10 minutes
 CONFIG_FILE_PATH = 'config.json'
 DEFAULT_JSON_HEADER = {'Content-Type': 'application/json'}
 API_AUTHORIZATION_URL = 'Auth/login'
@@ -68,7 +63,6 @@ class ESPConfig:
         self.aws_endpoint = DEFAULT_AWS_ENDPOINT
         self.aws_client_id = DEFAULT_AWS_CLIENT_ID
         self.aws_topic = DEFAULT_AWS_TOPIC
-        self.data_aqusition_period_in_ms = DEFAULT_DATA_ACQUISTION_PERIOD_MS
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
         self.use_dht = DEFAULT_USE_DHT
         self.use_aws = DEFAULT_USE_AWS
@@ -83,8 +77,6 @@ class ESPConfig:
         self.ntp_synchronized = DEFAULT_NTP_SYNCHRONIZED
         self.configuration_after_first_power_on_done = DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE
         self.QOS = DEFAULT_QOS
-        self.blue_led_pin = DEFAULT_LED_PIN
-        self.blink_led = DEFAULT_BLINK_LED
         self.api_url = DEFAULT_API_URL
         self.api_login = DEFAULT_API_LOGIN
         self.api_password = DEFAULT_API_PASSWORD
@@ -113,8 +105,6 @@ class ESPConfig:
             self.aws_client_id = config_dict.get('client_id', DEFAULT_AWS_CLIENT_ID)
             self.aws_topic = config_dict.get('topic', DEFAULT_AWS_TOPIC)
             self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
-            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms',
-                                                               DEFAULT_DATA_ACQUISTION_PERIOD_MS)
             self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms',
                                                                 DEFAULT_DATA_PUBLISHING_PERIOD_MS)
             self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
@@ -126,11 +116,10 @@ class ESPConfig:
             self.mqtt_port_ssl = config_dict.get('mqtt_port_ssl', DEFAULT_MQTT_PORT_SSL)
             self.mqtt_timeout = config_dict.get('mqtt_timeout', DEFAULT_MQTT_TIMEOUT)
             self.ap_config_done = config_dict.get('AP_config_done', DEFAULT_AP_CONFIG_DONE)
-            self.configuration_after_first_power_on_done = config_dict.get('configuration_after_first_power_on_done',
-                                                                           DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
+            self.configuration_after_first_power_on_done = \
+                config_dict.get('configuration_after_first_power_on_done',
+                                DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
             self.QOS = config_dict.get('QOS', DEFAULT_QOS)
-            self.blue_led_pin = config_dict.get('blue_led_pin', DEFAULT_LED_PIN)
-            self.blink_led = config_dict.get('blink_led', DEFAULT_BLINK_LED)
             if not self.device_uid:
                 self.device_uid = config_dict.get('device_uid', DEFAULT_DEVICE_UID)
         if not config_file_exists:
@@ -192,7 +181,7 @@ class ESPConfig:
         return config_dict
 
 
-def button_irq(p) -> None:
+def button_irq(p: Pin) -> None:
     """
     Callback of interrupt of BOOT button. Resets ESP.
     :param p: BOOT pin.
@@ -203,7 +192,7 @@ def button_irq(p) -> None:
     reset()
 
 
-def reset_config(p) -> None:
+def reset_config(p: Pin) -> None:
     """
     Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
     :param p: GPIO32 pin.
@@ -297,7 +286,7 @@ def read_certificates() -> (bool, str, str):
     return (result and result2), AWS_certificate, AWS_key
 
 
-def update_config_dict(new_config) -> None:
+def update_config_dict(new_config: dict) -> None:
     """
     Updates configuration.
     :param new_config: New configuration.

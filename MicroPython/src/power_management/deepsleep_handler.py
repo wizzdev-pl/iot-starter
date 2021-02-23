@@ -55,23 +55,6 @@ def publish_to_aws(data: dict):
     return 0
 
 
-def measure() -> dict:
-    """
-    Perform all sensor operations - power up, measure, power down.
-    :return: Measured data as dict that is ready to be uploaded to AWS.
-    """
-    debug("deepsleep_handler.py/measure(), reading data from sensor: {}".format(config.cfg.dht_type))
-    sensor = DHTSensor(config.cfg.dht_type, config.cfg.dht_measurement_pin, config.cfg.dht_power_pin)
-    sensor.turn_on()
-    sensor.measure()
-    sensor.turn_off()
-
-    data = dict()
-    data['dht_t'] = [[get_current_timestamp_ms(), sensor.temperature()]]
-    data['dht_h'] = [[get_current_timestamp_ms() + 1, sensor.humidity()]]
-    return data
-
-
 def power_save(ms):
     """
     Puts ESP to sleep.
