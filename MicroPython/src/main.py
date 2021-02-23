@@ -5,22 +5,9 @@ from logging import debug
 import _thread
 from controller.main_controller import MainController
 from controller.main_controller_event import MainControllerEventType, MainControllerEvent
-from power_management.deepsleep_handler import power_save, publish_to_aws, get_time_from_ntp, measure
+from power_management.deepsleep_handler import power_save, publish_to_aws, check_connection_to_aws, measure
 from common import config
 from common.utils import time_print
-
-
-def configuration_access_point():
-    debug("=== Entering configuration mode ===")
-
-    controller = MainController()
-    event = MainControllerEvent(MainControllerEventType.CONFIGURE_ACCESS_POINT)
-    controller.process_event(event)
-    controller.perform()
-
-    config.cfg.ap_config_done = True
-    config.save()
-    reset()
 
 
 def main():
@@ -40,12 +27,21 @@ def main():
             debug("SSID and password aren't default. Try to connect")
             pass
         else:
-            configuration_access_point()
+            debug("=== Entering configuration mode ===")
+
+            controller = MainController()
+            event = MainControllerEvent(MainControllerEventType.CONFIGURE_ACCESS_POINT)
+            controller.process_event(event)
+            controller.perform()
+
+            config.cfg.ap_config_done = True
+            config.save()
+            reset()
 
     debug("Main loop")
     # If the device is powered on, then actual time from NTP server must be downloaded
     if reset_cause() == HARD_RESET or reset_cause() == PWRON_RESET or reset_cause() == SOFT_RESET:
-        get_time_from_ntp()
+        check_connection_to_aws()
 
     # Print actual time
     time_print()
@@ -58,6 +54,7 @@ def main():
 
     # Good night!
     power_save(config.cfg.data_publishing_period_in_ms)
+
 
 if __name__ == '__main__':
     main()
