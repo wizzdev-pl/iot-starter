@@ -1,16 +1,14 @@
 from machine import Pin, reset, SLEEP, DEEPSLEEP
 from esp32 import wake_on_ext0, WAKEUP_ALL_LOW, WAKEUP_ANY_HIGH
-from lib.logging import debug, info
+from lib import logging
 from data_upload.handlers_container import HandlerContainer
 from communication.wirerless_connection_controller import get_mac_address_as_string
 from common import utils
 from ujson import dump, load
 from uos import mkdir
 
-
-
-cfg = None  # type: ESPConfig
-hc = None  # type: HandlerContainer
+cfg = None
+hc = None
 
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
@@ -54,8 +52,16 @@ THING_NAME_PREFIX = "ESP32"
 
 
 class ESPConfig:
+    """
+    Class to save, write and handle configuration of ESP device.
+    Creates config.json file, where is written data about wifi connection, certificates, credentials etc.
+    """
+
     def __init__(self):
-        debug("ESPConfig.__init__()")
+        """
+        ESPConfig constructor.
+        """
+        logging.debug("ESPConfig.__init__()")
         self.ssid = DEFAULT_SSID
         self.password = DEFAULT_PASSWORD
         self.local_endpoint = DEFAULT_LOCAL_ENDPOINT
@@ -82,29 +88,35 @@ class ESPConfig:
         self.api_url = DEFAULT_API_URL
         self.api_login = DEFAULT_API_LOGIN
         self.api_password = DEFAULT_API_PASSWORD
-        self.device_uid = "" # leave empty so you it won't wake up WLAN when working in deep sleep mode
+        self.device_uid = ""  # leave empty so you it won't wake up WLAN when working in deep sleep mode
 
-    def load_from_file(self):
-        debug("ESPConfig.load_from_file()")
+    def load_from_file(self) -> None:
+        """
+        Load configuration of ESP from file.
+        :return: None
+        """
+        logging.debug("ESPConfig.load_from_file()")
         config_file_exists = True
         if not utils.check_if_file_exists(CONFIG_FILE_PATH):
             with open(CONFIG_FILE_PATH, "w", encoding="utf8") as file:
                 config_file_exists = False
                 empty_config = {}
-                self.device_uid = get_mac_address_as_string() # set only if config does not exist
+                self.device_uid = get_mac_address_as_string()  # set only if config does not exist
                 dump(empty_config, file)
 
         with open(CONFIG_FILE_PATH, "r", encoding="utf8") as infile:
             config_dict = load(infile)
-            self.ssid = config_dict.get('ssid', DEFAULT_SSID)  # TODO: Generic approach to load all data
+            self.ssid = config_dict.get('ssid', DEFAULT_SSID)
             self.password = config_dict.get('password', DEFAULT_PASSWORD)
             self.local_endpoint = config_dict.get('local_endpoint', DEFAULT_LOCAL_ENDPOINT)
             self.aws_endpoint = config_dict.get('aws_endpoint', DEFAULT_AWS_ENDPOINT)
             self.aws_client_id = config_dict.get('client_id', DEFAULT_AWS_CLIENT_ID)
             self.aws_topic = config_dict.get('topic', DEFAULT_AWS_TOPIC)
             self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
-            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms', DEFAULT_DATA_ACQUISTION_PERIOD_MS)
-            self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms', DEFAULT_DATA_PUBLISHING_PERIOD_MS)
+            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms',
+                                                               DEFAULT_DATA_ACQUISTION_PERIOD_MS)
+            self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms',
+                                                                DEFAULT_DATA_PUBLISHING_PERIOD_MS)
             self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
             self.dht_measurement_pin = config_dict.get('dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
             self.dht_power_pin = config_dict.get('dht_power_pin', DEFAULT_DHT_POWER_PIN)
@@ -114,7 +126,8 @@ class ESPConfig:
             self.mqtt_port_ssl = config_dict.get('mqtt_port_ssl', DEFAULT_MQTT_PORT_SSL)
             self.mqtt_timeout = config_dict.get('mqtt_timeout', DEFAULT_MQTT_TIMEOUT)
             self.ap_config_done = config_dict.get('AP_config_done', DEFAULT_AP_CONFIG_DONE)
-            self.configuration_after_first_power_on_done = config_dict.get('configuration_after_first_power_on_done', DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
+            self.configuration_after_first_power_on_done = config_dict.get('configuration_after_first_power_on_done',
+                                                                           DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
             self.QOS = config_dict.get('QOS', DEFAULT_QOS)
             self.blue_led_pin = config_dict.get('blue_led_pin', DEFAULT_LED_PIN)
             self.blink_led = config_dict.get('blink_led', DEFAULT_BLINK_LED)
@@ -123,23 +136,34 @@ class ESPConfig:
         if not config_file_exists:
             self.save_to_file()
 
-    def load_aws_config_from_file(self):
-        #TODO patch will change
+    def load_aws_config_from_file(self) -> dict:
+        """
+        Load configuration of cloud from file.
+        :return: Configuration of cloud in dict.
+        """
         with open(AWS_CONFIG_PATH, "r", encoding="utf8") as infile:
             config_dict = load(infile)
         return config_dict
 
-    def save_to_file(self):
-        debug("ESPConfig.save_to_file()")
+    def save_to_file(self) -> None:
+        """
+        Save configuration to file.
+        :return: None
+        """
+        logging.debug("ESPConfig.save_to_file()")
         config_dict = self.as_dictionary
 
         with open(CONFIG_FILE_PATH, "w", encoding="utf8") as infile:
             dump(config_dict, infile)
-        info("New config saved!")
+        logging.info("New config saved!")
 
     @property
-    def as_dictionary(self):
-        debug("ESPConfig.as_dictionary()")
+    def as_dictionary(self) -> dict:
+        """
+        Returns configuration as dict.
+        :return: Configuration.
+        """
+        logging.debug("ESPConfig.as_dictionary()")
         config_dict = {}
         config_dict['ssid'] = self.ssid
         config_dict['password'] = self.password
@@ -167,16 +191,25 @@ class ESPConfig:
 
         return config_dict
 
-# Below functions as static methods to config class?
-# Interrput on pin 0
-def button_irq(p):
-    debug("=== RESET BUTTON PRESSED ===")
+
+def button_irq(p) -> None:
+    """
+    Callback of interrupt of BOOT button. Resets ESP.
+    :param p: BOOT pin.
+    :return: None
+    """
+    logging.debug("=== RESET BUTTON PRESSED ===")
     save()
     reset()
 
 
-def reset_config(p):
-    debug("=== CONFIG BUTTON PRESSED ===")
+def reset_config(p) -> None:
+    """
+    Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
+    :param p: GPIO32 pin.
+    :return: None
+    """
+    logging.debug("=== CONFIG BUTTON PRESSED ===")
     global cfg
     cfg.ap_config_done = False
     cfg.ssid = DEFAULT_SSID
@@ -185,8 +218,12 @@ def reset_config(p):
     reset()
 
 
-def init():
-    debug("config.py/init()")
+def init() -> None:
+    """
+    Initialize ESP, reads or creates configuration, sets interrupts.
+    :return: None
+    """
+    logging.debug("config.py/init()")
     global cfg
     global hc
     hc = HandlerContainer()
@@ -201,21 +238,30 @@ def init():
     button2.irq(trigger=Pin.IRQ_FALLING, handler=reset_config)
     wake_on_ext0(pin=button2, level=WAKEUP_ALL_LOW)
 
-    debug("Configuration loaded")
+    logging.debug("Configuration loaded")
 
 
-def save():
-    debug("ESPConfig.save()")
+def save() -> None:
+    """
+    Save config to file.
+    :return: None.
+    """
+    logging.debug("ESPConfig.save()")
     global cfg
     config_dict = cfg.as_dictionary
 
     with open(CONFIG_FILE_PATH, "w", encoding="utf8") as infile:
         dump(config_dict, infile)
-    info("New config saved!")
+    logging.info("New config saved!")
 
 
-def save_certificates(config_dict: dict):
-    debug("save_certificates()")
+def save_certificates(config_dict: dict) -> None:
+    """
+    Save AWS certificates to files.
+    :param config_dict: dict with credentials.
+    :return: None
+    """
+    logging.debug("save_certificates()")
     try:
         mkdir(CERTIFICATES_DIR)
     except:
@@ -229,7 +275,7 @@ def save_certificates(config_dict: dict):
 
     if 'priv_key' in config_dict.keys():
         private_key_string = config_dict['priv_key']
-        info(private_key_string)
+        logging.info(private_key_string)
         with open(KEY_PATH, "w", encoding="utf8") as infile:
             infile.write(private_key_string)
 
@@ -239,16 +285,25 @@ def save_certificates(config_dict: dict):
             infile.write(ca_certificate_string)
 
 
-def read_certificates():
-    debug("read_certificates()")
+def read_certificates() -> (bool, str, str):
+    """
+    Read certificates from files.
+    :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
+    """
+    logging.debug("read_certificates()")
     result, AWS_certificate = utils.read_from_file(CERTIFICATE_PATH)
     result2, AWS_key = utils.read_from_file(KEY_PATH)
 
     return (result and result2), AWS_certificate, AWS_key
 
 
-def update_config_dict(new_config):
-    debug("update_config_dict()")
+def update_config_dict(new_config) -> None:
+    """
+    Updates configuration.
+    :param new_config: New configuration.
+    :return: None
+    """
+    logging.debug("update_config_dict()")
     file_path = 'config.json'
     with open(file_path, "r", encoding="utf8") as infile:
         old_config = load(infile)
@@ -256,7 +311,7 @@ def update_config_dict(new_config):
     for key in old_config.keys():
         try:
             if old_config[key] != new_config[key]:
-                debug('Changing config entry: {} \n from: {}, to: {}'.format(key,
+                logging.debug('Changing config entry: {} \n from: {}, to: {}'.format(key,
                                                                                      old_config[key],
                                                                                      new_config[key]))
                 old_config[key] = new_config[key]
@@ -267,6 +322,6 @@ def update_config_dict(new_config):
     if modified_entries > 0:
         with open(file_path, "w", encoding="utf8") as infile:
             dump(old_config, infile)
-        debug('Modified {} entrires. Config updated succesfully!'.format(modified_entries))
+        logging.debug('Modified {} entrires. Config updated succesfully!'.format(modified_entries))
     else:
-        debug('No changes to config file were made!')
+        logging.debug('No changes to config file were made!')
