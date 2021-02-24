@@ -109,7 +109,7 @@ class MQTTCommunicator:
 
         self.MQTT_client.set_callback(callback)
         self.MQTT_client.subscribe(topic=topic, qos=qos)
-        logging.info("Subscibing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
+        logging.info("Subscribing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
 
     def _wait_for_message(self, timeout_ms: int = None):
         wait_time = 0

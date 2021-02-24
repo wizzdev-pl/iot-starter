@@ -17,6 +17,7 @@ DEFAULT_AWS_ENDPOINT = 'topic/data'
 DEFAULT_AWS_CLIENT_ID = 'default_id'
 DEFAULT_AWS_TOPIC = 'topic/data'
 DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
+DEFAULT_DATA_ACQUISTION_PERIOD_MS = 30000
 DEFAULT_USE_DHT = True
 DEFAULT_USE_AWS = True
 DEFAULT_DHT_MEASUREMENT_PIN = 4
@@ -45,6 +46,11 @@ CA_CERTIFICATE_PATH = "{}/{}".format(CERTIFICATES_DIR, "AWS.ca_certificate")
 AWS_CONFIG_PATH = "/resources/aws_config.json"
 THING_NAME_PREFIX = "ESP32"
 
+DEFAULT_TESTED_CONNECTION_CLOUD = False
+DEFAULT_PRINTED_TIME = False
+DEFAULT_GOT_SENSOR_DATA = False
+DEFAULT_PUBLISHED_TO_CLOUD = False
+
 
 class ESPConfig:
     """
@@ -63,6 +69,7 @@ class ESPConfig:
         self.aws_endpoint = DEFAULT_AWS_ENDPOINT
         self.aws_client_id = DEFAULT_AWS_CLIENT_ID
         self.aws_topic = DEFAULT_AWS_TOPIC
+        self.data_aqusition_period_in_ms = DEFAULT_DATA_ACQUISTION_PERIOD_MS
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
         self.use_dht = DEFAULT_USE_DHT
         self.use_aws = DEFAULT_USE_AWS
@@ -81,6 +88,11 @@ class ESPConfig:
         self.api_login = DEFAULT_API_LOGIN
         self.api_password = DEFAULT_API_PASSWORD
         self.device_uid = ""  # leave empty so you it won't wake up WLAN when working in deep sleep mode
+
+        self.tested_connection_cloud = DEFAULT_TESTED_CONNECTION_CLOUD
+        self.printed_time = DEFAULT_PRINTED_TIME
+        self.got_sensor_data = DEFAULT_GOT_SENSOR_DATA
+        self.published_to_cloud = DEFAULT_PUBLISHED_TO_CLOUD
 
     def load_from_file(self) -> None:
         """
@@ -107,6 +119,7 @@ class ESPConfig:
             self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
             self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms',
                                                                 DEFAULT_DATA_PUBLISHING_PERIOD_MS)
+            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms', DEFAULT_DATA_ACQUISTION_PERIOD_MS)
             self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
             self.dht_measurement_pin = config_dict.get('dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
             self.dht_power_pin = config_dict.get('dht_power_pin', DEFAULT_DHT_POWER_PIN)
@@ -120,6 +133,11 @@ class ESPConfig:
                 config_dict.get('configuration_after_first_power_on_done',
                                 DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
             self.QOS = config_dict.get('QOS', DEFAULT_QOS)
+
+            self.tested_connection_cloud = config_dict.get('tested_connection_cloud', DEFAULT_TESTED_CONNECTION_CLOUD)
+            self.printed_time = config_dict.get('printed_time', DEFAULT_PRINTED_TIME)
+            self.got_sensor_data = config_dict.get('got_sensor_data', DEFAULT_GOT_SENSOR_DATA)
+            self.published_to_cloud = config_dict.get('published_to_cloud', DEFAULT_PUBLISHED_TO_CLOUD)
             if not self.device_uid:
                 self.device_uid = config_dict.get('device_uid', DEFAULT_DEVICE_UID)
         if not config_file_exists:
@@ -175,8 +193,10 @@ class ESPConfig:
         config_dict['configuration_after_first_power_on_done'] = self.configuration_after_first_power_on_done
         config_dict['device_uid'] = self.device_uid
         config_dict['QOS'] = self.QOS
-        config_dict['blink_led'] = self.blink_led
-        config_dict['blue_led_pin'] = self.blue_led_pin
+        config_dict['tested_connection_cloud'] = self.tested_connection_cloud
+        config_dict['printed_time'] = self.printed_time
+        config_dict['got_sensor_data'] = self.got_sensor_data
+        config_dict['published_to_cloud'] = self.published_to_cloud
 
         return config_dict
 

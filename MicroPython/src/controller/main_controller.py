@@ -5,8 +5,6 @@ from data_acquisition import data_acquisitor
 from data_acquisition import run_test_data_acquisition
 from common import config, utils
 from communication.API_communication import authorization_request, configuration_request
-from typing import Any
-
 
 import logging
 import utime
@@ -19,6 +17,7 @@ from web_server import web_app
 import _thread
 
 ACCESS_POINT_BASE_NAME = "Wizzdev_IoT"
+
 
 class MainController():
     connection_status = {True: "Connected",
@@ -49,6 +48,7 @@ class MainController():
         self.web_server_thread = None
 
         self.data_acquisitor = data_acquisitor.DataAcquisitor()
+        logging.debug("FINISHED MAIN CONTROLLER CONSTRUCTOR")
 
     def add_event(self, event: MainControllerEvent):
         self.lock.acquire()
@@ -88,7 +88,6 @@ class MainController():
 
         elif event.event_type == MainControllerEventType.START_TEST_DATA_ACQUISITION:
             logging.debug("Processing event start test data acquisition")
-            # result = self.data_collector.start_data_acquisition(event.data)
             self.is_test_mode_running = True
             result = run_test_data_acquisition.schedule_test_mode(self.data_acquisitor)
             self.last_test_end_time = utime.time()
@@ -103,15 +102,115 @@ class MainController():
             self.is_test_mode_running = False
             self.send_callback(event, True)
 
+        elif event.event_type == MainControllerEventType.TEST_CONNECTION:
+            logging.debug("WAITING FOR WIFI CONFIG")
+            while not config.cfg.ap_config_done:
+                pass
+            logging.debug("GOT WIFI CONFIG")
+            logging.debug("Testing AWS connection")
+
+            result, error_msg, wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(sync_time=True)
+
+            if not result:
+                logging.error("Error in get_time_from_aws(), result={}".format(result))
+            else:
+                mqtt_communicator.update_device_shadow_startup(utils.get_current_timestamp_ms())
+                mqtt_communicator.disconnect()
+                wireless_controller.disconnect_station()
+
+            config.cfg.tested_connection_cloud = True
+            config.cfg.save_to_file()
+
+        elif event.event_type == MainControllerEventType.PRINT_TIME:
+            logging.debug("WAITING FOR TESTED CONNECTION CLOUD")
+            while not config.cfg.tested_connection_cloud:
+                pass
+            logging.debug("GOT TESTED CONNECTION CLOUD")
+
+            time = utime.localtime()
+            logging.debug(
+                "Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4],
+                                                                            time[5]))
+
+            config.cfg.printed_time = True
+            config.cfg.save_to_file()
+
+        elif event.event_type == MainControllerEventType.GET_SENSOR_DATA:
+            logging.debug("WAITING FOR PRINTED TIME")
+            while not config.cfg.printed_time:
+                pass
+            logging.debug("GOT PRINTED TIME")
+
+            logging.debug("GETTING SENSOR DATA")
+            self.data_acquisitor.acquire_temp_humi()
+
+            config.cfg.got_sensor_data = True
+            config.cfg.save_to_file()
+
+        elif event.event_type == MainControllerEventType.PUBLISH_DATA:
+            logging.debug("WAITING FOR GOT SENSOR DATA")
+            while not config.cfg.got_sensor_data:
+                pass
+            logging.debug("GOT GOT SENSOR DATA")
+
+            logging.debug("Publishing data to cloud")
+            result, error_reason, wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(
+                sync_time=False)
+
+            if not result:
+                logging.error("utils.connect_to_wifi_and_AWS: {}".format(error_reason))
+                return
+
+            certificates_existence = config.read_certificates()
+            if not certificates_existence[0]:
+                logging.debug("No AWS Certificates, configure_aws_thing()")
+                self.configure_aws_thing()
+
+            mqtt_communicator.get_device_shadow(timeout_ms=5000)
+
+            logging.debug("data to send = {}".format(self.data_acquisitor.data))
+            logging.info(config.cfg.aws_topic)
+            result = mqtt_communicator.publish_message(payload=self.data_acquisitor.data, topic=config.cfg.aws_topic,
+                                                       qos=config.cfg.QOS)
+
+            if not result:
+                logging.error("Error publishing data to MQTT in send_data()")
+
+            mqtt_communicator.disconnect()
+            wireless_controller.disconnect_station()
+
+            config.cfg.published_to_cloud = True
+            config.cfg.save_to_file()
+
+        elif event.event_type == MainControllerEventType.GO_TO_SLEEP:
+            logging.debug("WAITING FOR PUBLISHED TO CLOUD")
+            while not config.cfg.published_to_cloud:
+                pass
+            logging.debug("GOT PUBLISHED TO CLOUD")
+
+            # RESET
+            #config.cfg.tested_connection_cloud = False
+            config.cfg.printed_time = False
+            config.cfg.got_sensor_data = False
+            config.cfg.published_to_cloud = False
+            config.cfg.save_to_file()
+
+            logging.debug("sleep({})".format(event.data))
+            ms = int(event.data['ms'])
+            if ms <= 0:
+                ms = 10
+            machine.deepsleep(ms)
+
         elif event.event_type == MainControllerEventType.ERROR_OCCURRED:
             logging.debug("Processing event error occurred")
             print(event.data)
             self.send_callback(event, True)
+
         else:
             quit(-1)
 
     @staticmethod
-    def send_callback(event: MainControllerEvent, data: Any) -> None:
+    def send_callback(event: MainControllerEvent, data: object) -> None:
         if event.callback:
             event.callback(data)
 
@@ -127,7 +226,6 @@ class MainController():
         logging.info("Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-        #TODO some handling of bad password
         utils.connect_to_wifi(wireless_controller)
         logging.info(wireless_controller.sta_handler.ifconfig())
         try:
@@ -138,9 +236,9 @@ class MainController():
             self.add_event(event)
             return 1
 
-        event = MainControllerEvent(MainControllerEventType.START_DATA_ACQUISITION, None)
-        self.add_event(event)
-
+        config.cfg.ap_config_done = True
+        config.cfg.save_to_file()
+        machine.reset()
         return 0
 
     def configure_aws_thing(self) -> bool:
@@ -214,4 +312,3 @@ class MainController():
     def start_data_acquisition_hook(self) -> None:
         event = MainControllerEvent(MainControllerEventType.START_DATA_ACQUISITION, None)
         self.add_event(event)
-

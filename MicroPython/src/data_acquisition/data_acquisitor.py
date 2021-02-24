@@ -12,6 +12,7 @@ class DataAcquisitor:
 
     def __init__(self):
         self.dht = None
+        self.data = {}
 
         if config.cfg.use_dht:
             self.data_storage['dht'] = []
@@ -27,15 +28,28 @@ class DataAcquisitor:
 
     def acquire_temp_humi(self) -> dict:
         acquisition_timestamp = utils.get_current_timestamp_ms()
-        result = {}
         self.dht.turn_on()
+        self.data = {}
         if self.dht is not None:
             try:
                 self.dht.measure()
-                result['dht_t'] = [[acquisition_timestamp, self.dht.temperature()]]
-                result['dht_h'] = [[acquisition_timestamp + 1, self.dht.humidity()]]
+                self.data['dht_t'] = [[acquisition_timestamp, self.dht.temperature()]]
+                self.data['dht_h'] = [[acquisition_timestamp + 1, self.dht.humidity()]]
             except OSError:
                 logging.info("Error reading DHT sensor!")
 
         self.dht.turn_off()
-        return {}
+        return self.data
+
+    def get_single_measurement(self) -> int:
+        self.dht.turn_on()
+        if self.dht is not None:
+            try:
+                self.dht.measure()
+                temperature = self.dht.temperature()
+                self.dht.turn_off()
+                return temperature
+            except OSError:
+                logging.error("Error reading DHT sensor!")
+                self.dht.turn_off()
+                return -1

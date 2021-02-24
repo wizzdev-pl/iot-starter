@@ -175,6 +175,8 @@ def get_wifi_and_aws_handlers(sync_time: bool = False) -> (bool, str, WirelessCo
         except:
             # Probably not connected ignore
             pass
+        logging.debug("RESETTING BOARD")
+        machine.reset()
 
         return result[0], result[1], None, None
 
