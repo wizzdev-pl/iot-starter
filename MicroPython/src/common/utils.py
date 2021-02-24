@@ -10,7 +10,7 @@ from data_upload.mqtt_communicator import MQTTCommunicator
 from communication import wirerless_connection_controller
 from common import config
 
-TIME_EPOCH_SHIFT = 946684800000  # in ms - embedded port of Unix time counts from year 2000, not 1970
+TIME_EPOCH_SHIFT = 946684800000
 NUMBER_OF_NTP_SYNCHRONIZATION_ATTEMPTS = 5
 
 
@@ -33,7 +33,7 @@ def get_ntp_time() -> bool:
     time_before = get_current_timestamp_ms()
 
     try:
-        ntptime.settime()  # get current time from ntp server
+        ntptime.settime()
         time_after = get_current_timestamp_ms()
         print("Sync finished successful time before {} time after {}".format(time_before, time_after))
         return True
@@ -168,13 +168,12 @@ def get_wifi_and_aws_handlers(sync_time: bool = False) -> (bool, str, WirelessCo
             mqtt_communicator.disconnect()
         except:
             pass
-            # Probably not connected ignore
 
         try:
             wireless_controller.disconnect_station()
         except:
-            # Probably not connected ignore
             pass
+
         logging.debug("RESETTING BOARD")
         machine.reset()
 

@@ -1,5 +1,5 @@
-from machine import Pin, reset, SLEEP, DEEPSLEEP
-from esp32 import wake_on_ext0, WAKEUP_ALL_LOW, WAKEUP_ANY_HIGH
+from machine import Pin, reset
+from esp32 import wake_on_ext0, WAKEUP_ALL_LOW
 from lib import logging
 from data_upload.handlers_container import HandlerContainer
 from communication.wirerless_connection_controller import get_mac_address_as_string
@@ -87,7 +87,7 @@ class ESPConfig:
         self.api_url = DEFAULT_API_URL
         self.api_login = DEFAULT_API_LOGIN
         self.api_password = DEFAULT_API_PASSWORD
-        self.device_uid = ""  # leave empty so you it won't wake up WLAN when working in deep sleep mode
+        self.device_uid = ""
 
         self.tested_connection_cloud = DEFAULT_TESTED_CONNECTION_CLOUD
         self.printed_time = DEFAULT_PRINTED_TIME
@@ -105,7 +105,7 @@ class ESPConfig:
             with open(CONFIG_FILE_PATH, "w", encoding="utf8") as file:
                 config_file_exists = False
                 empty_config = {}
-                self.device_uid = get_mac_address_as_string()  # set only if config does not exist
+                self.device_uid = get_mac_address_as_string()
                 dump(empty_config, file)
 
         with open(CONFIG_FILE_PATH, "r", encoding="utf8") as infile:
@@ -119,7 +119,8 @@ class ESPConfig:
             self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
             self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms',
                                                                 DEFAULT_DATA_PUBLISHING_PERIOD_MS)
-            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms', DEFAULT_DATA_ACQUISTION_PERIOD_MS)
+            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms',
+                                                               DEFAULT_DATA_ACQUISTION_PERIOD_MS)
             self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
             self.dht_measurement_pin = config_dict.get('dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
             self.dht_power_pin = config_dict.get('dht_power_pin', DEFAULT_DHT_POWER_PIN)
@@ -274,7 +275,6 @@ def save_certificates(config_dict: dict) -> None:
     try:
         mkdir(CERTIFICATES_DIR)
     except:
-        # Already exists I can not logging it here
         pass
 
     if 'cert_pem' in config_dict.keys():

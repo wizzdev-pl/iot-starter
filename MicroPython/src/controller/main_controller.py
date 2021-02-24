@@ -19,7 +19,10 @@ import _thread
 ACCESS_POINT_BASE_NAME = "Wizzdev_IoT"
 
 
-class MainController():
+class MainController:
+    """
+    MainController is a "scheduler". It should be given every task to perform.
+    """
     connection_status = {True: "Connected",
                          False: "Disconnected"}
 
@@ -28,6 +31,9 @@ class MainController():
                         None: "No test has been carried out"}
 
     def __init__(self):
+        """
+        MainController constructor.
+        """
         self.controller_state = MainControllerState()
         self.events_queue = []
         self.lock = allocate_lock()
@@ -50,13 +56,22 @@ class MainController():
         self.data_acquisitor = data_acquisitor.DataAcquisitor()
         logging.debug("FINISHED MAIN CONTROLLER CONSTRUCTOR")
 
-    def add_event(self, event: MainControllerEvent):
+    def add_event(self, event: MainControllerEvent) -> None:
+        """
+        Adding new task to MainController.
+        :param event: New event.
+        :return: None
+        """
         self.lock.acquire()
 
         self.events_queue.append(event)
         self.lock.release()
 
     def perform(self) -> None:
+        """
+        Executing main loop.
+        :return: None
+        """
         while True:
             self.lock.acquire()
             if len(self.events_queue) != 0:
@@ -67,6 +82,11 @@ class MainController():
             utime.sleep_ms(500)
 
     def process_event(self, event: MainControllerEvent) -> None:
+        """
+        Executing single task based on its type.
+        :param event: Task to execute.
+        :return: None
+        """
         if event.event_type == MainControllerEventType.CONFIGURE_ACCESS_POINT:
             logging.debug("Processing configure access point event")
             access_point_name = "{}_{}".format(ACCESS_POINT_BASE_NAME, config.cfg.device_uid)
@@ -211,13 +231,28 @@ class MainController():
 
     @staticmethod
     def send_callback(event: MainControllerEvent, data: object) -> None:
+        """
+        Executing event's callback function.
+        :param event: Event's object.
+        :param data: Callback function parameters.
+        :return: None
+        """
         if event.callback:
             event.callback(data)
 
-    def get_measurement(self) -> None:
+    def get_measurement(self) -> int:
+        """
+        Get single measurement.
+        :return: Value of temperature.
+        """
         return self.data_acquisitor.get_single_measurement()
 
     def device_configuration(self, data: dict) -> int:
+        """
+        Configures device in the cloud. Function used as hook to web_app.
+        :param data: parameters to connect to wifi.
+        :return: Error code (0 - OK, 1 - Error).
+        """
         ssid = data['ssid']
         password = data['password']
         config.cfg.password = password
@@ -242,6 +277,10 @@ class MainController():
         return 0
 
     def configure_aws_thing(self) -> bool:
+        """
+        Register ESP as thing in AWS cloud.
+        :return: Error code (True - OK, False - Error).
+        """
         logging.info("Allocated bytes on heap before gc {}".format(gc.mem_alloc()))
         gc.collect()
         logging.info("Allocated bytes on heap after gc {}".format(gc.mem_alloc()))
@@ -261,6 +300,10 @@ class MainController():
             return False
 
     def configure_data_from_terraform(self) -> None:
+        """
+        Setup data from terraform to connect to AWS.
+        :return: None
+        """
         logging.debug("configure_data_from_terraform")
         aws_configuration = config.cfg.load_aws_config_from_file()
         if 'aws_iot_endpoint' in aws_configuration.keys():
@@ -281,6 +324,11 @@ class MainController():
         logging.debug("Configure data from terraform ends")
 
     def configure_sensor(self, sensor_configuration: dict) -> None:
+        """
+        Create DHT part of config file.
+        :param sensor_configuration: Sensor's parameters.
+        :return: None.
+        """
         logging.debug("Configure sensor")
         print(sensor_configuration)
         if 'acquisition_period_ms' in sensor_configuration.keys():
@@ -289,10 +337,12 @@ class MainController():
             config.cfg.data_publishing_period_in_ms = int(sensor_configuration['publishing_period_ms'])
         if 'dht_type' in sensor_configuration.keys():
             config.cfg.dht_type = sensor_configuration['dht_type']
-        if 'blink_led' in sensor_configuration.keys():
-            config.cfg.blink_led = sensor_configuration['blink_led']
 
     def get_status(self) -> dict:
+        """
+        Check ESP AP/STA status.
+        :return: Status.
+        """
         status = {}
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
@@ -306,9 +356,7 @@ class MainController():
         return status
 
     def start_test_data_acquisition_hook(self) -> None:
-        event = MainControllerEvent(MainControllerEventType.START_TEST_DATA_ACQUISITION, None)
-        self.add_event(event)
+        pass
 
     def start_data_acquisition_hook(self) -> None:
-        event = MainControllerEvent(MainControllerEventType.START_DATA_ACQUISITION, None)
-        self.add_event(event)
+        pass

@@ -8,14 +8,14 @@ MAX_SAMPLES = 10
 
 
 class DataAcquisitor:
-    data_storage = {}
-
+    """
+    Class to collect data from sensor DHT
+    """
     def __init__(self):
         self.dht = None
         self.data = {}
 
         if config.cfg.use_dht:
-            self.data_storage['dht'] = []
             self.dht = DHTSensor(dht_type=config.cfg.dht_type,
                                  dht_measurement_pin_number=config.cfg.dht_measurement_pin,
                                  dht_power_pin_number=config.cfg.dht_power_pin)
@@ -27,6 +27,10 @@ class DataAcquisitor:
         pass
 
     def acquire_temp_humi(self) -> dict:
+        """
+        Get measurements of temperature and humidity.
+        :return: Measurements in form of dict
+        """
         acquisition_timestamp = utils.get_current_timestamp_ms()
         self.dht.turn_on()
         self.data = {}
@@ -42,6 +46,10 @@ class DataAcquisitor:
         return self.data
 
     def get_single_measurement(self) -> int:
+        """
+        Return single measurement of temperature.
+        :return: Value of temperature.
+        """
         self.dht.turn_on()
         if self.dht is not None:
             try:

@@ -1,4 +1,3 @@
-import os
 import ujson
 import urequests
 import logging
@@ -7,6 +6,10 @@ from common import config
 
 
 def authorization_request() -> str:
+    """
+    Register your ESP in cloud. It takes password and login from aws_config.json
+    :return: JSON Web Token
+    """
     logging.debug("Authorization request function")
     headers = config.DEFAULT_JSON_HEADER
     url = config.cfg.api_url + config.API_AUTHORIZATION_URL
@@ -20,7 +23,7 @@ def authorization_request() -> str:
     try:
         response = urequests.post(url, data=body, headers=headers)
     except IndexError as e:
-        logging.ingo("No internet connection")
+        logging.info("No internet connection: {}".format(e))
         return None
     except Exception as e:
         logging.info("Failed to authorize in API {}".format(e))
@@ -36,6 +39,11 @@ def authorization_request() -> str:
 
 
 def configuration_request(_jwt_token: str):
+    """
+    Function configures ESP with cloud (AWS)
+    :param _jwt_token: JSON Web Token
+    :return: dict with certificates/keys
+    """
     headers = get_header_with_authorization(_jwt_token)
     url = config.cfg.api_url + config.API_CONFIG_URL
     thing_name = config.THING_NAME_PREFIX + config.cfg.device_uid
@@ -43,7 +51,6 @@ def configuration_request(_jwt_token: str):
     body['is_removed'] = True
     body['created_at'] = 0
     body['device_id'] = thing_name
-    #TODO what values should be below?
     body['description'] = 'Full configuration test'
     body['device_type'] = 'configuration_test'
     body['device_group'] = 'configuration_test'
@@ -68,7 +75,6 @@ def get_header_with_authorization(jwt_token: str) -> dict:
 
 def get_aws_certs(_response_dict: dict) -> dict:
     cert_dict = _response_dict.get('data')
-    #TODO change keys names in config and erase these three lines
     cert_dict['priv_key'] = cert_dict.pop('PrivateKey')
     cert_dict['cert_pem'] = cert_dict.pop('certificatePem')
     cert_dict['cert_ca'] = cert_dict.pop('certificateCa')

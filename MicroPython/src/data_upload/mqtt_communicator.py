@@ -55,7 +55,11 @@ class MQTTCommunicator:
         if self.is_connected:
             self.disconnect()
 
-    def connect(self):
+    def connect(self) -> (bool, str):
+        """
+        Connect to MQTT Server.
+        :return: Error code (True - OK, False - Error).
+        """
         try:
             gc.collect()
             result = self.MQTT_client.connect(clean_session=False)
@@ -71,20 +75,23 @@ class MQTTCommunicator:
             self.is_connected = False
             return False, "Exception during connection to MQTT server. Not implemented error occured {}".format(e)
 
-    def disconnect(self):
+    def disconnect(self) -> None:
+        """
+        Disconnect from MQTT Server.
+        :return: None
+        """
         if self.is_connected:
             self.MQTT_client.disconnect()
             self.is_connected = False
 
-    def publish(self, data, topic, qos):
-        '''
+    def publish(self, data, topic, qos) -> bool:
+        """
         :param data: data to be published
         :param topic: name of the topic to be published to default /topic/data
         :param qos: level of QOS to use either 0 or 1
-        :return:
+        :return: Error code (True - OK, False - Error).
         :example: publish('19.7', '/office/room_3/temperature', 0)
-        '''
-
+        """
         if not self.is_connected:
             logging.info("Publish called but not connected to MQTT broker!")
             return False
@@ -102,7 +109,14 @@ class MQTTCommunicator:
                 pass  # probably not connected
         return True
 
-    def subscribe(self, topic, callback, qos):
+    def subscribe(self, topic, callback, qos) -> bool:
+        """
+        Substribes to given topic
+        :param topic: topic to subscribe to.
+        :param callback: callback function.
+        :param qos: Quality of Service.
+        :return: Error code (True - OK, False - Error).
+        """
         if not self.is_connected:
             logging.info("Subscribe called but not connected to MQTT broker!")
             return False
@@ -110,6 +124,7 @@ class MQTTCommunicator:
         self.MQTT_client.set_callback(callback)
         self.MQTT_client.subscribe(topic=topic, qos=qos)
         logging.info("Subscribing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
+        return True
 
     def _wait_for_message(self, timeout_ms: int = None):
         wait_time = 0
@@ -121,8 +136,12 @@ class MQTTCommunicator:
             wait_time += 100
         return False
 
-    def get_device_shadow(self, timeout_ms: int):
-
+    def get_device_shadow(self, timeout_ms: int) -> bool:
+        """
+        Getting information about device.
+        :param timeout_ms: timeout.
+        :return: Error code (True - OK, False - Error).
+        """
         self.subscribe(topic=self.device_shadow_accepted_topic, callback=self._get_device_shadow_callback, qos=0)
         self.publish(topic=self.device_shadow_get_topic, data='', qos=0)  # Empty msg triggers AWS response to /update
 
