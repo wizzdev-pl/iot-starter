@@ -1,6 +1,6 @@
-from gc import enable, collect, threshold, mem_free, mem_alloc
-from logging import basicConfig, getLogger, DEBUG, debug
 from uos import statvfs
+from logging import basicConfig, getLogger, DEBUG, debug
+from gc import enable, collect, threshold, mem_free, mem_alloc
 
 from common import utils
 

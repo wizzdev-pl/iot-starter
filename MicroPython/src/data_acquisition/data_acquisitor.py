@@ -1,4 +1,5 @@
 import logging
+
 from common import utils
 from common import config
 from peripherals.dht_sensor import DHTSensor

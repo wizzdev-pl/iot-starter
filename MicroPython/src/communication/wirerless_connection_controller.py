@@ -70,12 +70,12 @@ class WirelessConnectionController:
         :return: Error code (True - OK, False - Error), error message.
         """
         if self.sta_handler:
-            return False, "STA already connected"
+            raise Exception("STA Already connected")
 
         self.sta_handler = network.WLAN(network.STA_IF)
 
         if self.sta_handler.isconnected():
-            return False, "STA already connected"
+            raise Exception("STA Already connected")
 
         self.sta_handler.active(True)
         existing_networks = self.sta_handler.scan()
@@ -83,8 +83,8 @@ class WirelessConnectionController:
         print("Connect to wifi: {}, pass: {}".format(self.sta_ssid, self.sta_password))
         try:
             self.sta_handler.connect(self.sta_ssid, self.sta_password)
-        except:
-            return False, "Failed to connect to access point (wifi ssid='{}')".format(self.sta_ssid)
+        except Exception:
+            raise Exception("Failed to connect to access point (wifi ssid='{}')".format(self.sta_ssid))
 
         number_of_retires = 0
         while not self.sta_handler.isconnected():
@@ -100,7 +100,7 @@ class WirelessConnectionController:
             return True, ""
         else:
             self.disconnect_station()
-            return False, "Failed to connect to access point v2 (wifi ssid='{}')".format(self.sta_ssid)
+            raise Exception("Failed to connect to access point v2 (wifi ssid='{}')".format(self.sta_ssid))
 
     def disconnect_station(self) -> bool:
         """

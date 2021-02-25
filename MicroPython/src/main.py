@@ -13,7 +13,7 @@ def main():
     _thread.stack_size(8192*2)
     
     # Read and parse configuration from config.json
-    config.init()
+    config.ESPConfig.init()
 
     controller = MainController()
 

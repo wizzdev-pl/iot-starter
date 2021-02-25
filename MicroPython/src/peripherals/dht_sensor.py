@@ -1,6 +1,6 @@
 import dht
-import machine
 import utime
+import machine
 import logging
 
 TIME_TO_DHT11_TO_WAKE_UP_S = 1

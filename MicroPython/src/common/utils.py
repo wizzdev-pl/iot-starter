@@ -55,8 +55,8 @@ def synchronize_time() -> bool:
         if result:
             return True
         i += 1
-    return False
 
+    raise Exception("Did not synchronize time")
 
 def get_current_timestamp_ms() -> int:
     """
@@ -150,7 +150,7 @@ def create_mqtt_communicator_from_config() -> MQTTCommunicator:
                             timeout=config.cfg.mqtt_timeout)
 
 
-def get_wifi_and_aws_handlers(sync_time: bool = False) -> (bool, str, WirelessConnectionController, MQTTCommunicator):
+def get_wifi_and_aws_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
     """
     Creates and returns connection handler to wifi and AWS.
     :param sync_time: flag if time is synchronized.
@@ -158,63 +158,53 @@ def get_wifi_and_aws_handlers(sync_time: bool = False) -> (bool, str, WirelessCo
     """
     logging.debug("utils.py/connect_to_wifi_and_aws({})".format(sync_time))
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-    connect_to_wifi(wireless_controller, sync_time)
-    mqtt_communicator = create_mqtt_communicator_from_config()
 
-    result = mqtt_communicator.connect()
-    if not result[0]:
-        logging.info("Failed to connect to mqtt server! {}".format(result[1]))
+    try:
+        connect_to_wifi(wireless_controller, sync_time)
+        mqtt_communicator = create_mqtt_communicator_from_config()
+        mqtt_communicator.connect()
+    except Exception as e:
+        logging.error("Error wifi_get_adn_aws_handler(): {}".format(e))
         try:
             mqtt_communicator.disconnect()
-        except:
+        except Exception:
             pass
-
         try:
             wireless_controller.disconnect_station()
-        except:
+        except Exception:
             pass
 
         logging.debug("RESETTING BOARD")
         machine.reset()
 
-        return result[0], result[1], None, None
-
-    return True, "", wireless_controller, mqtt_communicator
+    return wireless_controller, mqtt_communicator
 
 
-def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time: bool = False) -> (bool, str):
+def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time: bool = False) -> None:
     """
     Connects ESP to wifi.
     :param wireless_controller: Wifi handler
     :param sync_time: flag if time is synced.
-    :return: Error Code (False - error, True - OK), error message
+    :return: None
     """
     logging.debug("utils.py/connect_to_wifi({})".format(sync_time))
     wireless_controller.setup_station(ssid=config.cfg.ssid, password=config.cfg.password)
 
     try:
-        result = wireless_controller.configure_station()
+        wireless_controller.configure_station()
     except Exception as e:
         logging.info("Failed to connect to wifi {}".format(e))
-        return False, "Failed to connect to wifi"
-
-    print(result)
-    logging.debug("After configure station")
-    if not result[0]:
-        logging.info("Failed to connect to wifi!")
         try:
             wireless_controller.disconnect_station()
-        except:
-            # Probably not connected ignore
-            logging.debug("Not connected except")
+        except Exception:
             pass
-        return result[0], result[1]
-    logging.debug("After disconnect station")
+        raise Exception(e)
 
     if sync_time:
-        result = synchronize_time()
-        if not result:
-            return result, "Failed to synchronize time with ntp server"
+        try:
+            synchronize_time()
+        except Exception as e:
+            raise Exception(e)
 
 
 def get_last_commit_info() -> dict:

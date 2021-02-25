@@ -1,4 +1,3 @@
-import uos
 import utime
 import logging
 import ujson
@@ -29,7 +28,7 @@ class MQTTCommunicator:
         self.device_shadow_update_topic = '$aws/things/{}/shadow/update'.format(client_id)
         self.timeout = timeout
         if use_AWS:
-            result, AWS_certificate, AWS_key = config.read_certificates()
+            result, AWS_certificate, AWS_key = config.ESPConfig.read_certificates()
             AWS_certificate.replace('\n', '')
             AWS_key.replace('\n', '')
             if not result:
@@ -67,13 +66,16 @@ class MQTTCommunicator:
             if result:
                 return True, ""
             else:
-                return False, "Failed to connect to MQTT server"
+                raise Exception("Failed to connect to MQTT server")
+        except ValueError as e:
+            self.is_connected = False
+            raise ValueError(e)
         except Exception as e:
             self.is_connected = False
-            return False, "Exception during connection to MQTT server. Exception occurred {}".format(e)
+            raise Exception(e)
         except NotImplementedError as e:
             self.is_connected = False
-            return False, "Exception during connection to MQTT server. Not implemented error occured {}".format(e)
+            raise Exception(e)
 
     def disconnect(self) -> None:
         """
@@ -165,7 +167,7 @@ class MQTTCommunicator:
             logging.info("There was no config in the 'desired' segment.")
             return
 
-        config.update_config_dict(new_config)
+        config.ESPConfig.update_config_dict(new_config)
 
     def publish_message(self, payload, topic, qos):
         mqtt_message = {

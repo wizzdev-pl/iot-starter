@@ -1,20 +1,17 @@
-from _thread import allocate_lock
-from controller.main_controller_state import MainControllerState
-from controller.main_controller_event import MainControllerEvent, MainControllerEventType
-from data_acquisition import data_acquisitor
-from data_acquisition import run_test_data_acquisition
-from common import config, utils
-from communication.API_communication import authorization_request, configuration_request
-
+import _thread
 import logging
 import utime
 import machine
 import gc
 
-from communication import wirerless_connection_controller
+from common import config, utils
 from web_server import web_app
+from data_acquisition import data_acquisitor
+from communication import wirerless_connection_controller
+from controller.main_controller_state import MainControllerState
+from communication.API_communication import authorization_request, configuration_request
+from controller.main_controller_event import MainControllerEvent, MainControllerEventType
 
-import _thread
 
 ACCESS_POINT_BASE_NAME = "Wizzdev_IoT"
 
@@ -36,7 +33,7 @@ class MainController:
         """
         self.controller_state = MainControllerState()
         self.events_queue = []
-        self.lock = allocate_lock()
+        self.lock = _thread.allocate_lock()
         self.data_collector = None
         self.access_point_server = None
         self.is_test_mode_running = False
@@ -96,32 +93,6 @@ class MainController:
             wireless_controller.configure_access_point(access_point_name, "password")
             self.web_server_thread = _thread.start_new_thread(web_app.run, [])
 
-        elif event.event_type == MainControllerEventType.START_DATA_ACQUISITION:
-            logging.debug("Processing event start data acquisition")
-            wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-            wireless_controller.disconnect_station()
-            wireless_controller.disable_access_point()
-            config.cfg.save_to_file()
-            utils.set_ap_config_done(True)
-            machine.reset()
-            self.send_callback(event, True)
-
-        elif event.event_type == MainControllerEventType.START_TEST_DATA_ACQUISITION:
-            logging.debug("Processing event start test data acquisition")
-            self.is_test_mode_running = True
-            result = run_test_data_acquisition.schedule_test_mode(self.data_acquisitor)
-            self.last_test_end_time = utime.time()
-            if result[0]:
-                logging.debug("Test processing finished successfully")
-            else:
-                logging.error("Failed to run test data acquisition {}".format(result[1]))
-
-            self.last_test_comment = result[1]
-            self.last_test_result = result[0]
-
-            self.is_test_mode_running = False
-            self.send_callback(event, True)
-
         elif event.event_type == MainControllerEventType.TEST_CONNECTION:
             logging.debug("WAITING FOR WIFI CONFIG")
             while not config.cfg.ap_config_done:
@@ -129,14 +100,11 @@ class MainController:
             logging.debug("GOT WIFI CONFIG")
             logging.debug("Testing AWS connection")
 
-            result, error_msg, wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(sync_time=True)
+            wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(sync_time=True)
 
-            if not result:
-                logging.error("Error in get_time_from_aws(), result={}".format(result))
-            else:
-                mqtt_communicator.update_device_shadow_startup(utils.get_current_timestamp_ms())
-                mqtt_communicator.disconnect()
-                wireless_controller.disconnect_station()
+            mqtt_communicator.update_device_shadow_startup(utils.get_current_timestamp_ms())
+            mqtt_communicator.disconnect()
+            wireless_controller.disconnect_station()
 
             config.cfg.tested_connection_cloud = True
             config.cfg.save_to_file()
@@ -174,15 +142,10 @@ class MainController:
             logging.debug("GOT GOT SENSOR DATA")
 
             logging.debug("Publishing data to cloud")
-            result, error_reason, wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(
-                sync_time=False)
+            wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(sync_time=False)
 
-            if not result:
-                logging.error("utils.connect_to_wifi_and_AWS: {}".format(error_reason))
-                return
-
-            certificates_existence = config.read_certificates()
-            if not certificates_existence[0]:
+            certificates_existence, *_ = config.ESPConfig.read_certificates()
+            if not certificates_existence:
                 logging.debug("No AWS Certificates, configure_aws_thing()")
                 self.configure_aws_thing()
 
@@ -208,8 +171,7 @@ class MainController:
                 pass
             logging.debug("GOT PUBLISHED TO CLOUD")
 
-            # RESET
-            #config.cfg.tested_connection_cloud = False
+            # Resets flag before sleep
             config.cfg.printed_time = False
             config.cfg.got_sensor_data = False
             config.cfg.published_to_cloud = False
@@ -261,9 +223,9 @@ class MainController:
         logging.info("Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-        utils.connect_to_wifi(wireless_controller)
-        logging.info(wireless_controller.sta_handler.ifconfig())
         try:
+            utils.connect_to_wifi(wireless_controller)
+            logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_aws_thing()
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
@@ -290,7 +252,7 @@ class MainController:
 
         if jwt_token is not None:
             cert_dict = configuration_request(jwt_token)
-            config.save_certificates(cert_dict)
+            config.ESPConfig.save_certificates(cert_dict)
             logging.debug("Configuration done")
             return True
         else:
@@ -331,8 +293,6 @@ class MainController:
         """
         logging.debug("Configure sensor")
         print(sensor_configuration)
-        if 'acquisition_period_ms' in sensor_configuration.keys():
-            config.cfg.data_aqusition_period_in_ms = int(sensor_configuration['acquisition_period_ms'])
         if 'publishing_period_ms' in sensor_configuration.keys():
             config.cfg.data_publishing_period_in_ms = int(sensor_configuration['publishing_period_ms'])
         if 'dht_type' in sensor_configuration.keys():

@@ -1,11 +1,12 @@
-import ure as re
-import picoweb
-import ulogging as logging
 import ujson
 import utime
 import machine
+import picoweb
+import ure as re
+import ulogging as logging
 
-from common import config, utils
+from common import config
+
 
 app = picoweb.WebApp(__name__)
 hooks = {}
@@ -159,6 +160,7 @@ def start_data_acquisition(req, resp):
     encoded = create_success_response(data=response_data)
     yield from picoweb.start_response(resp, content_type="application/json")
     yield from resp.awrite(encoded)
+
 
 # setup and run
 def setup(get_measurement_hook=None,

@@ -1,23 +1,23 @@
+from uos import mkdir
+from ujson import dump, load
 from machine import Pin, reset
 from esp32 import wake_on_ext0, WAKEUP_ALL_LOW
 from lib import logging
+
 from data_upload.handlers_container import HandlerContainer
 from communication.wirerless_connection_controller import get_mac_address_as_string
 from common import utils
-from ujson import dump, load
-from uos import mkdir
+
 
 cfg = None
 hc = None
 
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
-DEFAULT_LOCAL_ENDPOINT = ''
 DEFAULT_AWS_ENDPOINT = 'topic/data'
 DEFAULT_AWS_CLIENT_ID = 'default_id'
 DEFAULT_AWS_TOPIC = 'topic/data'
 DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
-DEFAULT_DATA_ACQUISTION_PERIOD_MS = 30000
 DEFAULT_USE_DHT = True
 DEFAULT_USE_AWS = True
 DEFAULT_DHT_MEASUREMENT_PIN = 4
@@ -65,11 +65,9 @@ class ESPConfig:
         logging.debug("ESPConfig.__init__()")
         self.ssid = DEFAULT_SSID
         self.password = DEFAULT_PASSWORD
-        self.local_endpoint = DEFAULT_LOCAL_ENDPOINT
         self.aws_endpoint = DEFAULT_AWS_ENDPOINT
         self.aws_client_id = DEFAULT_AWS_CLIENT_ID
         self.aws_topic = DEFAULT_AWS_TOPIC
-        self.data_aqusition_period_in_ms = DEFAULT_DATA_ACQUISTION_PERIOD_MS
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
         self.use_dht = DEFAULT_USE_DHT
         self.use_aws = DEFAULT_USE_AWS
@@ -112,15 +110,12 @@ class ESPConfig:
             config_dict = load(infile)
             self.ssid = config_dict.get('ssid', DEFAULT_SSID)
             self.password = config_dict.get('password', DEFAULT_PASSWORD)
-            self.local_endpoint = config_dict.get('local_endpoint', DEFAULT_LOCAL_ENDPOINT)
             self.aws_endpoint = config_dict.get('aws_endpoint', DEFAULT_AWS_ENDPOINT)
             self.aws_client_id = config_dict.get('client_id', DEFAULT_AWS_CLIENT_ID)
             self.aws_topic = config_dict.get('topic', DEFAULT_AWS_TOPIC)
             self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
             self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms',
                                                                 DEFAULT_DATA_PUBLISHING_PERIOD_MS)
-            self.data_aqusition_period_in_ms = config_dict.get('data_aquisition_period_ms',
-                                                               DEFAULT_DATA_ACQUISTION_PERIOD_MS)
             self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
             self.dht_measurement_pin = config_dict.get('dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
             self.dht_power_pin = config_dict.get('dht_power_pin', DEFAULT_DHT_POWER_PIN)
@@ -175,12 +170,10 @@ class ESPConfig:
         config_dict = {}
         config_dict['ssid'] = self.ssid
         config_dict['password'] = self.password
-        config_dict['local_endpoint'] = self.local_endpoint
         config_dict['aws_endpoint'] = self.aws_endpoint
         config_dict['client_id'] = self.aws_client_id
         config_dict['topic'] = self.aws_topic
         config_dict['use_aws'] = self.use_aws
-        config_dict['data_aquisition_period_ms'] = self.data_aqusition_period_in_ms
         config_dict['data_publishing_period_ms'] = self.data_publishing_period_in_ms
         config_dict['use_dht'] = self.use_dht
         config_dict['dht_measurement_pin'] = self.dht_measurement_pin
@@ -201,136 +194,136 @@ class ESPConfig:
 
         return config_dict
 
+    @staticmethod
+    def button_irq(p: Pin) -> None:
+        """
+        Callback of interrupt of BOOT button. Resets ESP.
+        :param p: BOOT pin.
+        :return: None
+        """
+        logging.debug("=== RESET BUTTON PRESSED ===")
+        ESPConfig.save()
+        reset()
 
-def button_irq(p: Pin) -> None:
-    """
-    Callback of interrupt of BOOT button. Resets ESP.
-    :param p: BOOT pin.
-    :return: None
-    """
-    logging.debug("=== RESET BUTTON PRESSED ===")
-    save()
-    reset()
+    @staticmethod
+    def reset_config(p: Pin) -> None:
+        """
+        Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
+        :param p: GPIO32 pin.
+        :return: None
+        """
+        logging.debug("=== CONFIG BUTTON PRESSED ===")
+        global cfg
+        cfg.ap_config_done = False
+        cfg.ssid = DEFAULT_SSID
+        cfg.password = DEFAULT_PASSWORD
+        ESPConfig.save()
+        reset()
 
+    @staticmethod
+    def init() -> None:
+        """
+        Initialize ESP, reads or creates configuration, sets interrupts.
+        :return: None
+        """
+        logging.debug("config.py/init()")
+        global cfg
+        global hc
+        hc = HandlerContainer()
+        cfg = ESPConfig()
+        cfg.load_from_file()
 
-def reset_config(p: Pin) -> None:
-    """
-    Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
-    :param p: GPIO32 pin.
-    :return: None
-    """
-    logging.debug("=== CONFIG BUTTON PRESSED ===")
-    global cfg
-    cfg.ap_config_done = False
-    cfg.ssid = DEFAULT_SSID
-    cfg.password = DEFAULT_PASSWORD
-    save()
-    reset()
+        button = Pin(0, Pin.IN, Pin.PULL_UP)
+        button.irq(trigger=Pin.IRQ_FALLING, handler=ESPConfig.button_irq)
+        wake_on_ext0(pin=button, level=False)
 
+        button2 = Pin(32, Pin.IN, Pin.PULL_UP)
+        button2.irq(trigger=Pin.IRQ_FALLING, handler=ESPConfig.reset_config)
+        wake_on_ext0(pin=button2, level=WAKEUP_ALL_LOW)
 
-def init() -> None:
-    """
-    Initialize ESP, reads or creates configuration, sets interrupts.
-    :return: None
-    """
-    logging.debug("config.py/init()")
-    global cfg
-    global hc
-    hc = HandlerContainer()
-    cfg = ESPConfig()
-    cfg.load_from_file()
+        logging.debug("Configuration loaded")
 
-    button = Pin(0, Pin.IN, Pin.PULL_UP)
-    button.irq(trigger=Pin.IRQ_FALLING, handler=button_irq)
-    wake_on_ext0(pin=button, level=False)
+    @staticmethod
+    def save() -> None:
+        """
+        Save config to file.
+        :return: None.
+        """
+        logging.debug("ESPConfig.save()")
+        global cfg
+        config_dict = cfg.as_dictionary
 
-    button2 = Pin(32, Pin.IN, Pin.PULL_UP)
-    button2.irq(trigger=Pin.IRQ_FALLING, handler=reset_config)
-    wake_on_ext0(pin=button2, level=WAKEUP_ALL_LOW)
+        with open(CONFIG_FILE_PATH, "w", encoding="utf8") as infile:
+            dump(config_dict, infile)
+        logging.info("New config saved!")
 
-    logging.debug("Configuration loaded")
-
-
-def save() -> None:
-    """
-    Save config to file.
-    :return: None.
-    """
-    logging.debug("ESPConfig.save()")
-    global cfg
-    config_dict = cfg.as_dictionary
-
-    with open(CONFIG_FILE_PATH, "w", encoding="utf8") as infile:
-        dump(config_dict, infile)
-    logging.info("New config saved!")
-
-
-def save_certificates(config_dict: dict) -> None:
-    """
-    Save AWS certificates to files.
-    :param config_dict: dict with credentials.
-    :return: None
-    """
-    logging.debug("save_certificates()")
-    try:
-        mkdir(CERTIFICATES_DIR)
-    except:
-        pass
-
-    if 'cert_pem' in config_dict.keys():
-        certificate_string = config_dict['cert_pem']
-        with open(CERTIFICATE_PATH, "w", encoding="utf8") as infile:
-            infile.write(certificate_string)
-
-    if 'priv_key' in config_dict.keys():
-        private_key_string = config_dict['priv_key']
-        logging.info(private_key_string)
-        with open(KEY_PATH, "w", encoding="utf8") as infile:
-            infile.write(private_key_string)
-
-    if 'cert_ca' in config_dict.keys():
-        ca_certificate_string = config_dict['cert_ca']
-        with open(CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
-            infile.write(ca_certificate_string)
-
-
-def read_certificates() -> (bool, str, str):
-    """
-    Read certificates from files.
-    :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
-    """
-    logging.debug("read_certificates()")
-    result, AWS_certificate = utils.read_from_file(CERTIFICATE_PATH)
-    result2, AWS_key = utils.read_from_file(KEY_PATH)
-
-    return (result and result2), AWS_certificate, AWS_key
-
-
-def update_config_dict(new_config: dict) -> None:
-    """
-    Updates configuration.
-    :param new_config: New configuration.
-    :return: None
-    """
-    logging.debug("update_config_dict()")
-    file_path = 'config.json'
-    with open(file_path, "r", encoding="utf8") as infile:
-        old_config = load(infile)
-    modified_entries = 0
-    for key in old_config.keys():
+    @staticmethod
+    def save_certificates(config_dict: dict) -> None:
+        """
+        Save AWS certificates to files.
+        :param config_dict: dict with credentials.
+        :return: None
+        """
+        logging.debug("save_certificates()")
         try:
-            if old_config[key] != new_config[key]:
-                logging.debug('Changing config entry: {} \n from: {}, to: {}'.format(key,
-                                                                                     old_config[key],
-                                                                                     new_config[key]))
-                old_config[key] = new_config[key]
-                modified_entries += 1
+            mkdir(CERTIFICATES_DIR)
         except:
             pass
 
-    if modified_entries > 0:
-        with open(file_path, "w", encoding="utf8") as infile:
-            dump(old_config, infile)
-        logging.debug('Modified {} entrires. Config updated succesfully!'.format(modified_entries))
-    else:
-        logging.debug('No changes to config file were made!')
+        if 'cert_pem' in config_dict.keys():
+            certificate_string = config_dict['cert_pem']
+            with open(CERTIFICATE_PATH, "w", encoding="utf8") as infile:
+                infile.write(certificate_string)
+
+        if 'priv_key' in config_dict.keys():
+            private_key_string = config_dict['priv_key']
+            logging.info(private_key_string)
+            with open(KEY_PATH, "w", encoding="utf8") as infile:
+                infile.write(private_key_string)
+
+        if 'cert_ca' in config_dict.keys():
+            ca_certificate_string = config_dict['cert_ca']
+            with open(CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
+                infile.write(ca_certificate_string)
+
+    @staticmethod
+    def read_certificates() -> (bool, str, str):
+        """
+        Read certificates from files.
+        :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
+        """
+        logging.debug("read_certificates()")
+        result, AWS_certificate = utils.read_from_file(CERTIFICATE_PATH)
+        result2, AWS_key = utils.read_from_file(KEY_PATH)
+
+        return (result and result2), AWS_certificate, AWS_key
+
+    @staticmethod
+    def update_config_dict(new_config: dict) -> None:
+        """
+        Updates configuration.
+        :param new_config: New configuration.
+        :return: None
+        """
+        logging.debug("update_config_dict()")
+        file_path = 'config.json'
+        with open(file_path, "r", encoding="utf8") as infile:
+            old_config = load(infile)
+        modified_entries = 0
+        for key in old_config.keys():
+            try:
+                if old_config[key] != new_config[key]:
+                    logging.debug('Changing config entry: {} \n from: {}, to: {}'.format(key,
+                                                                                         old_config[key],
+                                                                                         new_config[key]))
+                    old_config[key] = new_config[key]
+                    modified_entries += 1
+            except:
+                pass
+
+        if modified_entries > 0:
+            with open(file_path, "w", encoding="utf8") as infile:
+                dump(old_config, infile)
+            logging.debug('Modified {} entrires. Config updated succesfully!'.format(modified_entries))
+        else:
+            logging.debug('No changes to config file were made!')

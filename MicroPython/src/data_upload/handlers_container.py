@@ -1,6 +1,7 @@
 from machine import Pin
-from data_acquisition.data_acquisitor import DataAcquisitor
 from network import WLAN
+
+from data_acquisition.data_acquisitor import DataAcquisitor
 
 
 class HandlerContainer:
