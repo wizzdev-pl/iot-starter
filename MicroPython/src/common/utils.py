@@ -2,8 +2,8 @@ import ntptime
 import utime
 import uos
 import machine
-import ujson
 import logging
+import esp32
 
 from communication.wirerless_connection_controller import WirelessConnectionController
 from data_upload.mqtt_communicator import MQTTCommunicator
@@ -14,13 +14,60 @@ TIME_EPOCH_SHIFT = 946684800000
 NUMBER_OF_NTP_SYNCHRONIZATION_ATTEMPTS = 5
 
 
+def button_irq(p: machine.Pin) -> None:
+    """
+    Callback of interrupt of BOOT button. Resets ESP.
+    :param p: BOOT pin.
+    :return: None
+    """
+    logging.debug("=== RESET BUTTON PRESSED ===")
+    config.ESPConfig.save()
+    machine.reset()
+
+
+def reset_config(p: machine.Pin) -> None:
+    """
+    Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
+    :param p: GPIO32 pin.
+    :return: None
+    """
+    logging.debug("=== CONFIG BUTTON PRESSED ===")
+    config.cfg.ap_config_done = False
+    config.cfg.ssid = config.DEFAULT_SSID
+    config.cfg.password = config.DEFAULT_PASSWORD
+    config.ESPConfig.save()
+    machine.reset()
+
+
+def init() -> None:
+    """
+    Initialize ESP, reads or creates configuration, sets interrupts.
+    :return: None
+    """
+    logging.debug("config.py/init()")
+    config.cfg = config.ESPConfig()
+    config.cfg.load_from_file()
+
+    button = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_UP)
+    button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_irq)
+    esp32.wake_on_ext0(pin=button, level=False)
+
+    button2 = machine.Pin(32, machine.Pin.IN, machine.Pin.PULL_UP)
+    button2.irq(trigger=machine.Pin.IRQ_FALLING, handler=reset_config)
+    esp32.wake_on_ext0(pin=button2, level=esp32.WAKEUP_ALL_LOW)
+
+    logging.debug("Configuration loaded")
+
+
 def time_print() -> None:
     """
     Print local time of ESP.
     :return: None
     """
     time = utime.localtime()
-    logging.info("Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4], time[5]))
+    logging.info(
+        "Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4],
+                                                                    time[5]))
 
 
 def get_ntp_time() -> bool:
@@ -58,22 +105,13 @@ def synchronize_time() -> bool:
 
     raise Exception("Did not synchronize time")
 
+
 def get_current_timestamp_ms() -> int:
     """
     Get current timestamp in UNIX notation.
     :return: Value of timestamp.
     """
     return int(round(utime.time() * 1000 + (utime.ticks_ms() % 1000) + TIME_EPOCH_SHIFT))
-
-
-def get_time_str() -> str:
-    """
-    Get time as string in seconds (as float with 3 significant digits).
-    :return: Value
-    """
-    logging.debug("utils.py/get_time_str()")
-    t = utime.ticks_ms()
-    return '%.3f' % (t/1000)
 
 
 def check_if_file_exists(path_to_file: str) -> int:
@@ -90,38 +128,6 @@ def check_if_file_exists(path_to_file: str) -> int:
         return 0
 
 
-def set_ap_config_done(done: bool) -> None:
-    """
-    Changes AP_CONFIG_DONE in config.json file.
-    :param done: Value to change to.
-    :return: None.
-    """
-    logging.debug("utils.py/set_ap_config_done({})".format(done))
-    file_path = 'config.json'
-    config_dict = {}
-    with open(file_path, "r", encoding="utf8") as infile:
-        config_dict = ujson.load(infile)
-    config_dict['AP_config_done'] = done
-    with open(file_path, "w", encoding="utf8") as infile:
-        ujson.dump(config_dict, infile)
-
-
-def restore_ap_mode() -> None:
-    logging.debug("utils.py/restore_ap_mode()")
-    touch = machine.TouchPad(machine.Pin(14))
-    threshold = 300
-    for i in range(50):
-        if touch.read() > threshold:
-            return
-        else:
-            utime.sleep(0.1)
-    set_ap_config_done(False)
-    led = machine.Pin(2, machine.Pin.OUT)
-    led.on()
-    utime.sleep(1)
-    led.off()
-
-
 def read_from_file(file_path: str) -> (bool, str):
     """
     Return content of given file.
@@ -131,7 +137,7 @@ def read_from_file(file_path: str) -> (bool, str):
     logging.debug("utils.py/read_from_file({})".format(file_path))
     result = check_if_file_exists(file_path)
     if not result:
-       return False, "File not found"
+        return False, "File not found"
     with open(file_path, 'r') as f:
         data = f.read()
         return True, data
@@ -160,8 +166,14 @@ def get_wifi_and_aws_handlers(sync_time: bool = False) -> (WirelessConnectionCon
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
     try:
+        logging.debug('1')
         connect_to_wifi(wireless_controller, sync_time)
-        mqtt_communicator = create_mqtt_communicator_from_config()
+        logging.debug('2')
+        mqtt_communicator = MQTTCommunicator(use_AWS=config.cfg.use_aws,
+                                             client_id=config.cfg.aws_client_id,
+                                             endpoint=config.cfg.aws_endpoint,
+                                             port=config.cfg.mqtt_port_ssl,
+                                             timeout=config.cfg.mqtt_timeout)
         mqtt_communicator.connect()
     except Exception as e:
         logging.error("Error wifi_get_adn_aws_handler(): {}".format(e))
@@ -205,27 +217,6 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time
             synchronize_time()
         except Exception as e:
             raise Exception(e)
-
-
-def get_last_commit_info() -> dict:
-    """
-    Get the most recent committed data.
-    :return: Data as dict
-    """
-    logging.debug("utils.py/get_last_commit_info()")
-    file_path = 'commit_info.txt'
-
-    commit_info_dict = {}
-
-    if check_if_file_exists(path_to_file=file_path):
-        with open(file_path, 'r', encoding="utf8") as file:
-            commit_info_dict = ujson.load(file)
-    else:
-        commit_info_dict['hash'] = 'Unknown'
-        commit_info_dict['tag'] = 'Unknown'
-        print("File with hash of the last commit doesn't exist")
-
-    return commit_info_dict
 
 
 def print_reset_wake_state() -> (int, int):

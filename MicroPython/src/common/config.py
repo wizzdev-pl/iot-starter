@@ -1,16 +1,14 @@
+import ujson
+import urequests
 from uos import mkdir
 from ujson import dump, load
-from machine import Pin, reset
-from esp32 import wake_on_ext0, WAKEUP_ALL_LOW
 from lib import logging
 
-from data_upload.handlers_container import HandlerContainer
 from communication.wirerless_connection_controller import get_mac_address_as_string
 from common import utils
 
 
 cfg = None
-hc = None
 
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
@@ -45,6 +43,11 @@ CERTIFICATE_PATH = "{}/{}".format(CERTIFICATES_DIR, "AWS.certificate")
 CA_CERTIFICATE_PATH = "{}/{}".format(CERTIFICATES_DIR, "AWS.ca_certificate")
 AWS_CONFIG_PATH = "/resources/aws_config.json"
 THING_NAME_PREFIX = "ESP32"
+
+DEFAULT_PRIV_KEY = ""
+DEFAULT_CERT_PEM = ""
+DEFAULT_CERT_CA = ""
+
 
 DEFAULT_TESTED_CONNECTION_CLOUD = False
 DEFAULT_PRINTED_TIME = False
@@ -91,6 +94,9 @@ class ESPConfig:
         self.printed_time = DEFAULT_PRINTED_TIME
         self.got_sensor_data = DEFAULT_GOT_SENSOR_DATA
         self.published_to_cloud = DEFAULT_PUBLISHED_TO_CLOUD
+        self.private_key = DEFAULT_PRIV_KEY
+        self.cert_pem = DEFAULT_CERT_PEM
+        self.cert_ca = DEFAULT_CERT_CA
 
     def load_from_file(self) -> None:
         """
@@ -134,12 +140,17 @@ class ESPConfig:
             self.printed_time = config_dict.get('printed_time', DEFAULT_PRINTED_TIME)
             self.got_sensor_data = config_dict.get('got_sensor_data', DEFAULT_GOT_SENSOR_DATA)
             self.published_to_cloud = config_dict.get('published_to_cloud', DEFAULT_PUBLISHED_TO_CLOUD)
+            self.private_key = config_dict.get('private_key', DEFAULT_PRIV_KEY)
+            self.cert_pem = config_dict.get('cert_pem', DEFAULT_CERT_PEM)
+            self.cert_ca = config_dict.get('cert_ca', DEFAULT_CERT_CA)
+
             if not self.device_uid:
                 self.device_uid = config_dict.get('device_uid', DEFAULT_DEVICE_UID)
         if not config_file_exists:
-            self.save_to_file()
+            self.save()
 
-    def load_aws_config_from_file(self) -> dict:
+    @staticmethod
+    def load_aws_config_from_file() -> dict:
         """
         Load configuration of cloud from file.
         :return: Configuration of cloud in dict.
@@ -147,18 +158,6 @@ class ESPConfig:
         with open(AWS_CONFIG_PATH, "r", encoding="utf8") as infile:
             config_dict = load(infile)
         return config_dict
-
-    def save_to_file(self) -> None:
-        """
-        Save configuration to file.
-        :return: None
-        """
-        logging.debug("ESPConfig.save_to_file()")
-        config_dict = self.as_dictionary
-
-        with open(CONFIG_FILE_PATH, "w", encoding="utf8") as infile:
-            dump(config_dict, infile)
-        logging.info("New config saved!")
 
     @property
     def as_dictionary(self) -> dict:
@@ -192,56 +191,11 @@ class ESPConfig:
         config_dict['got_sensor_data'] = self.got_sensor_data
         config_dict['published_to_cloud'] = self.published_to_cloud
 
+        config_dict['private_key'] = self.private_key
+        config_dict['cert_pem'] = self.cert_pem
+        config_dict['cert_ca'] = self.cert_ca
+
         return config_dict
-
-    @staticmethod
-    def button_irq(p: Pin) -> None:
-        """
-        Callback of interrupt of BOOT button. Resets ESP.
-        :param p: BOOT pin.
-        :return: None
-        """
-        logging.debug("=== RESET BUTTON PRESSED ===")
-        ESPConfig.save()
-        reset()
-
-    @staticmethod
-    def reset_config(p: Pin) -> None:
-        """
-        Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
-        :param p: GPIO32 pin.
-        :return: None
-        """
-        logging.debug("=== CONFIG BUTTON PRESSED ===")
-        global cfg
-        cfg.ap_config_done = False
-        cfg.ssid = DEFAULT_SSID
-        cfg.password = DEFAULT_PASSWORD
-        ESPConfig.save()
-        reset()
-
-    @staticmethod
-    def init() -> None:
-        """
-        Initialize ESP, reads or creates configuration, sets interrupts.
-        :return: None
-        """
-        logging.debug("config.py/init()")
-        global cfg
-        global hc
-        hc = HandlerContainer()
-        cfg = ESPConfig()
-        cfg.load_from_file()
-
-        button = Pin(0, Pin.IN, Pin.PULL_UP)
-        button.irq(trigger=Pin.IRQ_FALLING, handler=ESPConfig.button_irq)
-        wake_on_ext0(pin=button, level=False)
-
-        button2 = Pin(32, Pin.IN, Pin.PULL_UP)
-        button2.irq(trigger=Pin.IRQ_FALLING, handler=ESPConfig.reset_config)
-        wake_on_ext0(pin=button2, level=WAKEUP_ALL_LOW)
-
-        logging.debug("Configuration loaded")
 
     @staticmethod
     def save() -> None:
@@ -264,6 +218,7 @@ class ESPConfig:
         :param config_dict: dict with credentials.
         :return: None
         """
+        global cfg
         logging.debug("save_certificates()")
         try:
             mkdir(CERTIFICATES_DIR)
@@ -272,31 +227,39 @@ class ESPConfig:
 
         if 'cert_pem' in config_dict.keys():
             certificate_string = config_dict['cert_pem']
+            cfg.cert_pem = config_dict['cert_pem']
             with open(CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(certificate_string)
 
         if 'priv_key' in config_dict.keys():
             private_key_string = config_dict['priv_key']
+            cfg.private_key = config_dict['priv_key']
             logging.info(private_key_string)
             with open(KEY_PATH, "w", encoding="utf8") as infile:
                 infile.write(private_key_string)
 
         if 'cert_ca' in config_dict.keys():
             ca_certificate_string = config_dict['cert_ca']
+            cfg.cert_ca = config_dict['cert_ca']
             with open(CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(ca_certificate_string)
 
     @staticmethod
-    def read_certificates() -> (bool, str, str):
+    def read_certificates(parse: bool = False) -> (bool, str, str):
         """
         Read certificates from files.
         :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
         """
         logging.debug("read_certificates()")
-        result, AWS_certificate = utils.read_from_file(CERTIFICATE_PATH)
-        result2, AWS_key = utils.read_from_file(KEY_PATH)
+        result, aws_certificate = utils.read_from_file(CERTIFICATE_PATH)
+        result2, aws_key = utils.read_from_file(KEY_PATH)
 
-        return (result and result2), AWS_certificate, AWS_key
+        if parse:
+            aws_certificate.replace('\n', '')
+            aws_key.replace('\n', '')
+            return (result and result2), aws_certificate, aws_key
+        else:
+            return (result and result2), aws_certificate, aws_key
 
     @staticmethod
     def update_config_dict(new_config: dict) -> None:
@@ -327,3 +290,83 @@ class ESPConfig:
             logging.debug('Modified {} entrires. Config updated succesfully!'.format(modified_entries))
         else:
             logging.debug('No changes to config file were made!')
+
+    @staticmethod
+    def authorization_request() -> str:
+        """
+        Register your ESP in cloud. It takes password and login from aws_config.json
+        :return: JSON Web Token
+        """
+        global cfg
+        logging.debug("Authorization request function")
+        headers = DEFAULT_JSON_HEADER
+        url = cfg.api_url + API_AUTHORIZATION_URL
+        body = {}
+        body['is_removed'] = True
+        body['created_at'] = 0
+        body['username'] = cfg.api_login
+        body['password'] = cfg.api_password
+
+        logging.debug('LOGIN: {}, password: {}'.format(cfg.api_login, cfg.api_password))
+
+        body = ujson.dumps(body)
+        try:
+            response = urequests.post(url, data=body, headers=headers)
+        except IndexError as e:
+            logging.info("No internet connection: {}".format(e))
+            return ""
+        except Exception as e:
+            logging.info("Failed to authorize in API {}".format(e))
+            return ""
+
+        if response.status_code != '200' and response.status_code != 200:
+            logging.error(response.text)
+            return ""
+
+        response_dict = response.json()
+        jwt_token = response_dict.get("data")
+        return jwt_token
+
+    @staticmethod
+    def configuration_request(_jwt_token: str):
+        """
+        Function configures ESP with cloud (AWS)
+        :param _jwt_token: JSON Web Token
+        :return: dict with certificates/keys
+        """
+        global cfg
+        headers = ESPConfig.get_header_with_authorization(_jwt_token)
+        url = cfg.api_url + API_CONFIG_URL
+        thing_name = THING_NAME_PREFIX + cfg.device_uid
+        body = {}
+        body['is_removed'] = True
+        body['created_at'] = 0
+        body['device_id'] = thing_name
+        body['description'] = 'Full configuration test'
+        body['device_type'] = 'configuration_test'
+        body['device_group'] = 'configuration_test'
+        body['settings'] = {}
+
+        body = ujson.dumps(body)
+        response = urequests.post(url, data=body, headers=headers)
+        response_dict = response.json()
+        if response_dict is None:
+            raise Exception("ESP32 not receive certificates from AWS")
+        cfg.aws_client_id = thing_name
+        cfg.save()
+        return ESPConfig.get_aws_certs(response_dict)
+
+    @staticmethod
+    def get_header_with_authorization(jwt_token: str) -> dict:
+        standard_header = DEFAULT_JSON_HEADER
+        authorization_header = standard_header.copy()
+        authorization_header['Authorization'] = "Bearer " + jwt_token
+        return authorization_header
+
+    @staticmethod
+    def get_aws_certs(_response_dict: dict) -> dict:
+        cert_dict = _response_dict.get('data')
+        cert_dict['priv_key'] = cert_dict.pop('PrivateKey')
+        cert_dict['cert_pem'] = cert_dict.pop('certificatePem')
+        cert_dict['cert_ca'] = cert_dict.pop('certificateCa')
+        return cert_dict

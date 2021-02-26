@@ -23,20 +23,15 @@ class MQTTCommunicator:
         self.client_id = client_id
         self.endpoint = endpoint
         self.port = port
-        self.device_shadow_get_topic = '$aws/things/{}/shadow/get'.format(client_id)
-        self.device_shadow_accepted_topic = '$aws/things/{}/shadow/get/accepted'.format(client_id)
-        self.device_shadow_update_topic = '$aws/things/{}/shadow/update'.format(client_id)
         self.timeout = timeout
         if use_AWS:
-            result, AWS_certificate, AWS_key = config.ESPConfig.read_certificates()
-            AWS_certificate.replace('\n', '')
-            AWS_key.replace('\n', '')
+            result, aws_certificate, aws_key = config.ESPConfig.read_certificates(True)
             if not result:
-                raise Exception ("Failed to read AWS certificate or key")
+                raise Exception("Failed to read AWS certificate or key")
             ssl_parameters = {
                 "server_side": False,
-                "key": AWS_key,
-                "cert": AWS_certificate
+                "key": aws_key,
+                "cert": aws_certificate
             }
             self.MQTT_client = MQTTClient(client_id=self.client_id,
                                           server=self.endpoint,
@@ -113,7 +108,7 @@ class MQTTCommunicator:
 
     def subscribe(self, topic, callback, qos) -> bool:
         """
-        Substribes to given topic
+        Subscribes to given topic
         :param topic: topic to subscribe to.
         :param callback: callback function.
         :param qos: Quality of Service.
@@ -138,37 +133,6 @@ class MQTTCommunicator:
             wait_time += 100
         return False
 
-    def get_device_shadow(self, timeout_ms: int) -> bool:
-        """
-        Getting information about device.
-        :param timeout_ms: timeout.
-        :return: Error code (True - OK, False - Error).
-        """
-        self.subscribe(topic=self.device_shadow_accepted_topic, callback=self._get_device_shadow_callback, qos=0)
-        self.publish(topic=self.device_shadow_get_topic, data='', qos=0)  # Empty msg triggers AWS response to /update
-
-        if self._wait_for_message(timeout_ms):
-            message = "Could not update device shadow, timed out! [{}]".format(timeout_ms)
-            try:
-                with open("errorlog.txt", "a") as file:
-                    file.write(message)
-            except:
-                logging.error(message)
-                logging.error("Can't write to errorlog.txt")
-            return False
-        return True
-
-    @staticmethod
-    def _get_device_shadow_callback(topic, msg):
-        shadow = ujson.loads(msg)
-        try:
-            new_config = shadow['state']['desired']['config']
-        except:
-            logging.info("There was no config in the 'desired' segment.")
-            return
-
-        config.ESPConfig.update_config_dict(new_config)
-
     def publish_message(self, payload, topic, qos):
         mqtt_message = {
             'client_id': self.client_id,
@@ -192,16 +156,4 @@ class MQTTCommunicator:
                 logging.error("Can't write to errorlog.txt")
             return False
 
-    def update_device_shadow_startup(self, power_on_timestamp):
-        logging.debug("MQTTCommunicator({})".format(power_on_timestamp))
-        updated_config = {'state': {}}
-        updated_config['state']['reported'] = {}
-        updated_config['state']['reported']['config'] = config.cfg.as_dictionary
-        updated_config['state']['reported']['power_on_timestamp'] = power_on_timestamp
-        #updated_config['state']['reported']['last_commit_info'] = utils.get_last_commit_info()
-        logging.info('Updating shadow device info and config')
-        data = ujson.dumps(updated_config)
-        logging.debug("data to send = {}".format(data))
-        self.publish(data, '$aws/things/{}/shadow/update'.format(self.client_id), 0)
-        utime.sleep(0.25)
 

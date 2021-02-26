@@ -24,14 +24,14 @@ def authorization_request() -> str:
         response = urequests.post(url, data=body, headers=headers)
     except IndexError as e:
         logging.info("No internet connection: {}".format(e))
-        return None
+        return ""
     except Exception as e:
         logging.info("Failed to authorize in API {}".format(e))
-        return None
+        return ""
 
     if response.status_code != '200' and response.status_code != 200:
         logging.error(response.text)
-        return None
+        return ""
 
     response_dict = response.json()
     jwt_token = response_dict.get("data")
@@ -62,7 +62,7 @@ def configuration_request(_jwt_token: str):
     if response_dict is None:
         raise Exception("ESP32 not receive certificates from AWS")
     config.cfg.aws_client_id = thing_name
-    config.cfg.save_to_file()
+    config.cfg.save()
     return get_aws_certs(response_dict)
 
 

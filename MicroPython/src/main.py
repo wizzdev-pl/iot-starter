@@ -1,9 +1,10 @@
 from machine import reset, reset_cause, wake_reason, HARD_RESET, PWRON_RESET, SOFT_RESET, PIN_WAKE, lightsleep
 import logging
 import _thread
+
 from controller.main_controller import MainController
 from controller.main_controller_event import MainControllerEventType, MainControllerEvent
-from common import config
+from common import config, utils
 
 
 def main():
@@ -13,7 +14,7 @@ def main():
     _thread.stack_size(8192*2)
     
     # Read and parse configuration from config.json
-    config.ESPConfig.init()
+    utils.init()
 
     controller = MainController()
 
