@@ -96,6 +96,8 @@ class MainController:
             logging.debug("GOT WIFI CONFIG")
             logging.debug("Testing AWS connection")
 
+            MainController.test_connection_with_wifi_and_cloud()
+
             config.cfg.tested_connection_cloud = True
             config.cfg.save()
 
@@ -117,6 +119,7 @@ class MainController:
             logging.debug("GOT PRINTED TIME")
 
             logging.debug("GETTING SENSOR DATA")
+
             self.data_acquisitor.acquire_temp_humi()
 
             config.cfg.got_sensor_data = True
