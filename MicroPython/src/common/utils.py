@@ -35,6 +35,10 @@ def reset_config(p: machine.Pin) -> None:
     config.cfg.ap_config_done = False
     config.cfg.ssid = config.DEFAULT_SSID
     config.cfg.password = config.DEFAULT_PASSWORD
+    config.cfg.tested_connection_cloud = False
+    config.cfg.printed_time = False
+    config.cfg.got_sensor_date = False
+    config.cfg.published_to_cloud = False
     config.ESPConfig.save()
     machine.reset()
 
