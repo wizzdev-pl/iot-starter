@@ -12,6 +12,7 @@ MicroPython/src/aws_config.json
 *.pyc
 venv/
 .idea/
+*.vscode/
 
 
 Misc files
