@@ -5,6 +5,7 @@ import subprocess
 import sys
 import git
 from git.refs.tag import TagReference
+from pathlib import Path
 
 import pyboard
 

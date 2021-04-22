@@ -20,11 +20,16 @@ terraform --version
 Python can be downloaded from this website: https://www.python.org/downloads/
 Please follow installation instructions from their website. 
 After installation, you can check if it is installed correctly by typing the following commands in your terminal:
+* Linux:
 ```bash
 python3 --version
 pip3 --version
 ```
-
+* Windows:
+```bash
+python --version
+pip --version
+```
 #### Node.js, npm
 These requirements are needed to build and bundle visualization. Nodejs can be installed from this website:
 https://nodejs.org/en/download/. Npm should be installed automatically along with nodejs.
@@ -48,9 +53,15 @@ npm install -g npm@next
 
 ##### 1. Create virtual environment:
 First, you need to create virtual environment
+* Linux:
 ```
 cd scripts
 python3 -m venv venv
+```
+* Windows:
+```
+cd scripts
+python -m venv venv
 ```
 Next, you should activate it. This step is platform dependent
 ###### Windows
@@ -69,8 +80,9 @@ pip3 install -r requirements.txt
 ```
 ##### 3. Configure aws credentials:
 
-1. Prepare `ACCESS_KEY` and `SECRET_KEY`, which can be obtained from AWS IAM console.
-Connect AWS with your account by running following command:  
+1. Prepare `ACCESS_KEY` and `SECRET_KEY`, which can be obtained from AWS IAM console. Download AWS CLI from 
+   https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html to connect AWS with your account and
+   run following command:  
 ```
 aws configure
 ```

@@ -1,5 +1,3 @@
-# This module handles all wifi communication
-
 import network
 import logging
 import time
@@ -9,36 +7,31 @@ import ubinascii
 wireless_connection_controller_instance = None
 
 
-def get_wireless_connection_controller_instance():
-    # Get global instance of wifi controller, create if not found
-    global wireless_connection_controller_instance
-    if not wireless_connection_controller_instance:
-        wireless_connection_controller_instance = WirelessConnectionController()
-    return wireless_connection_controller_instance
-
-def get_mac_address_as_string():
-    wlan = network.WLAN()
-    mac_address = wlan.config('mac')
-    print("Mac address {}".format(mac_address))
-
-    mac_address_string = ubinascii.hexlify(mac_address).decode('asci')
-    print("Mac address {}".format(mac_address_string))
-    return mac_address_string
-
-
 class WirelessConnectionController:
-
+    """
+    Wifi handler class.
+    """
     WIFI_CONNECTION_CHECK_SLEEP_TIME_S = 5
     WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES = 10
 
-    def __init__(self, sta_ssid="", sta_password=""):
+    def __init__(self, sta_ssid: str = "", sta_password: str = ""):
+        """
+        Constructor of WirelessConnectionController class.
+        :param sta_ssid: Wifi ssid.
+        :param sta_password: Wifi password.
+        """
         self.sta_handler = None
         self.sta_ssid = sta_ssid
         self.sta_password = sta_password
         self.ap_handler = None
 
-    def configure_access_point(self, ssid, password):
-        # Configure wifi as access point
+    def configure_access_point(self, ssid: str, password: str) -> bool:
+        """
+        Configure Access Point with given ssid and password
+        :param ssid: AP ssid.
+        :param password: AP password.
+        :return: Error code (True - OK, False - error).
+        """
         if self.ap_handler:
             return False
 
@@ -52,27 +45,37 @@ class WirelessConnectionController:
 
         return True
 
-    def disable_access_point(self):
+    def disable_access_point(self) -> None:
+        """
+        Disable/Turn off Access Point.
+        :return: None.
+        """
         if self.ap_handler is not None:
             logging.debug("Disabling AP")
-            #self.ap_handler.disconnect()
             self.ap_handler.active(False)
 
-    def setup_station(self, ssid, password):
-        # Setup class with parameters to configure device as wifi station by providing
-        # ssid and password to external wifi access point
+    def setup_station(self, ssid: str, password: str) -> None:
+        """
+        Change default ssid and password to given ones.
+        :param ssid: New ssid.
+        :param password: New password.
+        :return: None.
+        """
         self.sta_ssid = ssid
         self.sta_password = password
 
-    def configure_station(self):
-        # Configure device as wifi station
+    def configure_station(self) -> (bool, str):
+        """
+        Configuration of wifi station.
+        :return: Error code (True - OK, False - Error), error message.
+        """
         if self.sta_handler:
-            return False, "STA already connected"
+            raise Exception("STA Already connected")
 
         self.sta_handler = network.WLAN(network.STA_IF)
 
         if self.sta_handler.isconnected():
-            return False, "STA already connected"
+            raise Exception("STA Already connected")
 
         self.sta_handler.active(True)
         existing_networks = self.sta_handler.scan()
@@ -80,8 +83,8 @@ class WirelessConnectionController:
         print("Connect to wifi: {}, pass: {}".format(self.sta_ssid, self.sta_password))
         try:
             self.sta_handler.connect(self.sta_ssid, self.sta_password)
-        except:
-            return False, "Failed to connect to access point (wifi ssid='{}')".format(self.sta_ssid)
+        except Exception:
+            raise Exception("Failed to connect to access point (wifi ssid='{}')".format(self.sta_ssid))
 
         number_of_retires = 0
         while not self.sta_handler.isconnected():
@@ -92,31 +95,67 @@ class WirelessConnectionController:
                 logging.info("Too many reconnections")
                 break
 
-
         if self.sta_handler.isconnected():
             self.sta_handler.ifconfig()
             return True, ""
         else:
             self.disconnect_station()
-            return False, "Failed to connect to access point v2 (wifi ssid='{}')".format(self.sta_ssid)
+            raise Exception("Failed to connect to access point v2 (wifi ssid='{}')".format(self.sta_ssid))
 
-    def disconnect_station(self):
-        # Disconnect wifi station
+    def disconnect_station(self) -> bool:
+        """
+        Disconnects wifi station.
+        :return: Error code (True - OK, False - Error).
+        """
         if not self.sta_handler:
             return True
-        #self.sta_handler.disconnect()
         self.sta_handler.active(False)
         self.sta_handler = None
         return True
 
-    def is_station(self):
-        # Check if wifi is configured as station
+    def is_station(self) -> bool:
+        """
+        Check if device is setup as station.
+        :return: True -> device is wifi station, False -> station is not wifi station.
+        """
         return self.sta_handler is not None
 
-    def is_access_point(self):
-        # Check if wifi is configured as access point
+    def is_access_point(self) -> bool:
+        """
+        Check if device is setup as access point.
+        :return: True -> device is access point, False -> station is not access point.
+        """
         return self.ap_handler is not None
 
-    def get_wifi_ssid(self):
-        # Get ssid to which station is connected
+    def get_wifi_ssid(self) -> str:
+        """
+        Gets wifi station ssid.
+        :return: Wifi ssid.
+        """
         return self.sta_ssid
+
+
+def get_wireless_connection_controller_instance() -> WirelessConnectionController:
+    """
+    Get wifi handler or create it and get it.
+    :return: Wifi handler.
+    """
+    global wireless_connection_controller_instance
+    if not wireless_connection_controller_instance:
+        wireless_connection_controller_instance = WirelessConnectionController()
+    return wireless_connection_controller_instance
+
+
+def get_mac_address_as_string() -> str:
+    """
+    Get MAC address as string.
+    :return: MAC address.
+    """
+    wlan = network.WLAN()
+    mac_address = wlan.config('mac')
+    print("Mac address {}".format(mac_address))
+
+    mac_address_string = ubinascii.hexlify(mac_address).decode('asci')
+    print("Mac address {}".format(mac_address_string))
+    return mac_address_string
+
