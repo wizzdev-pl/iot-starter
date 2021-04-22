@@ -9,41 +9,59 @@ Configuration files describe to Terraform the components needed to run a single 
 _(via: https://www.terraform.io/intro/index.html)_
 
 ## Requirements
-#### Terraform
-You can download terraform binary from this website: https://www.terraform.io/downloads.html
-Downloaded file should be placed in this directory (iot-starter/terraform). You can check your installation with this command:
+### Terraform
+Terraform can be installed in two ways:
+
+- You can download terraform binary from this website: https://www.terraform.io/downloads.html. Downloaded file should be placed in this directory (iot-starter/terraform)
+- You can install terraform via package manager on Unix like systems (assuming it’s available). Fedora has the latest version available, so to install it on the Fedora Linux follow this link: https://www.terraform.io/docs/cli/install/yum.html
+
+You can check your installation with this command (if the terraform was downloaded as a binary file, remember to run this command from "iot-starter/terraform" directory):
+
 ```bash
 terraform --version
 ```
  
-#### Python 3, PIP 
-Python can be downloaded from this website: https://www.python.org/downloads/
-Please follow installation instructions from their website. 
+### Python 3, PIP 
+Python can be downloaded from this website: https://www.python.org/downloads (in case of using Anaconda environment, please skip this part and refer to "**Installation**" section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
 After installation, you can check if it is installed correctly by typing the following commands in your terminal:
-* Linux:
+
+* Linux
 ```bash
 python3 --version
 pip3 --version
 ```
+
 * Windows:
 ```bash
 python --version
 pip --version
 ```
-#### Node.js, npm
-These requirements are needed to build and bundle visualization. Nodejs can be installed from this website:
-https://nodejs.org/en/download/. Npm should be installed automatically along with nodejs.
+
+### Node.js, npm
+These requirements are needed to build and bundle visualization. Nodejs can be installed in two ways:
+- From the website: https://nodejs.org/en/download. Npm should be installed automatically along with nodejs.
+- Via the package manager. For Fedora, to install both packages execute the following command:
+
+  ```bash
+  sudo dnf install nodejs
+  ```
+
 You can check if installation succeed with these commands:
+
 ```bash
 node --version
 npm --version
 ```
+
 Project requires to install node.js in version >= 10.0.
-To update npm to the latest version
+To update npm to the latest version:
+
 ```bash
 npm install -g npm@latest
 ```
+
 or to update to the most recent release:
+
 ```bash
 npm install -g npm@next
 ```
@@ -51,34 +69,58 @@ npm install -g npm@next
 
 ## Installation
 
-##### 1. Create virtual environment:
-First, you need to create virtual environment
-* Linux:
-```
-cd scripts
-python3 -m venv venv
-```
-* Windows:
-```
-cd scripts
-python -m venv venv
-```
-Next, you should activate it. This step is platform dependent
-###### Windows
-```
-venv/Scripts/activate.bat
-```
+### 1. Create virtual environment:
+First, you need to create virtual environment (either with python venv module or anaconda-python):
 
-###### Linux/ Mac OS
-```
-source venv/bin/activate
-```
+* For anaconda (either in terminal - Linux or anaconda prompt - Windows):
+  ```
+  cd scripts
+  conda create --name ENV_NAME python=3.7 pip
+  ```
 
-##### 2. Install requirements
+* For venv:
+  * Linux:
+  ```
+  cd scripts
+  python3 -m venv ENV_NAME
+  ```
+
+  * Windows:
+  ```
+  cd scripts
+  python -m venv ENV_NAME
+  ```
+
+where "ENV_NAME" is the name of the environment you’re creating.
+
+Next, you should activate it. This step is platform dependent:
+#### Windows
+* For anaconda:
+  ```
+  conda activate ENV_NAME
+  ```
+
+* For venv:
+  ```
+  ENV_NAME/Scripts/activate.bat
+  ```
+
+#### Linux/ Mac OS
+* For anaconda:
+  ```
+  conda activate ENV_NAME
+  ```
+
+* For venv:
+  ```
+  source ENV_NAME/bin/activate
+  ```
+
+### 2. Install requirements
 ```
 pip3 install -r requirements.txt
 ```
-##### 3. Configure aws credentials:
+### 3. Configure aws credentials:
 
 1. Prepare `ACCESS_KEY` and `SECRET_KEY`, which can be obtained from AWS IAM console. Download AWS CLI from 
    https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html to connect AWS with your account and
@@ -88,7 +130,7 @@ aws configure
 ```
 If you have trouble generating 'credentials' see the Additional Information and Help section.
 
-##### 4. Adjust terraform settings:
+### 4. Adjust terraform settings:
 You need to create your own s3 bucket in AWS. The whole procedure was described
 in this website: https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html
 
@@ -108,18 +150,16 @@ terraform {
 }
 ```
 
-##### 5 Modify project variables
-Due to security reasons you have to modify files `devel.tfvars` (developement environment settings) and `production.tfvars` (production environment settings) in 
-the `terraform/environments` directory. Changing **ESP_HARD_LOGIN, ESP_HARD_PASSWORD, owner and project** 
-values is obligatory. Other way your AWS infrastructure could be accessed by 
-unauthorized devices. 
+### 5 Modify project variables
+Due to security reasons you have to modify files `devel.tfvars` (developement environment settings) and `production.tfvars` (production environment settings) in the `terraform/environments` directory. 
+Changing **ESP_HARD_LOGIN, ESP_HARD_PASSWORD, owner and project** values is obligatory. 
+Otherwise, your AWS infrastructure could be accessed by unauthorized devices. 
 
-**Project** variable value, should be unique for each infrastructure 
-building.
+- Values of "ESP_HARD_LOGIN" and "ESP_HARD_PASSWORD" are independent from AWS account - a new connection is created with these credentials.
 
-You can change **Region** variable according to your preferences. All available regions
-are listed in this webpage (https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html)
-Region of S3 bucket created for Terraform state synchronization is independent of this settings.
+- "project" variable value should be unique for each infrastructure building.
+
+- Region of S3 bucket created for Terraform state synchronization is independent of these settings and so you can change the "region" variable according to your preferences. All available regions are listed on this webpage: (https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html) 
 
 Example:
 
@@ -132,7 +172,9 @@ ESP_HARD_PASSWORD = "TopSecretPassword"
 ESP_HARD_LOGIN = "TopSecretLogin"
 ```
 
-##### 6. Initialize terraform, from directory ./terraform run following commands:
+### 6. Initialize terraform, from directory ./terraform run following commands:
+(Remember to adjust this command depending on your terraform installation!)
+
 ```
 ./terraform init
 ./terraform workspace new production
@@ -142,28 +184,28 @@ You can also configure `devel` workspace, that can be used for testing and tryin
 ## How to run
 Here is a short instruction about how to build your cloud infrastructure for this project.
 
-##### 1. Set system environment variable for production (or devel)
-on Linux:
+### 1. Set system environment variable for production (or devel)
+* Linux:
 ```
 export VERSION="production";
 ```
-on Windows:
+* Windows:
 ```
 set VERSION=production
 ```
 
-##### 2. Build deploying packages for Lambdas, REST API and Visualization
+### 2. Build deploying packages for Lambdas, REST API and Visualization
 ```
 cd scripts
 python build_all.py
 cd ..
 ```
-##### 3. Run terraform
+### 3. Run terraform
 ```                                                                        
 ./terraform workspace select $VERSION
-./terraform apply -var-file=./environments/$VERSION.tfvars                                                                                                                                                              
+./terraform apply -var-file=./environments/$VERSION.tfvars
 ```
-##### 4. Refresh IoT Core Rule in AWS console
+### 4. Refresh IoT Core Rule in AWS console
 Since Terraform's communication with AWS is not 100% perfect, 
 the following steps are necessary when first establishing a cloud architecture:   
 1. Go to AWS console.
