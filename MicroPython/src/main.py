@@ -1,63 +1,61 @@
-import time
-
-from machine import Pin, reset, reset_cause, wake_reason, HARD_RESET, PWRON_RESET, SOFT_RESET, PIN_WAKE
-from logging import debug
+from machine import reset, reset_cause, wake_reason, HARD_RESET, PWRON_RESET, SOFT_RESET, PIN_WAKE, lightsleep
+import logging
 import _thread
+
 from controller.main_controller import MainController
 from controller.main_controller_event import MainControllerEventType, MainControllerEvent
-from power_management.deepsleep_handler import power_save, publish_to_aws, get_time_from_ntp, measure
-from common import config
-from common.utils import time_print
-
-
-def configuration_access_point():
-    debug("=== Entering configuration mode ===")
-
-    controller = MainController()
-    event = MainControllerEvent(MainControllerEventType.CONFIGURE_ACCESS_POINT)
-    controller.process_event(event)
-    controller.perform()
-
-    config.cfg.ap_config_done = True
-    config.save()
-    reset()
+from common import config, utils
 
 
 def main():
-    debug("=== MAIN START ===")
+    logging.debug("=== MAIN START ===")
 
     # Increase stack size per thread this increases micropython recursion depth
     _thread.stack_size(8192*2)
     
     # Read and parse configuration from config.json
-    config.init()
+    utils.init()
+
+    controller = MainController()
 
     # Check if configuration via access point has to be started
     if not config.cfg.ap_config_done or wake_reason() == PIN_WAKE:
-        debug("AP_DONE: {}, wake_reason: {}".format(config.cfg.ap_config_done, wake_reason()))
-        debug("SSID: {}, Password: {}".format(config.cfg.ssid, config.cfg.password))
+        logging.debug("AP_DONE: {}, wake_reason: {}".format(config.cfg.ap_config_done, wake_reason()))
+        logging.debug("SSID: {}, Password: {}".format(config.cfg.ssid, config.cfg.password))
         if config.cfg.ssid != 'ssid' and config.cfg.password != 'password':
-            debug("SSID and password aren't default. Try to connect")
+            logging.debug("SSID and password aren't default. Try to connect")
             pass
         else:
-            configuration_access_point()
+            logging.debug("=== Entering configuration mode ===")
 
-    debug("Main loop")
+            event = MainControllerEvent(MainControllerEventType.CONFIGURE_ACCESS_POINT)
+            controller.add_event(event)
+
+    logging.debug("Main loop")
     # If the device is powered on, then actual time from NTP server must be downloaded
+
     if reset_cause() == HARD_RESET or reset_cause() == PWRON_RESET or reset_cause() == SOFT_RESET:
-        get_time_from_ntp()
+        event = MainControllerEvent(MainControllerEventType.TEST_CONNECTION)
+        controller.add_event(event)
 
     # Print actual time
-    time_print()
+    event = MainControllerEvent(MainControllerEventType.PRINT_TIME)
+    controller.add_event(event)
 
     # Read temperature and humidity from the sensor and return the data as JSON
-    result = measure()
+    event = MainControllerEvent(MainControllerEventType.GET_SENSOR_DATA)
+    controller.add_event(event)
 
     # Connect to WIFI and publish JSON with data to AWS via MQTT
-    publish_to_aws(result)
+    event = MainControllerEvent(MainControllerEventType.PUBLISH_DATA)
+    controller.add_event(event)
 
     # Good night!
-    power_save(config.cfg.data_publishing_period_in_ms)
+    event = MainControllerEvent(MainControllerEventType.GO_TO_SLEEP, callback=None,
+                                ms=config.cfg.data_publishing_period_in_ms)
+    controller.add_event(event)
+
+    controller.perform()
 
 if __name__ == '__main__':
     main()

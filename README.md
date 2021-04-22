@@ -12,9 +12,27 @@ for embedded devices.
 ## Prerequisites
 
 Before compiling there are some packages required to install on the PC. Run the following command to install them:
+- Ubuntu:
 ```
 sudo apt-get install git wget bison gperf python python-pip python3-virtualenv python-setuptools python-serial python-click python-cryptography python-future python-pyparsing python-pyelftools ninja-build libssl-dev
 ```
+
+* Windows:
+    - install git (https://git-scm.com/downloads)
+    - install python 3.6+ with pip, virtualenv (https://www.python.org/downloads/windows/)
+    - run:
+  
+```
+pip install pyserial cryptography click future pyelftools setuptools
+```
+
+
+Make sure you have access to required hardware:
+- AWS account with ACCESS_CODE and SECRET_CODE
+- ESP32 MCU board (preferably ESP32 DevKitC v4)
+- MicroUSB cable
+- DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed)
+- WiFi connection
 
 ## Cloning repository
 To clone repository use following lines:
@@ -30,12 +48,6 @@ To flash and debug device it is required to add user to dialout group:
 ```
 sudo usermod -a -G dialout $USER
 ```
-
-- AWS account with ACCESS_CODE and SECRET_CODE
-- ESP32 MCU board (preferably ESP32 DevKitC v4)
-- MicroUSB cable
-- DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed)
-- WiFi connection
 
 ## Installing
 ### AWS configuration 

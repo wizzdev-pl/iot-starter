@@ -7,15 +7,7 @@
 
 
 ### To develop in PyCharm:
-1. Create and activate virtual environment with Python 3.6 using PyCharm GUI
-or do it manually.
-````bash
-cd Micropython
-virtualenv venv
-pip3 install -r requirements.txt
-````
-
-2. Open the project MicroPython with PyCharm and mark *src* and *ulib_mocks* directory as Sources Root in Pycharm.
+1. Open the project MicroPython with PyCharm and mark *src* and *ulib_mocks* directory as Sources Root in Pycharm.
 
 ### AWS and terraform 
 Make sure that your AWS cloud is configured. For more information please go to 
@@ -42,12 +34,10 @@ This step is platform dependent
 ```bash
 venv/Scripts/activate.bat
 ```
-
 ###### Linux/ Mac OS
 ```bash
 source venv/bin/activate
 ```
-
 #### Install requirements
 ```bash
 pip3 install -r requirements.txt
@@ -57,8 +47,7 @@ pip3 install -r requirements.txt
 Make sure that your board is connected to computer. Check the port number.
 
 ```bash
-source venv/bin/activate
-python3 scripts/upload_all.py -p <port>
+python scripts/upload_all.py -p <port>
 ```
 
 After flashing the board please reset it using button EN button.

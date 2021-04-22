@@ -1,11 +1,12 @@
-import ure as re
-import picoweb
-import ulogging as logging
 import ujson
 import utime
 import machine
+import picoweb
+import ure as re
+import ulogging as logging
 
-from common import config, utils
+from common import config
+
 
 app = picoweb.WebApp(__name__)
 hooks = {}
@@ -96,23 +97,6 @@ def index(req, resp):
 
 @app.route("/config")
 def set_config(req, resp):
-    # Body:
-    # {
-    #     'wifi': {
-    #         'ssid': 'xx',
-    #         'password': 'yy'}
-    #     'aws': {
-    #         'aws_endpoint': “xxx.amazonaws.com”,
-    # 'client_id': “new_iot_device”,
-    # 'cert_pem': yyy,
-    # 'priv_key': xxx,
-    # 'topic': ‘topic / data’}
-    # 'sensor': {
-    #     'acquisition_period_ms': 2000,
-    #     "publishing_period_ms": 300,
-    # }
-    #
-
     assert req.method == 'POST'
     data = yield from parse_post_body(req)
     print(data)
@@ -125,8 +109,7 @@ def set_config(req, resp):
     if 'sensor' in data.keys():
         hooks[CONFIGURE_SENSOR_HOOK](data['sensor'])
 
-    config.cfg.save_to_file()
-    #utils.set_ap_config_done(True)
+    config.cfg.save()
 
     response_data = {'result': 'ok'}
     encoded = create_success_response(data=response_data)
@@ -159,6 +142,7 @@ def start_data_acquisition(req, resp):
     encoded = create_success_response(data=response_data)
     yield from picoweb.start_response(resp, content_type="application/json")
     yield from resp.awrite(encoded)
+
 
 # setup and run
 def setup(get_measurement_hook=None,

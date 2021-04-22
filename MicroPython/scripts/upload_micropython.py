@@ -8,6 +8,7 @@ MICROPYTHON_BIN_FILE_NAME = "esp32-idf3-20191220-v1.12.bin"
 MICROPYTHON_BIN_FILE_DIR = "MicroPython_firmware/"
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
+
 #read -n 1 -s -r -p "Reset ESP32 into bootloader mode - Hold BOOT button and click EN button. Release BOOT. Then press any key to continue"
 def erase_chip_advanced(port):
     print('Erasing Chip...')
