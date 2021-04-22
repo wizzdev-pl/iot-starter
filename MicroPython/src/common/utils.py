@@ -33,8 +33,8 @@ def reset_config(p: machine.Pin) -> None:
     """
     logging.debug("=== CONFIG BUTTON PRESSED ===")
     config.cfg.ap_config_done = False
-    config.cfg.ssid = config.DEFAULT_SSID
-    config.cfg.password = config.DEFAULT_PASSWORD
+    config.cfg.ssid = config.DEFAULT_VARIABLES['ssid']
+    config.cfg.password = config.DEFAULT_VARIABLES['password']
     config.cfg.tested_connection_cloud = False
     config.cfg.printed_time = False
     config.cfg.got_sensor_date = False
@@ -170,9 +170,7 @@ def get_wifi_and_aws_handlers(sync_time: bool = False) -> (WirelessConnectionCon
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
     try:
-        logging.debug('1')
         connect_to_wifi(wireless_controller, sync_time)
-        logging.debug('2')
         mqtt_communicator = MQTTCommunicator(use_AWS=config.cfg.use_aws,
                                              client_id=config.cfg.aws_client_id,
                                              endpoint=config.cfg.aws_endpoint,
@@ -184,11 +182,11 @@ def get_wifi_and_aws_handlers(sync_time: bool = False) -> (WirelessConnectionCon
         try:
             mqtt_communicator.disconnect()
         except Exception:
-            pass
+            logging.error("Error in disconnecting MQTT communicator")
         try:
             wireless_controller.disconnect_station()
         except Exception:
-            pass
+            logging.error("Error in disconnecting WiFi controller")
 
         logging.debug("RESETTING BOARD")
         machine.reset()

@@ -21,11 +21,6 @@ class DataAcquisitor:
                                  dht_measurement_pin_number=config.cfg.dht_measurement_pin,
                                  dht_power_pin_number=config.cfg.dht_power_pin)
 
-    def get_data(self) -> None:
-        pass
-
-    def acquire_data(self) -> None:
-        pass
 
     def acquire_temp_humi(self) -> dict:
         """

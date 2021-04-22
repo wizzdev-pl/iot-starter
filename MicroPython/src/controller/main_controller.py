@@ -212,7 +212,7 @@ class MainController:
         logging.debug("Authorization request...")
         jwt_token = config.ESPConfig.authorization_request()
 
-        if jwt_token is not None:
+        if jwt_token is not "":
             cert_dict = config.ESPConfig.configuration_request(jwt_token)
             config.ESPConfig.save_certificates(cert_dict)
             logging.debug("Configuration done")
