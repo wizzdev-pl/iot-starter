@@ -1,9 +1,13 @@
 import os
+import pathlib
 import json
 import subprocess
+import shutil
+import sys
 
 TERRAFORM_DIR = "../terraform"
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+ROOT_DIR = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..'))
 TERRAFORM_BINARY_NAME = "terraform"
 TERRAFORM_LOCAL_EXE = "./terraform"
 
@@ -29,10 +33,28 @@ def save_terraform_output_as_file(_output_file_name: str):
         outfile.write(tf_output_str)
 
 
+def _check_terraform():
+    """Checks if terraform binary exists in the system"""
+
+    terraform_path = shutil.which(TERRAFORM_BINARY_NAME)
+    if terraform_path is not None:
+        # Terraform installed on the system
+        return TERRAFORM_BINARY_NAME
+    elif pathlib.Path(TERRAFORM_LOCAL_EXE).exists():
+        # Terraform binary exists inside terraform dir
+        return TERRAFORM_LOCAL_EXE
+    else:
+        print("No terraform binary file found! Aborting.")
+        sys.exit(1)
+
+
 def create_terraform_output() -> str:
-    subprocess.run([TERRAFORM_LOCAL_EXE, "init"])
-    subprocess.run([TERRAFORM_LOCAL_EXE, "workspace", "select", "production"])
-    proc = subprocess.Popen([TERRAFORM_LOCAL_EXE, 'output', '-json'], stdout=subprocess.PIPE)
+    terraform = _check_terraform()
+
+    subprocess.run([terraform, "init"])
+    subprocess.run([terraform, "workspace", "select", "production"])
+    proc = subprocess.Popen(
+        [terraform, 'output', '-json'], stdout=subprocess.PIPE)
     output = proc.stdout.read()
     return get_string_from_byte(output)
 

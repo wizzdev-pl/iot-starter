@@ -1,7 +1,7 @@
 boto3
 botocore
 jmespath
-pkg-resources
+setuptools
 python-dateutil
 s3transfer
 six

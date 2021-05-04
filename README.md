@@ -10,14 +10,24 @@ for embedded devices.
 
 
 ## Prerequisites
-
 Before compiling there are some packages required to install on the PC. Run the following command to install them:
-- Ubuntu:
+
+* Ubuntu:
+
 ```
 sudo apt-get install git wget bison gperf python python-pip python3-virtualenv python-setuptools python-serial python-click python-cryptography python-future python-pyparsing python-pyelftools ninja-build libssl-dev
 ```
 
+* Fedora like systems:
+
+(Tested on Fedora 33, should also work at major versions 30+ at least.)
+
+```
+sudo dnf install git wget bison gperf python python-pip python3-virtualenv python-setuptools pyserial python-click python-cryptography python-future python-pyparsing python-pyelftools ninja-build openssl-devel
+```
+
 * Windows:
+
     - install git (https://git-scm.com/downloads)
     - install python 3.6+ with pip, virtualenv (https://www.python.org/downloads/windows/)
     - run:
@@ -26,16 +36,21 @@ sudo apt-get install git wget bison gperf python python-pip python3-virtualenv p
 pip install pyserial cryptography click future pyelftools setuptools
 ```
 
+There is also a possibility to use anaconda-python virtual environment instead of python3-virtualenv. If one chooses so, then there is no need to install: “python3-virtualenv” and “python-setuptools”.
 
 Make sure you have access to required hardware:
+
 - AWS account with ACCESS_CODE and SECRET_CODE
 - ESP32 MCU board (preferably ESP32 DevKitC v4)
 - MicroUSB cable
 - DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed)
 - WiFi connection
 
+
 ## Cloning repository
+
 To clone repository use following lines:
+
 ```bash
 git clone https://github.com/wizzdev-pl/iot-starter.git
 cd iot-starter
