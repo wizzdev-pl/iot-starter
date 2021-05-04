@@ -49,12 +49,12 @@ def _check_terraform():
 
 
 def create_terraform_output() -> str:
-    TERRAFORM = _check_terraform()
+    terraform = _check_terraform()
 
-    subprocess.run([TERRAFORM, "init"])
-    subprocess.run([TERRAFORM, "workspace", "select", "production"])
+    subprocess.run([terraform, "init"])
+    subprocess.run([terraform, "workspace", "select", "production"])
     proc = subprocess.Popen(
-        [TERRAFORM, 'output', '-json'], stdout=subprocess.PIPE)
+        [terraform, 'output', '-json'], stdout=subprocess.PIPE)
     output = proc.stdout.read()
     return get_string_from_byte(output)
 

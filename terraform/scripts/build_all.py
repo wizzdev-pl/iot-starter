@@ -28,23 +28,23 @@ def _check_python():
 
 if __name__ == '__main__':
     # Get python version
-    PYTHON = _check_python()
+    python = _check_python()
 
     # Run build script for REST API
     subprocess.check_call(
-        [PYTHON, "build_lambda.py", "../../web_server/server", "../.tmp/rest_api",
+        [python, "build_lambda.py", "../../web_server/server", "../.tmp/rest_api",
          "--include-db-access"])
 
     # Run build script for lambda_collect_measurements
     subprocess.check_call(
-        [PYTHON, "build_lambda.py", "../../lambda_collect_measurements", "../.tmp/lambda_collect_measurements",
+        [python, "build_lambda.py", "../../lambda_collect_measurements", "../.tmp/lambda_collect_measurements",
          "--include-db-access"])
 
     # Run build script for lambda_health_check
     subprocess.check_call(
-        [PYTHON, "build_lambda.py", "../../lamba_health_check", "../.tmp/lambda_health_check",
+        [python, "build_lambda.py", "../../lamba_health_check", "../.tmp/lambda_health_check",
          "--include-db-access"])
 
     # Run build script for visualization
     subprocess.check_call(
-        [PYTHON, "build_frontend.py", "../../web_server/client", "../.tmp/build_visualization"])
+        [python, "build_frontend.py", "../../web_server/client", "../.tmp/build_visualization"])
