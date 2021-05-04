@@ -10,6 +10,8 @@ from common import utils
 
 cfg = None
 
+DEFAULT_CLOUD_PROVIDER = 'AWS'
+
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
 DEFAULT_AWS_ENDPOINT = 'topic/data'
@@ -97,6 +99,8 @@ class ESPConfig:
         self.private_key = DEFAULT_PRIV_KEY
         self.cert_pem = DEFAULT_CERT_PEM
         self.cert_ca = DEFAULT_CERT_CA
+
+        self.cloud_provider = DEFAULT_CLOUD_PROVIDER
 
     def load_from_file(self) -> None:
         """

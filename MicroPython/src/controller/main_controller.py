@@ -1,15 +1,19 @@
 import _thread
-import logging
-import utime
-import machine
 import gc
+import logging
 
+import machine
+import utime
+from cloud.AWS_cloud import AWS_cloud
+from cloud.cloud_interface import CloudProvider, Providers
 from common import config, utils
-from web_server import web_app
-from data_acquisition import data_acquisitor
 from communication import wirerless_connection_controller
+from data_acquisition import data_acquisitor
+from web_server import web_app
+
+from controller.main_controller_event import (MainControllerEvent,
+                                              MainControllerEventType)
 from controller.main_controller_state import MainControllerState
-from controller.main_controller_event import MainControllerEvent, MainControllerEventType
 
 ACCESS_POINT_BASE_NAME = "Wizzdev_IoT"
 
@@ -38,6 +42,8 @@ class MainController:
         self.last_test_result = None
         self.last_test_comment = ""
         self.last_test_end_time = None
+
+        self.cloud_provider = self.get_cloud_provider()
 
         web_app.setup(get_measurement_hook=self.get_measurement,
                       configure_device_hook=self.device_configuration,
@@ -75,6 +81,17 @@ class MainController:
 
             self.lock.release()
             utime.sleep_ms(500)
+
+    def get_cloud_provider(self) -> CloudProvider:
+        """
+        Returns cloud service provider based on current settings in config
+        :return: CloudProvider
+        """
+        if config.cfg.cloud_provider == Providers.AWS:
+            return AWS_cloud()
+
+        elif config.cfg.cloud_provider == Providers.KAA:
+            pass
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
