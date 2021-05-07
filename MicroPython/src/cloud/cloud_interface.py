@@ -4,13 +4,14 @@ class Providers:
 
 
 class CloudProvider:
-    def __init__(self) -> None:
-        pass
-
     def device_configuration(self):
         pass
 
-    def send_data(self):
+    def publish_data(self):
+        """
+        Publish data to the cloud
+        :return: None
+        """
         pass
 
     def check_connection(self):

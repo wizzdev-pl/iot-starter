@@ -153,15 +153,16 @@ class ESPConfig:
         if not config_file_exists:
             self.save()
 
-    @staticmethod
-    def load_aws_config_from_file() -> dict:
-        """
-        Load configuration of cloud from file.
-        :return: Configuration of cloud in dict.
-        """
-        with open(AWS_CONFIG_PATH, "r", encoding="utf8") as infile:
-            config_dict = load(infile)
-        return config_dict
+    # TODO: DELETE AND MOVE TO AWS_cloud
+    # @staticmethod
+    # def load_aws_config_from_file() -> dict:
+    #     """
+    #     Load configuration of cloud from file.
+    #     :return: Configuration of cloud in dict.
+    #     """
+    #     with open(AWS_CONFIG_PATH, "r", encoding="utf8") as infile:
+    #         config_dict = load(infile)
+    #     return config_dict
 
     @property
     def as_dictionary(self) -> dict:
@@ -215,55 +216,57 @@ class ESPConfig:
             dump(config_dict, infile)
         logging.info("New config saved!")
 
-    @staticmethod
-    def save_certificates(config_dict: dict) -> None:
-        """
-        Save AWS certificates to files.
-        :param config_dict: dict with credentials.
-        :return: None
-        """
-        global cfg
-        logging.debug("save_certificates()")
-        try:
-            mkdir(CERTIFICATES_DIR)
-        except:
-            pass
+    # TODO: DELETE AND MOVE TO AWS_cloud
+    # @staticmethod
+    # def save_certificates(config_dict: dict) -> None:
+    #     """
+    #     Save AWS certificates to files.
+    #     :param config_dict: dict with credentials.
+    #     :return: None
+    #     """
+    #     global cfg
+    #     logging.debug("save_certificates()")
+    #     try:
+    #         mkdir(CERTIFICATES_DIR)
+    #     except:
+    #         pass
 
-        if 'cert_pem' in config_dict.keys():
-            certificate_string = config_dict['cert_pem']
-            cfg.cert_pem = config_dict['cert_pem']
-            with open(CERTIFICATE_PATH, "w", encoding="utf8") as infile:
-                infile.write(certificate_string)
+    #     if 'cert_pem' in config_dict.keys():
+    #         certificate_string = config_dict['cert_pem']
+    #         cfg.cert_pem = config_dict['cert_pem']
+    #         with open(CERTIFICATE_PATH, "w", encoding="utf8") as infile:
+    #             infile.write(certificate_string)
 
-        if 'priv_key' in config_dict.keys():
-            private_key_string = config_dict['priv_key']
-            cfg.private_key = config_dict['priv_key']
-            logging.info(private_key_string)
-            with open(KEY_PATH, "w", encoding="utf8") as infile:
-                infile.write(private_key_string)
+    #     if 'priv_key' in config_dict.keys():
+    #         private_key_string = config_dict['priv_key']
+    #         cfg.private_key = config_dict['priv_key']
+    #         logging.info(private_key_string)
+    #         with open(KEY_PATH, "w", encoding="utf8") as infile:
+    #             infile.write(private_key_string)
 
-        if 'cert_ca' in config_dict.keys():
-            ca_certificate_string = config_dict['cert_ca']
-            cfg.cert_ca = config_dict['cert_ca']
-            with open(CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
-                infile.write(ca_certificate_string)
+    #     if 'cert_ca' in config_dict.keys():
+    #         ca_certificate_string = config_dict['cert_ca']
+    #         cfg.cert_ca = config_dict['cert_ca']
+    #         with open(CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
+    #             infile.write(ca_certificate_string)
 
-    @staticmethod
-    def read_certificates(parse: bool = False) -> (bool, str, str):
-        """
-        Read certificates from files.
-        :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
-        """
-        logging.debug("read_certificates()")
-        result, aws_certificate = utils.read_from_file(CERTIFICATE_PATH)
-        result2, aws_key = utils.read_from_file(KEY_PATH)
+    # TODO: DELETE IT AND MOVE TO AWS_cloud
+    # @staticmethod
+    # def read_certificates(parse: bool = False) -> (bool, str, str):
+    #     """
+    #     Read certificates from files.
+    #     :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
+    #     """
+    #     logging.debug("read_certificates()")
+    #     result, aws_certificate = utils.read_from_file(CERTIFICATE_PATH)
+    #     result2, aws_key = utils.read_from_file(KEY_PATH)
 
-        if parse:
-            aws_certificate.replace('\n', '')
-            aws_key.replace('\n', '')
-            return (result and result2), aws_certificate, aws_key
-        else:
-            return (result and result2), aws_certificate, aws_key
+    #     if parse:
+    #         aws_certificate.replace('\n', '')
+    #         aws_key.replace('\n', '')
+    #         return (result and result2), aws_certificate, aws_key
+    #     else:
+    #         return (result and result2), aws_certificate, aws_key
 
     @staticmethod
     def update_config_dict(new_config: dict) -> None:
@@ -295,70 +298,72 @@ class ESPConfig:
         else:
             logging.debug('No changes to config file were made!')
 
-    @staticmethod
-    def authorization_request() -> str:
-        """
-        Register your ESP in cloud. It takes password and login from aws_config.json
-        :return: JSON Web Token
-        """
-        global cfg
-        logging.debug("Authorization request function")
-        headers = DEFAULT_JSON_HEADER
-        url = cfg.api_url + API_AUTHORIZATION_URL
-        body = {}
-        body['is_removed'] = True
-        body['created_at'] = 0
-        body['username'] = cfg.api_login
-        body['password'] = cfg.api_password
+    # TODO: DELETE AND MOVE TO AWS_cloud (???)
+    # @staticmethod
+    # def authorization_request() -> str:
+    #     """
+    #     Register your ESP in cloud. It takes password and login from aws_config.json
+    #     :return: JSON Web Token
+    #     """
+    #     global cfg
+    #     logging.debug("Authorization request function")
+    #     headers = DEFAULT_JSON_HEADER
+    #     url = cfg.api_url + API_AUTHORIZATION_URL
+    #     body = {}
+    #     body['is_removed'] = True
+    #     body['created_at'] = 0
+    #     body['username'] = cfg.api_login
+    #     body['password'] = cfg.api_password
 
-        logging.debug('LOGIN: {}, password: {}'.format(cfg.api_login, cfg.api_password))
+    #     logging.debug('LOGIN: {}, password: {}'.format(cfg.api_login, cfg.api_password))
 
-        body = ujson.dumps(body)
-        try:
-            response = urequests.post(url, data=body, headers=headers)
-        except IndexError as e:
-            logging.info("No internet connection: {}".format(e))
-            return ""
-        except Exception as e:
-            logging.info("Failed to authorize in API {}".format(e))
-            return ""
+    #     body = ujson.dumps(body)
+    #     try:
+    #         response = urequests.post(url, data=body, headers=headers)
+    #     except IndexError as e:
+    #         logging.info("No internet connection: {}".format(e))
+    #         return ""
+    #     except Exception as e:
+    #         logging.info("Failed to authorize in API {}".format(e))
+    #         return ""
 
-        if response.status_code != '200' and response.status_code != 200:
-            logging.error(response.text)
-            return ""
+    #     if response.status_code != '200' and response.status_code != 200:
+    #         logging.error(response.text)
+    #         return ""
 
-        response_dict = response.json()
-        jwt_token = response_dict.get("data")
-        return jwt_token
+    #     response_dict = response.json()
+    #     jwt_token = response_dict.get("data")
+    #     return jwt_token
 
-    @staticmethod
-    def configuration_request(_jwt_token: str):
-        """
-        Function configures ESP with cloud (AWS)
-        :param _jwt_token: JSON Web Token
-        :return: dict with certificates/keys
-        """
-        global cfg
-        headers = ESPConfig.get_header_with_authorization(_jwt_token)
-        url = cfg.api_url + API_CONFIG_URL
-        thing_name = THING_NAME_PREFIX + cfg.device_uid
-        body = {}
-        body['is_removed'] = True
-        body['created_at'] = 0
-        body['device_id'] = thing_name
-        body['description'] = 'Full configuration test'
-        body['device_type'] = 'configuration_test'
-        body['device_group'] = 'configuration_test'
-        body['settings'] = {}
+    # TODO: DELETE AND MOVE TO AWS_cloud (???)
+    # @staticmethod
+    # def configuration_request(_jwt_token: str):
+    #     """
+    #     Function configures ESP with cloud (AWS)
+    #     :param _jwt_token: JSON Web Token
+    #     :return: dict with certificates/keys
+    #     """
+    #     global cfg
+    #     headers = ESPConfig.get_header_with_authorization(_jwt_token)
+    #     url = cfg.api_url + API_CONFIG_URL
+    #     thing_name = THING_NAME_PREFIX + cfg.device_uid
+    #     body = {}
+    #     body['is_removed'] = True
+    #     body['created_at'] = 0
+    #     body['device_id'] = thing_name
+    #     body['description'] = 'Full configuration test'
+    #     body['device_type'] = 'configuration_test'
+    #     body['device_group'] = 'configuration_test'
+    #     body['settings'] = {}
 
-        body = ujson.dumps(body)
-        response = urequests.post(url, data=body, headers=headers)
-        response_dict = response.json()
-        if response_dict is None:
-            raise Exception("ESP32 not receive certificates from AWS")
-        cfg.aws_client_id = thing_name
-        cfg.save()
-        return ESPConfig.get_aws_certs(response_dict)
+    #     body = ujson.dumps(body)
+    #     response = urequests.post(url, data=body, headers=headers)
+    #     response_dict = response.json()
+    #     if response_dict is None:
+    #         raise Exception("ESP32 not receive certificates from AWS")
+    #     cfg.aws_client_id = thing_name
+    #     cfg.save()
+    #     return ESPConfig.get_aws_certs(response_dict)
 
     @staticmethod
     def get_header_with_authorization(jwt_token: str) -> dict:
@@ -367,10 +372,11 @@ class ESPConfig:
         authorization_header['Authorization'] = "Bearer " + jwt_token
         return authorization_header
 
-    @staticmethod
-    def get_aws_certs(_response_dict: dict) -> dict:
-        cert_dict = _response_dict.get('data')
-        cert_dict['priv_key'] = cert_dict.pop('PrivateKey')
-        cert_dict['cert_pem'] = cert_dict.pop('certificatePem')
-        cert_dict['cert_ca'] = cert_dict.pop('certificateCa')
-        return cert_dict
+    # TODO: DELETE AND MOVE TO AWS_cloud
+    # @staticmethod
+    # def get_aws_certs(_response_dict: dict) -> dict:
+    #     cert_dict = _response_dict.get('data')
+    #     cert_dict['priv_key'] = cert_dict.pop('PrivateKey')
+    #     cert_dict['cert_pem'] = cert_dict.pop('certificatePem')
+    #     cert_dict['cert_ca'] = cert_dict.pop('certificateCa')
+    #     return cert_dict
