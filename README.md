@@ -10,7 +10,7 @@ for embedded devices.
 
 
 ## Prerequisites
-Before compiling there are some packages required to install on the PC. Run the following command to install them:
+Before compiling there are some packages required to install on the PC. Run the following command to install them (note that there is also a possibility to use [anaconda-python](https://www.anaconda.com/products/individual) virtual environment instead of python3-virtualenv. If one chooses so, then there is no need to install: “python3-virtualenv” and “python-setuptools”):
 
 * Ubuntu:
 
@@ -28,19 +28,12 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
 
 * Windows:
 
-    - install git (https://git-scm.com/downloads)
-    - install python 3.6+ with pip, virtualenv (https://www.python.org/downloads/windows/)
-    - run:
-  
-```
-pip install pyserial cryptography click future pyelftools setuptools
-```
-
-There is also a possibility to use anaconda-python virtual environment instead of python3-virtualenv. If one chooses so, then there is no need to install: “python3-virtualenv” and “python-setuptools”.
+    - install [git](https://git-scm.com/downloads)
+    - install [python](https://www.python.org/downloads/windows/) (3.6 / 3.7) with pip and virtualenv - no need to install if you've chosen anaconda-python
 
 Make sure you have access to required hardware:
 
-- AWS account with ACCESS_CODE and SECRET_CODE
+- AWS account with ACCESS_CODE and SECRET_CODE - [more info](https://github.com/wizzdev-pl/iot-starter/blob/devel/terraform/README.md#Additional-information-and-help)
 - ESP32 MCU board (preferably ESP32 DevKitC v4)
 - MicroUSB cable
 - DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed)
@@ -57,6 +50,8 @@ cd iot-starter
 git submodule init
 git submodule update --init --recursive
 ```
+
+* Linux users:
 
 To flash and debug device it is required to add user to dialout group:
 

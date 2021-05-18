@@ -19,7 +19,7 @@
 
     * For venv:
         ```
-        ENV_NAME/Scripts/activate.bat
+        ../terraform/scripts/ENV_NAME/Scripts/activate.bat
         ```
 
     #### Linux/ Mac OS
@@ -30,7 +30,7 @@
 
     * For venv:
         ```
-        source ENV_NAME/bin/activate
+        source ../terraform/scripts/ENV_NAME/bin/activate
         ```
 
 2. Open the project MicroPython with PyCharm and mark *src* and *ulib_mocks* directory as Sources Root in Pycharm.
