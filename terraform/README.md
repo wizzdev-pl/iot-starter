@@ -36,6 +36,7 @@ After installation, you can check if it is installed correctly by typing the fol
 python3 --version
 pip3 --version
 ```
+If python3 is not recognized, try "python"
 
 * Windows:
 ```bash
@@ -73,6 +74,31 @@ or to update to the most recent release:
 npm install -g npm@next
 ```
 
+If you are on **Windows** then you must take additional steps. Run **cmd** with administrative privileges and run three below commands:
+(They may take some time)
+
+```
+npm install --global --production windows-build-tools@4.0.0
+npm config set python python2.7
+```
+
+Next you need to set the path for MSBuild.exe. The location of this file may vary. Usually this file resides in:
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\XX.X\Bin\MSBuild.exe"
+
+or:
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2015\BuildTools\MSBuild\XX.X\Bin\MSBuild.exe"
+
+Where **XX.X** is a version and may also vary.
+If you found the file in 2017 type (remember to change XX.X value!):
+
+```
+npm config set msvs_version 2017
+npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\XX.X\Bin\MSBuild.exe"
+```
+
+If it's the latter, change 2017 to 2015 in above commands.
 
 ## Installation
 
@@ -184,8 +210,8 @@ ESP_HARD_LOGIN = "TopSecretLogin"
 (Remember to adjust this command depending on your terraform installation!)
 
 ```
-./terraform init
-./terraform workspace new production
+terraform init
+terraform workspace new production
 ```
 You can also configure `devel` workspace, that can be used for testing and trying new modifications.
 
@@ -208,11 +234,16 @@ cd scripts
 python build_all.py
 cd ..
 ```
+
 ### 3. Run terraform
+
+For **Linux** type **$VERSION** instead of **%VERSION%**
+
 ```                                                                        
-./terraform workspace select $VERSION
-./terraform apply -var-file=./environments/$VERSION.tfvars
+terraform workspace select %VERSION%
+terraform apply -var-file=./environments/%VERSION%.tfvars
 ```
+
 ### 4. Refresh IoT Core Rule in AWS console
 Since Terraform's communication with AWS is not 100% perfect, 
 the following steps are necessary when first establishing a cloud architecture:   
