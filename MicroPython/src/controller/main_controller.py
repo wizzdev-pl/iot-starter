@@ -113,7 +113,7 @@ class MainController:
             while not config.cfg.ap_config_done:
                 pass
             logging.debug("GOT WIFI CONFIG")
-            logging.debug("Testing AWS connection")
+            logging.debug("Testing {} connection".format(config.cfg.cloud_provider))
 
             MainController.test_connection_with_wifi_and_cloud()
 
@@ -151,7 +151,7 @@ class MainController:
             logging.debug("GOT GOT SENSOR DATA")
             logging.debug("Publishing data to cloud")
 
-            self.publish_data()
+            self.cloud_provider.publish_data(self.data_acquisitor.data)
 
             config.cfg.published_to_cloud = True
             config.cfg.save()
@@ -189,86 +189,6 @@ class MainController:
         :return: Value of temperature.
         """
         return self.data_acquisitor.get_single_measurement()
-
-    # TODO: DELETE AND MOVE TO AWS_cloud
-    # def device_configuration(self, data: dict) -> int:
-    #     """
-    #     Configures device in the cloud. Function used as hook to web_app.
-    #     :param data: parameters to connect to wifi.
-    #     :return: Error code (0 - OK, 1 - Error).
-    #     """
-    #     ssid = data['ssid']
-    #     password = data['password']
-    #     config.cfg.password = password
-    #     config.cfg.ssid = ssid
-    #     config.cfg.save()
-    #     logging.info("Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
-
-    #     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-    #     try:
-    #         utils.connect_to_wifi(wireless_controller)
-    #         logging.info(wireless_controller.sta_handler.ifconfig())
-    #         self.configure_aws_thing()
-    #     except Exception as e:
-    #         logging.error("Exception catched: {}".format(e))
-    #         event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-    #         self.add_event(event)
-    #         return 1
-
-    #     config.cfg.ap_config_done = True
-    #     config.cfg.save()
-    #     machine.reset()
-    #     return 0
-
-    # TODO: DELETE AND MOVE TO AWS_cloud
-    # def configure_aws_thing(self) -> bool:
-    #     """
-    #     Register ESP as thing in AWS cloud.
-    #     :return: Error code (True - OK, False - Error).
-    #     """
-    #     logging.info("Allocated bytes on heap before gc {}".format(gc.mem_alloc()))
-    #     gc.collect()
-    #     logging.info("Allocated bytes on heap after gc {}".format(gc.mem_alloc()))
-    #     self.configure_data_from_terraform()
-    #     logging.debug("Authorization request...")
-    #     jwt_token = config.ESPConfig.authorization_request()
-
-    #     if jwt_token is not "":
-    #         cert_dict = config.ESPConfig.configuration_request(jwt_token)
-    #         config.ESPConfig.save_certificates(cert_dict)
-    #         logging.debug("Configuration done")
-    #         return True
-    #     else:
-    #         logging.error("Problem with authorization")
-    #         event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-    #         self.add_event(event)
-    #         return False
-
-    # TODO: DELETE AND MOVE TO AWS_cloud
-    # @staticmethod
-    # def configure_data_from_terraform() -> None:
-    #     """
-    #     Setup data from terraform to connect to AWS.
-    #     :return: None
-    #     """
-    #     logging.debug("configure_data_from_terraform")
-    #     aws_configuration = config.cfg.load_aws_config_from_file()
-    #     if 'aws_iot_endpoint' in aws_configuration.keys():
-    #         config.cfg.aws_endpoint = aws_configuration['aws_iot_endpoint'].get("value").get("endpoint_address")
-
-    #     if 'visualization_url' in aws_configuration.keys():
-    #         visualization_url = aws_configuration['visualization_url'].get("value")
-    #         config.cfg.api_url = 'https://' + visualization_url + '/api/'
-
-    #     if 'esp_login' in aws_configuration.keys():
-    #         config.cfg.api_login = aws_configuration['esp_login'].get("value")
-
-    #     if 'esp_password' in aws_configuration.keys():
-    #         config.cfg.api_password = aws_configuration['esp_password'].get("value")
-
-    #     config.cfg.save()
-
-    #     logging.debug("Configure data from terraform ends")
 
     @staticmethod
     def configure_sensor(sensor_configuration: dict) -> None:
@@ -320,29 +240,6 @@ class MainController:
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
-
-    # TODO: DELETE AND MOVE TO AWS_cloud
-    # def publish_data(self) -> None:
-    #     """
-    #     Publish data to the cloud
-    #     """
-    #     wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(sync_time=False)
-
-    #     certificates_existence, *_ = config.ESPConfig.read_certificates()
-    #     if not certificates_existence:
-    #         logging.debug("No AWS Certificates, configure_aws_thing()")
-    #         self.configure_aws_thing()
-
-    #     logging.debug("data to send = {}".format(self.data_acquisitor.data))
-    #     logging.info(config.cfg.aws_topic)
-    #     result = mqtt_communicator.publish_message(payload=self.data_acquisitor.data, topic=config.cfg.aws_topic,
-    #                                                qos=config.cfg.QOS)
-
-    #     if not result:
-    #         logging.error("Error publishing data to MQTT in send_data()")
-
-    #     mqtt_communicator.disconnect()
-    #     wireless_controller.disconnect_station()
 
     @staticmethod
     def print_time() -> None:

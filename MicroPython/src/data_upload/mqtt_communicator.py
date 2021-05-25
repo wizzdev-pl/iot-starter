@@ -1,3 +1,4 @@
+from cloud.AWS_cloud import AWS_cloud
 import utime
 import logging
 import ujson
@@ -24,8 +25,9 @@ class MQTTCommunicator:
         self.endpoint = endpoint
         self.port = port
         self.timeout = timeout
+        # TODO: Create MQTTClient based on cloud provider from config.cfg instead of if else
         if use_AWS:
-            result, aws_certificate, aws_key = config.ESPConfig.read_certificates(True)
+            result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
             ssl_parameters = {
@@ -54,6 +56,7 @@ class MQTTCommunicator:
         Connect to MQTT Server.
         :return: Error code (True - OK, False - Error).
         """
+        logging.debug("mqtt_communicator.py/connect()")
         try:
             gc.collect()
             result = self.MQTT_client.connect(clean_session=False)
@@ -155,5 +158,3 @@ class MQTTCommunicator:
                 logging.error(str(e))
                 logging.error("Can't write to errorlog.txt")
             return False
-
-

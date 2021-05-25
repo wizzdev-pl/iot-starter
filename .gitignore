@@ -1,6 +1,7 @@
 # terraform temps
 terraform/.tmp/**
 terraform/.terraform/*
+terraform/.terraform.lock.hcl
 
 # terraform bin
 terraform/terraform

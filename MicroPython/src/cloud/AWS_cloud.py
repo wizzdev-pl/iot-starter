@@ -1,12 +1,10 @@
 import gc
 import logging
 from os import mkdir
-from typing import Tuple
 
 import machine
 import urequests
 from common import config, utils
-from common.config import cfg
 from communication import wirerless_connection_controller
 from controller.main_controller_event import (MainControllerEvent,
                                               MainControllerEventType)
@@ -28,9 +26,9 @@ class AWS_cloud(CloudProvider):
         ssid = data['ssid']
         password = data['password']
 
-        cfg.ssid = ssid
-        cfg.password = password
-        cfg.save()
+        config.cfg.ssid = ssid
+        config.cfg.password = password
+        config.cfg.save()
 
         logging.info(
             "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
@@ -46,8 +44,8 @@ class AWS_cloud(CloudProvider):
             self.add_event(event)
             return 1
 
-        cfg.ap_config_done = True
-        cfg.save()
+        config.cfg.ap_config_done = True
+        config.cfg.save()
         machine.reset()
 
         return 0
@@ -86,26 +84,27 @@ class AWS_cloud(CloudProvider):
         logging.debug("AWS_cloud/configure_data_from_terraform()")
         aws_configuration = self.load_aws_config_from_file()
         if 'aws_iot_endpoint' in aws_configuration.keys():
-            cfg.aws_endpoint = aws_configuration['aws_iot_endpoint'].get(
+            config.cfg.aws_endpoint = aws_configuration['aws_iot_endpoint'].get(
                 "value").get("endpoint_address")
 
         if 'visualization_url' in aws_configuration.keys():
             visualization_url = aws_configuration['visualization_url'].get(
                 "value")
-            cfg.api_url = 'https://' + visualization_url + '/api/'
+            config.cfg.api_url = 'https://' + visualization_url + '/api/'
 
         if 'esp_login' in aws_configuration.keys():
-            cfg.api_login = aws_configuration['esp_login'].get("value")
+            config.cfg.api_login = aws_configuration['esp_login'].get("value")
 
         if 'esp_password' in aws_configuration.keys():
-            cfg.api_password = aws_configuration['esp_password'].get(
+            config.cfg.api_password = aws_configuration['esp_password'].get(
                 "value")
 
-        cfg.save()
+        config.cfg.save()
 
         logging.debug("Configure data from terraform ends")
 
-    def save_certificates(self, config_dict: dict) -> None:
+    @staticmethod
+    def save_certificates(config_dict: dict) -> None:
         """
         Save AWS certificates to files.
         :param config_dict: dict with credentials.
@@ -119,24 +118,24 @@ class AWS_cloud(CloudProvider):
 
         if 'cert_pem' in config_dict.keys():
             certificate_string = config_dict['cert_pem']
-            cfg.cert_pem = config_dict['cert_pem']
+            config.cfg.cert_pem = config_dict['cert_pem']
             with open(config.CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(certificate_string)
 
         if 'priv_key' in config_dict.keys():
             private_key_string = config_dict['priv_key']
-            cfg.private_key = config_dict['priv_key']
+            config.cfg.private_key = config_dict['priv_key']
             logging.info(private_key_string)
             with open(config.KEY_PATH, "w", encoding="utf8") as infile:
                 infile.write(private_key_string)
 
         if 'cert_ca' in config_dict.keys():
             ca_certificate_string = config_dict['cert_ca']
-            cfg.cert_ca = config_dict['cert_ca']
+            config.cfg.cert_ca = config_dict['cert_ca']
             with open(config.CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(ca_certificate_string)
 
-    def read_certificates(self, parse: bool = False) -> Tuple(bool, str, str):
+    def read_certificates(self, parse: bool = False) -> tuple(bool, str, str):
         """
         Read certificates from files.
         :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
@@ -166,15 +165,15 @@ class AWS_cloud(CloudProvider):
         """
         logging.debug("Authorization request function")
         headers = config.DEFAULT_JSON_HEADER
-        url = cfg.api_url + config.API_AUTHORIZATION_URL
+        url = config.cfg.api_url + config.API_AUTHORIZATION_URL
         body = {}
         body['is_removed'] = True
         body['created_at'] = 0
-        body['username'] = cfg.api_login
-        body['password'] = cfg.api_password
+        body['username'] = config.cfg.api_login
+        body['password'] = config.cfg.api_password
 
         logging.debug('LOGIN: {}, password: {}'.format(
-            cfg.api_login, cfg.api_password))
+            config.cfg.api_login, config.cfg.api_password))
 
         body = dumps(body)
         try:
@@ -201,8 +200,8 @@ class AWS_cloud(CloudProvider):
         :return: dict with certificates/keys
         """
         headers = config.ESPConfig.get_header_with_authorization(_jwt_token)
-        url = cfg.api_url + config.API_CONFIG_URL
-        thing_name = config.THING_NAME_PREFIX + cfg.device_uid
+        url = config.cfg.api_url + config.API_CONFIG_URL
+        thing_name = config.THING_NAME_PREFIX + config.cfg.device_uid
         body = {}
         body['is_removed'] = True
         body['created_at'] = 0
@@ -217,8 +216,8 @@ class AWS_cloud(CloudProvider):
         response_dict = response.json()
         if response_dict is None:
             raise Exception("ESP32 not receive certificates from AWS")
-        cfg.aws_client_id = thing_name
-        cfg.save()
+        config.cfg.aws_client_id = thing_name
+        config.cfg.save()
         return self.get_aws_certs(response_dict)
 
     def load_aws_config_from_file(self) -> dict:
@@ -230,7 +229,7 @@ class AWS_cloud(CloudProvider):
             config_dict = load(infile)
         return config_dict
 
-    def publish_data(self) -> None:
+    def publish_data(self, data) -> None:
 
         wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(
             sync_time=False)
@@ -240,10 +239,10 @@ class AWS_cloud(CloudProvider):
             logging.debug("No AWS Certificates, configure_aws_thing()")
             self.configure_aws_thing()
 
-        logging.debug("data to send = {}".format(self.data_acquisitor.data))
-        logging.info(cfg.aws_topic)
-        result = mqtt_communicator.publish_message(payload=self.data_acquisitor.data, topic=cfg.aws_topic,
-                                                   qos=cfg.QOS)
+        logging.debug("data to send = {}".format(data))
+        logging.info(config.cfg.aws_topic)
+        result = mqtt_communicator.publish_message(payload=data, topic=config.cfg.aws_topic,
+                                                   qos=config.cfg.QOS)
 
         if not result:
             logging.error("Error publishing data to MQTT in send_data()")
