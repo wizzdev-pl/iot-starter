@@ -12,17 +12,23 @@ _(via: https://www.terraform.io/intro/index.html)_
 ### Terraform
 Terraform can be installed in two ways:
 
-- You can download terraform binary from this website: https://www.terraform.io/downloads.html. Downloaded file should be placed in this directory (iot-starter/terraform)
-- You can install terraform via package manager on Unix like systems (assuming it’s available). Fedora has the latest version available, so to install it on the Fedora Linux follow this link: https://www.terraform.io/docs/cli/install/yum.html
+- You can download terraform binary from this [website](https://www.terraform.io/downloads.html). Downloaded file should be placed in this directory (iot-starter/terraform)
+- You can install terraform via package manager on Unix like systems (assuming it’s available). Fedora has the latest version available, so to install it on the Fedora Linux follow this [link](https://www.terraform.io/docs/cli/install/yum.html)
 
 You can check your installation with this command (if the terraform was downloaded as a binary file, remember to run this command from "iot-starter/terraform" directory):
 
-```bash
-terraform --version
-```
- 
+* For Linux:
+  ```bash
+  terraform --version
+  ```
+
+* For Windows:
+  ```bash
+  terraform.exe -version
+  ```
+
 ### Python 3, PIP 
-Python can be downloaded from this website: https://www.python.org/downloads (in case of using Anaconda environment, please skip this part and refer to "**Installation**" section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
+Python can be downloaded from this [website](https://www.python.org/downloads) (in case of using [Anaconda environment](https://www.anaconda.com/products/individual), please skip this part and refer to "**Installation**" section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
 After installation, you can check if it is installed correctly by typing the following commands in your terminal:
 
 * Linux
@@ -30,6 +36,7 @@ After installation, you can check if it is installed correctly by typing the fol
 python3 --version
 pip3 --version
 ```
+If python3 is not recognized, try "python"
 
 * Windows:
 ```bash
@@ -39,13 +46,14 @@ pip --version
 
 ### Node.js, npm
 These requirements are needed to build and bundle visualization. Nodejs can be installed in two ways:
-- From the website: https://nodejs.org/en/download. Npm should be installed automatically along with nodejs.
+- From the [website](https://nodejs.org/en/download). Npm should be installed automatically along with nodejs.
 - Via the package manager. For Fedora, to install both packages execute the following command:
 
   ```bash
   sudo dnf install nodejs
   ```
 
+Please remember that in case of using **Windows** during installation of nodejs, it is required to check: **"Automatically install the necessary tools"** which will install Chocolatey on your computer.
 You can check if installation succeed with these commands:
 
 ```bash
@@ -66,6 +74,31 @@ or to update to the most recent release:
 npm install -g npm@next
 ```
 
+If you are on **Windows** then you must take additional steps. Run **cmd** with administrative privileges and run three below commands:
+(They may take some time)
+
+```
+npm install --global --production windows-build-tools@4.0.0
+npm config set python python2.7
+```
+
+Next you need to set the path for MSBuild.exe. The location of this file may vary. Usually this file resides in:
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\XX.X\Bin\MSBuild.exe"
+
+or:
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2015\BuildTools\MSBuild\XX.X\Bin\MSBuild.exe"
+
+Where **XX.X** is a version and may also vary.
+If you found the file in 2017 type (remember to change XX.X value!):
+
+```
+npm config set msvs_version 2017
+npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\XX.X\Bin\MSBuild.exe"
+```
+
+If it's the latter, change 2017 to 2015 in above commands.
 
 ## Installation
 
@@ -81,13 +114,13 @@ First, you need to create virtual environment (either with python venv module or
 * For venv:
   * Linux:
   ```
-  cd scripts
+  cd terraform/scripts
   python3 -m venv ENV_NAME
   ```
 
   * Windows:
   ```
-  cd scripts
+  cd terraform/scripts
   python -m venv ENV_NAME
   ```
 
@@ -118,7 +151,8 @@ Next, you should activate it. This step is platform dependent:
 
 ### 2. Install requirements
 ```
-pip3 install -r requirements.txt
+pip install pyserial cryptography click future pyelftools setuptools
+pip install -r requirements.txt
 ```
 ### 3. Configure aws credentials:
 
@@ -135,7 +169,7 @@ You need to create your own s3 bucket in AWS. The whole procedure was described
 in this website: https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html
 
 Next, you should change "_bucket_" value to the name of the created bucket
-for s3 backend in main.tf in this directory. 
+for s3 backend in **main.tf** in **terraform** directory. 
 (AWS policy says that s3 bucket name should be unique in the world).
 Value "_region_" refers to one of AWS regions. Remember to change "_region_" according to region 
 where you have set your s3 bucket.
@@ -155,7 +189,7 @@ Due to security reasons you have to modify files `devel.tfvars` (developement en
 Changing **ESP_HARD_LOGIN, ESP_HARD_PASSWORD, owner and project** values is obligatory. 
 Otherwise, your AWS infrastructure could be accessed by unauthorized devices. 
 
-- Values of "ESP_HARD_LOGIN" and "ESP_HARD_PASSWORD" are independent from AWS account - a new connection is created with these credentials.
+- Values of "ESP_HARD_LOGIN" and "ESP_HARD_PASSWORD" are independent from the AWS account and should be unique - a new connection is created with these credentials.
 
 - "project" variable value should be unique for each infrastructure building.
 
@@ -176,8 +210,8 @@ ESP_HARD_LOGIN = "TopSecretLogin"
 (Remember to adjust this command depending on your terraform installation!)
 
 ```
-./terraform init
-./terraform workspace new production
+terraform init
+terraform workspace new production
 ```
 You can also configure `devel` workspace, that can be used for testing and trying new modifications.
 
@@ -200,31 +234,36 @@ cd scripts
 python build_all.py
 cd ..
 ```
+
 ### 3. Run terraform
+
+For **Linux** type **$VERSION** instead of **%VERSION%**
+
 ```                                                                        
-./terraform workspace select $VERSION
-./terraform apply -var-file=./environments/$VERSION.tfvars
+terraform workspace select %VERSION%
+terraform apply -var-file=./environments/%VERSION%.tfvars
 ```
+
 ### 4. Refresh IoT Core Rule in AWS console
 Since Terraform's communication with AWS is not 100% perfect, 
 the following steps are necessary when first establishing a cloud architecture:   
 1. Go to AWS console.
 2. Choose IoT Core service from the menu.      
-3. Select  Act/Rules and then choose existed rule on "Edit".     
-4. Change SQL version to another, then save. After that restore back first value and save again.
+3. Select  Act/Rules and then choose the existing rule on "Edit".     
+4. Change SQL version to another, then save. After that, restore the first value and save again.
 
 The above steps are primarily needed when the readings sent to AWS do not appear in the visualization
 
 ## Troubleshooting
-If any problems occurs, please rerun terraform.
+If any problems occur, please rerun terraform.
 Another solution to deal with errors is to destroy terraform and build again. 
 
 ## Additional information and help
 ### Obtaining `ACCESS_CODE` and `SECRET_CODE` from the AWS
-You need to gain programmatic access to your AWS account from computer if you want to automatically build your infrastructure with terraform.
+You need to gain programmatic access to your AWS account from the computer if you want to automatically build your infrastructure with terraform.
 To do that:
 1. Go to: https://aws.amazon.com/console/ > IAM service (Identity and Access Management) > Users.
-2. Find your name and click on it. You should be redirected to details view of your account.
+2. Find your name and click on it. You should be redirected to a detailed view of your account.
 3. Switch to "Security credentials tabs".
-4. Click on "Create access key" button.
-5. Remember both keys because secret key will not be able to get the secret key from AWS system.
+4. Click on the "Create access key" button.
+5. Remember both keys because the secret key will not be able to get the secret key from AWS system.

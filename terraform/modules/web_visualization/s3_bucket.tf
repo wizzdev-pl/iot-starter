@@ -45,6 +45,6 @@ resource "null_resource" "web_visualization_prepare_s3_package" {
   ]
   provisioner "local-exec" {
     working_dir = "./scripts"
-    command = "python3 upload_frontend.py ${var.s3_web_visualization.bucket_name} ../.tmp/build_visualization -v INFO"
+    command = "python upload_frontend.py ${var.s3_web_visualization.bucket_name} ../.tmp/build_visualization -v INFO"
   }
 }

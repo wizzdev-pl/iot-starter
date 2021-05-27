@@ -14,10 +14,10 @@ def _check_python():
     py_path = shutil.which(py)
     if py_path is not None:
         # Python binary 'python' exists
-        py_ver = subprocess.run([py_path, '--version'], capture_output=True).stdout
+        py_ver = subprocess.run([py_path, '--version'], stdout=subprocess.PIPE)
         
         # Decode and get major version of python bin
-        _, ver = py_ver.decode().strip().split()
+        _, ver = py_ver.stdout.decode().strip().split()
         if ver.split('.')[0] == '3':
             # Binary is version 3.X.X
             return py
