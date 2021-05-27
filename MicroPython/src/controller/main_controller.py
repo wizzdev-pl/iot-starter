@@ -235,7 +235,7 @@ class MainController:
 
     @staticmethod
     def test_connection_with_wifi_and_cloud() -> None:
-        wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(
+        wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=True)
 
         mqtt_communicator.disconnect()

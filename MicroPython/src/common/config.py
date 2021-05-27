@@ -68,35 +68,39 @@ class ESPConfig:
         logging.debug("ESPConfig.__init__()")
         self.ssid = DEFAULT_SSID
         self.password = DEFAULT_PASSWORD
-        self.aws_endpoint = DEFAULT_AWS_ENDPOINT
-        self.aws_client_id = DEFAULT_AWS_CLIENT_ID
-        self.aws_topic = DEFAULT_AWS_TOPIC
+
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
-        self.use_dht = DEFAULT_USE_DHT
-        self.use_aws = DEFAULT_USE_AWS
-        self.dht_measurement_pin = DEFAULT_DHT_MEASUREMENT_PIN
-        self.dht_power_pin = DEFAULT_DHT_POWER_PIN
-        self.dht_type = DEFAULT_DHT_TYPE
         self.wifi_timeout = DEFAULT_WIFI_TIMEOUT
         self.mqtt_port = DEFAULT_MQTT_PORT
         self.mqtt_port_ssl = DEFAULT_MQTT_PORT_SSL
         self.mqtt_timeout = DEFAULT_MQTT_TIMEOUT
+        self.printed_time = DEFAULT_PRINTED_TIME
+        self.QOS = DEFAULT_QOS
+        self.tested_connection_cloud = DEFAULT_TESTED_CONNECTION_CLOUD
+        self.published_to_cloud = DEFAULT_PUBLISHED_TO_CLOUD
+
+        self.private_key = DEFAULT_PRIV_KEY
+        self.cert_pem = DEFAULT_CERT_PEM
+        self.cert_ca = DEFAULT_CERT_CA
+
+        self.use_dht = DEFAULT_USE_DHT
+        self.dht_measurement_pin = DEFAULT_DHT_MEASUREMENT_PIN
+        self.dht_power_pin = DEFAULT_DHT_POWER_PIN
+        self.dht_type = DEFAULT_DHT_TYPE
+        self.got_sensor_data = DEFAULT_GOT_SENSOR_DATA
+
         self.ap_config_done = DEFAULT_AP_CONFIG_DONE
         self.ntp_synchronized = DEFAULT_NTP_SYNCHRONIZED
         self.configuration_after_first_power_on_done = DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE
-        self.QOS = DEFAULT_QOS
         self.api_url = DEFAULT_API_URL
         self.api_login = DEFAULT_API_LOGIN
         self.api_password = DEFAULT_API_PASSWORD
         self.device_uid = ""
 
-        self.tested_connection_cloud = DEFAULT_TESTED_CONNECTION_CLOUD
-        self.printed_time = DEFAULT_PRINTED_TIME
-        self.got_sensor_data = DEFAULT_GOT_SENSOR_DATA
-        self.published_to_cloud = DEFAULT_PUBLISHED_TO_CLOUD
-        self.private_key = DEFAULT_PRIV_KEY
-        self.cert_pem = DEFAULT_CERT_PEM
-        self.cert_ca = DEFAULT_CERT_CA
+        self.aws_endpoint = DEFAULT_AWS_ENDPOINT
+        self.aws_client_id = DEFAULT_AWS_CLIENT_ID
+        self.aws_topic = DEFAULT_AWS_TOPIC
+        # self.use_aws = DEFAULT_USE_AWS
 
         self.cloud_provider = DEFAULT_CLOUD_PROVIDER
 
@@ -118,36 +122,57 @@ class ESPConfig:
             config_dict = load(infile)
             self.ssid = config_dict.get('ssid', DEFAULT_SSID)
             self.password = config_dict.get('password', DEFAULT_PASSWORD)
-            self.aws_endpoint = config_dict.get('aws_endpoint', DEFAULT_AWS_ENDPOINT)
-            self.aws_client_id = config_dict.get('client_id', DEFAULT_AWS_CLIENT_ID)
-            self.aws_topic = config_dict.get('topic', DEFAULT_AWS_TOPIC)
-            self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
-            self.data_publishing_period_in_ms = config_dict.get('data_publishing_period_ms',
-                                                                DEFAULT_DATA_PUBLISHING_PERIOD_MS)
-            self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
-            self.dht_measurement_pin = config_dict.get('dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
-            self.dht_power_pin = config_dict.get('dht_power_pin', DEFAULT_DHT_POWER_PIN)
-            self.dht_type = config_dict.get('dht_type', DEFAULT_DHT_TYPE)
-            self.wifi_timeout = config_dict.get('wifi_connection_timeout', DEFAULT_WIFI_TIMEOUT)
-            self.mqtt_port = config_dict.get('mqtt_port', DEFAULT_MQTT_PORT)
-            self.mqtt_port_ssl = config_dict.get('mqtt_port_ssl', DEFAULT_MQTT_PORT_SSL)
-            self.mqtt_timeout = config_dict.get('mqtt_timeout', DEFAULT_MQTT_TIMEOUT)
-            self.ap_config_done = config_dict.get('AP_config_done', DEFAULT_AP_CONFIG_DONE)
-            self.configuration_after_first_power_on_done = \
-                config_dict.get('configuration_after_first_power_on_done',
-                                DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
-            self.QOS = config_dict.get('QOS', DEFAULT_QOS)
 
-            self.tested_connection_cloud = config_dict.get('tested_connection_cloud', DEFAULT_TESTED_CONNECTION_CLOUD)
-            self.printed_time = config_dict.get('printed_time', DEFAULT_PRINTED_TIME)
-            self.got_sensor_data = config_dict.get('got_sensor_data', DEFAULT_GOT_SENSOR_DATA)
-            self.published_to_cloud = config_dict.get('published_to_cloud', DEFAULT_PUBLISHED_TO_CLOUD)
+            self.data_publishing_period_in_ms = config_dict.get(
+                'data_publishing_period_ms', DEFAULT_DATA_PUBLISHING_PERIOD_MS)
+            self.wifi_timeout = config_dict.get(
+                'wifi_connection_timeout', DEFAULT_WIFI_TIMEOUT)
+            self.mqtt_port = config_dict.get('mqtt_port', DEFAULT_MQTT_PORT)
+            self.mqtt_port_ssl = config_dict.get(
+                'mqtt_port_ssl', DEFAULT_MQTT_PORT_SSL)
+            self.mqtt_timeout = config_dict.get(
+                'mqtt_timeout', DEFAULT_MQTT_TIMEOUT)
+            self.printed_time = config_dict.get(
+                'printed_time', DEFAULT_PRINTED_TIME)
+            self.QOS = config_dict.get('QOS', DEFAULT_QOS)
+            self.tested_connection_cloud = config_dict.get(
+                'tested_connection_cloud', DEFAULT_TESTED_CONNECTION_CLOUD)
+            self.published_to_cloud = config_dict.get(
+                'published_to_cloud', DEFAULT_PUBLISHED_TO_CLOUD)
+
             self.private_key = config_dict.get('private_key', DEFAULT_PRIV_KEY)
             self.cert_pem = config_dict.get('cert_pem', DEFAULT_CERT_PEM)
             self.cert_ca = config_dict.get('cert_ca', DEFAULT_CERT_CA)
 
+            self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
+            self.dht_measurement_pin = config_dict.get(
+                'dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
+            self.dht_power_pin = config_dict.get(
+                'dht_power_pin', DEFAULT_DHT_POWER_PIN)
+            self.dht_type = config_dict.get('dht_type', DEFAULT_DHT_TYPE)
+            self.got_sensor_data = config_dict.get(
+                'got_sensor_data', DEFAULT_GOT_SENSOR_DATA)
+
+            self.ap_config_done = config_dict.get(
+                'AP_config_done', DEFAULT_AP_CONFIG_DONE)
+            self.configuration_after_first_power_on_done = \
+                config_dict.get('configuration_after_first_power_on_done',
+                                DEFAULT_CONFIGURATION_AFTER_FIRST_POWER_ON_DONE)
+
+            self.aws_endpoint = config_dict.get(
+                'aws_endpoint', DEFAULT_AWS_ENDPOINT)
+            self.aws_client_id = config_dict.get(
+                'client_id', DEFAULT_AWS_CLIENT_ID)
+            self.aws_topic = config_dict.get('topic', DEFAULT_AWS_TOPIC)
+            # self.use_aws = config_dict.get('use_aws', DEFAULT_USE_AWS)
+
+            self.cloud_provider = config_dict.get(
+                'cloud_provider', DEFAULT_CLOUD_PROVIDER)
+
             if not self.device_uid:
-                self.device_uid = config_dict.get('device_uid', DEFAULT_DEVICE_UID)
+                self.device_uid = config_dict.get(
+                    'device_uid', DEFAULT_DEVICE_UID)
+
         if not config_file_exists:
             self.save()
 
@@ -159,33 +184,40 @@ class ESPConfig:
         """
         logging.debug("ESPConfig.as_dictionary()")
         config_dict = {}
+
         config_dict['ssid'] = self.ssid
         config_dict['password'] = self.password
-        config_dict['aws_endpoint'] = self.aws_endpoint
-        config_dict['client_id'] = self.aws_client_id
-        config_dict['topic'] = self.aws_topic
-        config_dict['use_aws'] = self.use_aws
+
         config_dict['data_publishing_period_ms'] = self.data_publishing_period_in_ms
-        config_dict['use_dht'] = self.use_dht
-        config_dict['dht_measurement_pin'] = self.dht_measurement_pin
-        config_dict['dht_power_pin'] = self.dht_power_pin
-        config_dict['dht_type'] = self.dht_type
         config_dict['wifi_connection_timeout'] = self.wifi_timeout
         config_dict['mqtt_port'] = self.mqtt_port
         config_dict['mqtt_port_ssl'] = self.mqtt_port_ssl
         config_dict['mqtt_timeout'] = self.mqtt_timeout
-        config_dict['AP_config_done'] = self.ap_config_done
-        config_dict['configuration_after_first_power_on_done'] = self.configuration_after_first_power_on_done
-        config_dict['device_uid'] = self.device_uid
+        config_dict['printed_time'] = self.printed_time
         config_dict['QOS'] = self.QOS
         config_dict['tested_connection_cloud'] = self.tested_connection_cloud
-        config_dict['printed_time'] = self.printed_time
-        config_dict['got_sensor_data'] = self.got_sensor_data
         config_dict['published_to_cloud'] = self.published_to_cloud
 
         config_dict['private_key'] = self.private_key
         config_dict['cert_pem'] = self.cert_pem
         config_dict['cert_ca'] = self.cert_ca
+
+        config_dict['use_dht'] = self.use_dht
+        config_dict['dht_measurement_pin'] = self.dht_measurement_pin
+        config_dict['dht_power_pin'] = self.dht_power_pin
+        config_dict['dht_type'] = self.dht_type
+        config_dict['got_sensor_data'] = self.got_sensor_data
+
+        config_dict['AP_config_done'] = self.ap_config_done
+        config_dict['configuration_after_first_power_on_done'] = self.configuration_after_first_power_on_done
+        config_dict['device_uid'] = self.device_uid
+
+        config_dict['aws_endpoint'] = self.aws_endpoint
+        config_dict['client_id'] = self.aws_client_id
+        config_dict['topic'] = self.aws_topic
+        # config_dict['use_aws'] = self.use_aws
+
+        config_dict['cloud_provider'] = self.cloud_provider
 
         return config_dict
 

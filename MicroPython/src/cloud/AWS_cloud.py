@@ -231,7 +231,7 @@ class AWS_cloud(CloudProvider):
 
     def publish_data(self, data) -> None:
 
-        wireless_controller, mqtt_communicator = utils.get_wifi_and_aws_handlers(
+        wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False)
 
         certificates_existence, *_ = self.read_certificates()

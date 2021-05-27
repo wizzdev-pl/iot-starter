@@ -1,4 +1,5 @@
 from cloud.AWS_cloud import AWS_cloud
+from cloud.KAA_cloud import KAA_cloud
 import utime
 import logging
 import ujson
@@ -13,20 +14,21 @@ import gc
 
 class MQTTCommunicator:
     def __init__(self,
-                 use_AWS,
+                 cloud_provider,
                  client_id,
                  endpoint,
                  port,
                  timeout,
                  ):
         self.is_connected = False
-        self.use_AWS = use_AWS
+        self.cloud_provider = cloud_provider
         self.client_id = client_id
         self.endpoint = endpoint
         self.port = port
         self.timeout = timeout
-        # TODO: Create MQTTClient based on cloud provider from config.cfg instead of if else
-        if use_AWS:
+
+        # TODO: Create MQTTClient based on cloud provider from config.cfg (maybe method for switch case?)
+        if cloud_provider == 'AWS':
             result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
@@ -41,7 +43,8 @@ class MQTTCommunicator:
                                           ssl=True,
                                           keepalive=self.timeout,
                                           ssl_params=ssl_parameters)
-
+        
+        # TODO: Implement MQTT for other clients like KAA
         else:
             self.MQTT_client = MQTTClient(client_id=self.client_id,
                                           server=self.endpoint,

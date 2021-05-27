@@ -46,7 +46,7 @@ def main():
     event = MainControllerEvent(MainControllerEventType.GET_SENSOR_DATA)
     controller.add_event(event)
 
-    # Connect to WIFI and publish JSON with data to AWS via MQTT
+    # Connect to WIFI and publish JSON with data to cloud via MQTT
     event = MainControllerEvent(MainControllerEventType.PUBLISH_DATA)
     controller.add_event(event)
 
