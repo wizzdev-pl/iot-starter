@@ -15,6 +15,7 @@ from cloud.cloud_interface import CloudProvider
 
 class AWS_cloud(CloudProvider):
     def __init__(self) -> None:
+        # TODO: Any initialization at constructor for a given cloud?
         pass
 
     def device_configuration(self, data: dict) -> int:
@@ -165,7 +166,7 @@ class AWS_cloud(CloudProvider):
         """
         logging.debug("Authorization request function")
         headers = config.DEFAULT_JSON_HEADER
-        url = config.cfg.api_url + config.API_AUTHORIZATION_URL
+        url = config.cfg.api_url + config.AWS_API_AUTHORIZATION_URL
         body = {}
         body['is_removed'] = True
         body['created_at'] = 0
@@ -200,8 +201,8 @@ class AWS_cloud(CloudProvider):
         :return: dict with certificates/keys
         """
         headers = config.ESPConfig.get_header_with_authorization(_jwt_token)
-        url = config.cfg.api_url + config.API_CONFIG_URL
-        thing_name = config.THING_NAME_PREFIX + config.cfg.device_uid
+        url = config.cfg.api_url + config.AWS_API_CONFIG_URL
+        thing_name = config.AWS_THING_NAME_PREFIX + config.cfg.device_uid
         body = {}
         body['is_removed'] = True
         body['created_at'] = 0
@@ -230,9 +231,9 @@ class AWS_cloud(CloudProvider):
         return config_dict
 
     def publish_data(self, data) -> None:
-
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
-            sync_time=False)
+            sync_time=False
+        )
 
         certificates_existence, *_ = self.read_certificates()
         if not certificates_existence:
@@ -245,7 +246,7 @@ class AWS_cloud(CloudProvider):
                                                    qos=config.cfg.QOS)
 
         if not result:
-            logging.error("Error publishing data to MQTT in send_data()")
+            logging.error("Error publishing data to MQTT in publish_data()")
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()

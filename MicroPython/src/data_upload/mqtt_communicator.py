@@ -1,5 +1,6 @@
 from cloud.AWS_cloud import AWS_cloud
 from cloud.KAA_cloud import KAA_cloud
+from cloud.cloud_interface import Providers
 import utime
 import logging
 import ujson
@@ -28,8 +29,9 @@ class MQTTCommunicator:
         self.timeout = timeout
 
         # TODO: Create MQTTClient based on cloud provider from config.cfg (maybe method for switch case?)
-        if cloud_provider == 'AWS':
-            result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
+        if cloud_provider == Providers.AWS:
+            result, aws_certificate, aws_key = AWS_cloud.read_certificates(
+                True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
             ssl_parameters = {
@@ -43,9 +45,12 @@ class MQTTCommunicator:
                                           ssl=True,
                                           keepalive=self.timeout,
                                           ssl_params=ssl_parameters)
-        
-        # TODO: Implement MQTT for other clients like KAA
+
+        elif cloud_provider == Providers.KAA:
+            # TODO: Adjust MQTT for KAA
+            self.MQTT_client = MQTTClient()
         else:
+            # Not implemented for other clouds yet
             self.MQTT_client = MQTTClient(client_id=self.client_id,
                                           server=self.endpoint,
                                           port=self.port)
@@ -102,7 +107,8 @@ class MQTTCommunicator:
         gc.collect()
         try:
             self.MQTT_client.publish(topic=topic, msg=data, qos=qos)
-            logging.info("Publishing with MQTT at %s:%d" % (self.MQTT_client.server, self.MQTT_client.port))
+            logging.info("Publishing with MQTT at %s:%d" %
+                         (self.MQTT_client.server, self.MQTT_client.port))
         except Exception as e:
             try:
                 self.disconnect()
@@ -110,6 +116,23 @@ class MQTTCommunicator:
                               (self.MQTT_client.server, self.MQTT_client.port, e))
             except:
                 pass  # probably not connected
+        return True
+
+    def set_callback(self, callback) -> bool:
+        """
+        Sets callback to MQTT client for all received messages for all topics
+        :param callback: Callback function for received message
+        :return: Error code (True - OK, False - Error)
+        """
+        if not self.is_connected:
+            logging.info(
+                "Setting callback called but not connected to MQTT broker!")
+            return False
+
+        self.MQTT_client.set_callback(callback)
+        logging.info("Setting callback for all topics with MQTT at {}:{}".format(
+            self.endpoint, self.port))
+
         return True
 
     def subscribe(self, topic, callback, qos) -> bool:
@@ -126,7 +149,8 @@ class MQTTCommunicator:
 
         self.MQTT_client.set_callback(callback)
         self.MQTT_client.subscribe(topic=topic, qos=qos)
-        logging.info("Subscribing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
+        logging.info("Subscribing to {} with MQTT at {}:{}".format(
+            topic, self.endpoint, self.port))
         return True
 
     def _wait_for_message(self, timeout_ms: int = None):
@@ -147,7 +171,8 @@ class MQTTCommunicator:
         }
         gc.collect()  # run garbage collector to clean up memory
         try:
-            if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):  # if qos == 1 it's a blocking method
+            # if qos == 1 it's a blocking method
+            if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
                 logging.debug("Publishing mesage succesfull")
                 return True
             else:

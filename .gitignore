@@ -7,8 +7,9 @@ terraform/.terraform.lock.hcl
 terraform/terraform
 terraform/terraform.exe
 
-#JSON aws configuration file
+#JSON cloud configuration file
 MicroPython/src/aws_config.json
+MicroPython/src/kaa_config.json
 
 # Python cache files
 *.pyc
