@@ -15,6 +15,9 @@ esp_board = None
 DEVICE_RESOURCES_FILE_DIR = "/resources"
 AWS_CONFIG_DEVICE_FILE_PATH = DEVICE_RESOURCES_FILE_DIR + "/" + "aws_config.json"
 
+KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
+KAA_CONFIG_DEVICE_FILE_PATH = DEVICE_RESOURCES_FILE_DIR + "/" + "kaa_config.json"
+
 
 def remove_some_dirs_from_path():
     # because there may be a library that interferes with ampy (and actually is)
@@ -174,6 +177,9 @@ def flash_scripts(port, aws_config_file_path):
 
     aws_config_file_path = os.path.abspath(aws_config_file_path)
     upload_file(aws_config_file_path, AWS_CONFIG_DEVICE_FILE_PATH)
+
+    # TODO: Rewrite temp solution for uploading kaa_config
+    upload_file(KAA_CONFIG_SRC_PATH, AWS_CONFIG_DEVICE_FILE_PATH)
 
 
 if __name__ == '__main__':

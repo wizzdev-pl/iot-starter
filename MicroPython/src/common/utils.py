@@ -147,6 +147,7 @@ def read_from_file(file_path: str) -> (bool, str):
         return True, data
 
 
+# TODO: Not needed?
 def create_mqtt_communicator_from_config() -> MQTTCommunicator:
     """
     Create new instance od MQTTCommunicator.
