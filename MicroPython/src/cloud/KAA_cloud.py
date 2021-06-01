@@ -1,7 +1,11 @@
 import logging
 
+import machine
 import ujson
 from common import config, utils
+from communication import wirerless_connection_controller
+from controller.main_controller_event import (MainControllerEvent,
+                                              MainControllerEventType)
 
 from cloud.cloud_interface import CloudProvider
 
@@ -30,20 +34,86 @@ class KAA_cloud(CloudProvider):
 
         if topic == self.publish_success_topic:
             if msg == '':
-                print('Operation successful\n')
+                logging.info('Operation successful\n')
             else:
-                print('Operation successful with return code: {}\n'.format(msg))
+                logging.info('Operation successful with return code: {}\n'.format(msg))
         elif topic == self.publish_error_topic:
             status_code = msg['statusCode']
             reason = msg['reasonPhrase']
-            print('Operation failed with error code: {} - reason: {}\n'.format(
+            logging.info('Operation failed with error code: {} - reason: {}\n'.format(
                 status_code, reason
             ))
         else:
-            print('On topic: {} received msg: {}'.format(topic, msg))
+            logging.info('On topic: {} received msg: {}'.format(topic, msg))
 
-    def device_configuration(self):
-        pass
+    def device_configuration(self, data: dict) -> int:
+        """
+        Configures device in the cloud. Function used as hook to web_app.
+        :param data: parameters to connect to wifi.
+        :return: Error code (0 - OK, 1 - Error).
+        """
+        ssid = data['ssid']
+        password = data['password']
+
+        config.cfg.ssid = ssid
+        config.cfg.password = password
+        config.cfg.save()
+
+        logging.info(
+            "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
+
+        wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
+        try:
+            utils.connect_to_wifi(wireless_controller)
+            logging.info(wireless_controller.sta_handler.ifconfig())
+            self.configure_data()
+        except Exception as e:
+            logging.error("Exception catched: {}".format(e))
+            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
+            self.add_event(event)
+            return 1
+
+        config.cfg.ap_config_done = True
+        config.cfg.save()
+        machine.reset()
+
+        return 0
+
+    def configure_data(self) -> None:
+        """
+        Setup data from kaa_config file and save it to general config file
+        :return: None
+        """
+        logging.debug("KAA_cloud/configure_data()")
+        kaa_configuration = self.load_kaa_config_from_file()
+        
+        config.cfg.kaa_app_version = kaa_configuration.get(
+            "kaa_app_version", config.DEFAULT_KAA_APP_VERSION)
+        
+        config.cfg.kaa_endpoint = kaa_configuration.get(
+            "kaa_endpoint", config.DEFAULT_KAA_APP_VERSION)
+
+        # Update in case app_version of kaa_endpoint changed
+        config.cfg.kaa_topic = 'kp1/{}/dcx/{}/json/{}'.format(
+            config.cfg.kaa_app_version, 
+            config.cfg.kaa_endpoint, 
+            config.cfg.mqqt_request_id
+        )
+
+        config.cfg.save()
+
+    def load_kaa_config_from_file(self) -> dict:
+        """
+        Load configuration of AWS from file.
+        :return: Configuration in dict.
+        """
+        if utils.check_if_file_exists(config.KAA_CONFIG_PATH) == 0:
+            raise Exception("Create kaa_config.json file first!")
+
+        with open(config.KAA_CONFIG_PATH, "r", encoding="utf8") as infile:
+            config_dict = ujson.load(infile)
+
+        return config_dict
 
     def publish_data(self, data):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(

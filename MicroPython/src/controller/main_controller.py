@@ -46,13 +46,25 @@ class MainController:
 
         self.cloud_provider = self.get_cloud_provider()
 
-        web_app.setup(get_measurement_hook=self.get_measurement,
-                      configure_device_hook=self.cloud_provider.device_configuration,
-                      configure_aws_hook=self.cloud_provider.configure_data_from_terraform,
-                      configure_sensor_hook=self.configure_sensor,
-                      start_test_data_acquisition=self.start_test_data_acquisition_hook,
-                      start_data_acquisition=self.start_data_acquisition_hook,
-                      get_status_hook=self.get_status)
+        if config.cfg.cloud_provider == Providers.AWS:
+            web_app.setup(get_measurement_hook=self.get_measurement,
+                        configure_device_hook=self.cloud_provider.device_configuration,
+                        configure_aws_hook=self.cloud_provider.configure_data_from_terraform,
+                        configure_sensor_hook=self.configure_sensor,
+                        start_test_data_acquisition=self.start_test_data_acquisition_hook,
+                        start_data_acquisition=self.start_data_acquisition_hook,
+                        get_status_hook=self.get_status)
+
+        elif config.cfg.cloud_provider == Providers.KAA:
+            web_app.setup(
+                get_measurement_hook=self.get_measurement,
+                configure_device_hook=self.cloud_provider.device_configuration,
+                configure_sensor_hook=self.configure_sensor,
+                start_test_data_acquisition=self.start_test_data_acquisition_hook,
+                start_data_acquisition=self.start_data_acquisition_hook,
+                get_status_hook=self.get_status
+            )
+
         self.web_server_thread = None
 
         self.data_acquisitor = data_acquisitor.DataAcquisitor()

@@ -161,7 +161,6 @@ def create_mqtt_communicator_from_config() -> MQTTCommunicator:
                             timeout=config.cfg.mqtt_timeout)
 
 
-# TODO: This function should return handler to general cloud provider not AWS
 def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
     """
     Creates and returns connection handler to wifi and cloud.
@@ -174,13 +173,10 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     try:
         connect_to_wifi(wireless_controller, sync_time)
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
-                                             client_id=config.cfg.aws_client_id,
-                                             endpoint=config.cfg.aws_endpoint,
-                                             port=config.cfg.mqtt_port_ssl,
                                              timeout=config.cfg.mqtt_timeout)
         mqtt_communicator.connect()
     except Exception as e:
-        logging.error("Error wifi_get_and_cloud_handlers(): {}".format(e))
+        logging.error("Error get_wifi_and_cloud_handlers(): {}".format(e))
         try:
             mqtt_communicator.disconnect()
         except Exception:

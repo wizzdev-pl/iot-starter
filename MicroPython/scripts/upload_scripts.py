@@ -179,7 +179,7 @@ def flash_scripts(port, aws_config_file_path):
     upload_file(aws_config_file_path, AWS_CONFIG_DEVICE_FILE_PATH)
 
     # TODO: Rewrite temp solution for uploading kaa_config
-    upload_file(KAA_CONFIG_SRC_PATH, AWS_CONFIG_DEVICE_FILE_PATH)
+    upload_file(KAA_CONFIG_SRC_PATH, KAA_CONFIG_DEVICE_FILE_PATH)
 
 
 if __name__ == '__main__':

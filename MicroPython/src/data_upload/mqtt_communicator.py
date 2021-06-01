@@ -16,43 +16,54 @@ import gc
 class MQTTCommunicator:
     def __init__(self,
                  cloud_provider,
-                 client_id,
-                 endpoint,
-                 port,
                  timeout,
                  ):
         self.is_connected = False
         self.cloud_provider = cloud_provider
-        self.client_id = client_id
-        self.endpoint = endpoint
-        self.port = port
         self.timeout = timeout
 
-        # TODO: Create MQTTClient based on cloud provider from config.cfg (maybe method for switch case?)
         if cloud_provider == Providers.AWS:
-            result, aws_certificate, aws_key = AWS_cloud.read_certificates(
-                True)
+            # Secure socket layer MQTT communication
+            
+            result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
+            
             ssl_parameters = {
                 "server_side": False,
                 "key": aws_key,
                 "cert": aws_certificate
             }
-            self.MQTT_client = MQTTClient(client_id=self.client_id,
-                                          server=self.endpoint,
-                                          port=self.port,
-                                          ssl=True,
-                                          keepalive=self.timeout,
-                                          ssl_params=ssl_parameters)
+            self.server = config.cfg.aws_endpoint
+            self.client_id = config.cfg.aws_client_id
+            self.port = config.cfg.mqtt_port_ssl
+
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port,
+                ssl=True,
+                keepalive=self.timeout,
+                ssl_params=ssl_parameters
+            )
 
         elif cloud_provider == Providers.KAA:
-            # TODO: Adjust MQTT for KAA
-            self.MQTT_client = MQTTClient()
+            # Default MQTT port
+            self.port = config.cfg.mqtt_port
+            self.server = config.DEFAULT_KAA_KPC_HOST
+            self.client_id = config.cfg.kaa_endpoint
+
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port,
+                keepalive=self.timeout
+            )
+
         else:
             # Not implemented for other clouds yet
             self.MQTT_client = MQTTClient(client_id=self.client_id,
-                                          server=self.endpoint,
+                                          server=self.server,
                                           port=self.port)
 
     def __del__(self):
@@ -67,12 +78,14 @@ class MQTTCommunicator:
         logging.debug("mqtt_communicator.py/connect()")
         try:
             gc.collect()
-            result = self.MQTT_client.connect(clean_session=False)
-            self.is_connected = result
-            if result:
-                return True, ""
-            else:
-                raise Exception("Failed to connect to MQTT server")
+            # result = self.MQTT_client.connect(clean_session=False)
+            self.MQTT_client.connect(clean_session=False)
+            # self.is_connected = result
+            self.is_connected = True
+            # if result:
+            #     return True, ""
+            # else:
+            #     raise Exception("Failed to connect to MQTT server")
         except ValueError as e:
             self.is_connected = False
             raise ValueError(e)
@@ -126,12 +139,14 @@ class MQTTCommunicator:
         """
         if not self.is_connected:
             logging.info(
-                "Setting callback called but not connected to MQTT broker!")
+                "Setting callback called but not connected to MQTT broker!"
+            )
             return False
 
         self.MQTT_client.set_callback(callback)
         logging.info("Setting callback for all topics with MQTT at {}:{}".format(
-            self.endpoint, self.port))
+            self.server, self.port
+        ))
 
         return True
 
@@ -150,7 +165,7 @@ class MQTTCommunicator:
         self.MQTT_client.set_callback(callback)
         self.MQTT_client.subscribe(topic=topic, qos=qos)
         logging.info("Subscribing to {} with MQTT at {}:{}".format(
-            topic, self.endpoint, self.port))
+            topic, self.server, self.port))
         return True
 
     def _wait_for_message(self, timeout_ms: int = None):
@@ -163,6 +178,7 @@ class MQTTCommunicator:
             wait_time += 100
         return False
 
+    # TODO: KAA doesn't need timestamp
     def publish_message(self, payload, topic, qos):
         mqtt_message = {
             'client_id': self.client_id,

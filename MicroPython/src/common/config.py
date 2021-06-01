@@ -7,13 +7,13 @@ from common import utils
 
 cfg = None
 
-DEFAULT_CLOUD_PROVIDER = 'AWS'
+DEFAULT_CLOUD_PROVIDER = 'KAA'
 
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
 
 # Connection
-DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
+DEFAULT_DATA_PUBLISHING_PERIOD_MS = 5000 # 120000
 DEFAULT_WIFI_TIMEOUT = 5000
 DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_REQUEST_ID = 42
@@ -63,6 +63,7 @@ CA_CERTIFICATE_PATH = "{}/{}".format(CERTIFICATES_DIR, "AWS.ca_certificate")
 DEFAULT_JSON_HEADER = {'Content-Type': 'application/json'}
 
 # KAA stuff
+KAA_CONFIG_PATH = "/resources/kaa_config.json"
 DEFAULT_KAA_KPC_HOST = "mqtt.cloud.kaaiot.com"
 DEFAULT_KAA_APP_VERSION = ""
 DEFAULT_KAA_ENDPOINT = ""
@@ -79,7 +80,6 @@ class ESPConfig:
     Creates config.json file, where is written data about wifi connection, certificates, credentials etc.
     """
 
-    # TODO: Move all AWS related stuff directly to AWS class???
     def __init__(self):
         """
         ESPConfig constructor.
