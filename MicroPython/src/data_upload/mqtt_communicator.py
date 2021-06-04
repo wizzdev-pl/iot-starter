@@ -1,4 +1,3 @@
-import uos
 import utime
 import logging
 import ujson
@@ -24,20 +23,15 @@ class MQTTCommunicator:
         self.client_id = client_id
         self.endpoint = endpoint
         self.port = port
-        self.device_shadow_get_topic = '$aws/things/{}/shadow/get'.format(client_id)
-        self.device_shadow_accepted_topic = '$aws/things/{}/shadow/get/accepted'.format(client_id)
-        self.device_shadow_update_topic = '$aws/things/{}/shadow/update'.format(client_id)
         self.timeout = timeout
         if use_AWS:
-            result, AWS_certificate, AWS_key = config.read_certificates()
-            AWS_certificate.replace('\n', '')
-            AWS_key.replace('\n', '')
+            result, aws_certificate, aws_key = config.ESPConfig.read_certificates(True)
             if not result:
-                raise Exception ("Failed to read AWS certificate or key")
+                raise Exception("Failed to read AWS certificate or key")
             ssl_parameters = {
                 "server_side": False,
-                "key": AWS_key,
-                "cert": AWS_certificate
+                "key": aws_key,
+                "cert": aws_certificate
             }
             self.MQTT_client = MQTTClient(client_id=self.client_id,
                                           server=self.endpoint,
@@ -55,7 +49,11 @@ class MQTTCommunicator:
         if self.is_connected:
             self.disconnect()
 
-    def connect(self):
+    def connect(self) -> (bool, str):
+        """
+        Connect to MQTT Server.
+        :return: Error code (True - OK, False - Error).
+        """
         try:
             gc.collect()
             result = self.MQTT_client.connect(clean_session=False)
@@ -63,28 +61,34 @@ class MQTTCommunicator:
             if result:
                 return True, ""
             else:
-                return False, "Failed to connect to MQTT server"
+                raise Exception("Failed to connect to MQTT server")
+        except ValueError as e:
+            self.is_connected = False
+            raise ValueError(e)
         except Exception as e:
             self.is_connected = False
-            return False, "Exception during connection to MQTT server. Exception occurred {}".format(e)
+            raise Exception(e)
         except NotImplementedError as e:
             self.is_connected = False
-            return False, "Exception during connection to MQTT server. Not implemented error occured {}".format(e)
+            raise Exception(e)
 
-    def disconnect(self):
+    def disconnect(self) -> None:
+        """
+        Disconnect from MQTT Server.
+        :return: None
+        """
         if self.is_connected:
             self.MQTT_client.disconnect()
             self.is_connected = False
 
-    def publish(self, data, topic, qos):
-        '''
+    def publish(self, data, topic, qos) -> bool:
+        """
         :param data: data to be published
         :param topic: name of the topic to be published to default /topic/data
         :param qos: level of QOS to use either 0 or 1
-        :return:
+        :return: Error code (True - OK, False - Error).
         :example: publish('19.7', '/office/room_3/temperature', 0)
-        '''
-
+        """
         if not self.is_connected:
             logging.info("Publish called but not connected to MQTT broker!")
             return False
@@ -102,14 +106,22 @@ class MQTTCommunicator:
                 pass  # probably not connected
         return True
 
-    def subscribe(self, topic, callback, qos):
+    def subscribe(self, topic, callback, qos) -> bool:
+        """
+        Subscribes to given topic
+        :param topic: topic to subscribe to.
+        :param callback: callback function.
+        :param qos: Quality of Service.
+        :return: Error code (True - OK, False - Error).
+        """
         if not self.is_connected:
             logging.info("Subscribe called but not connected to MQTT broker!")
             return False
 
         self.MQTT_client.set_callback(callback)
         self.MQTT_client.subscribe(topic=topic, qos=qos)
-        logging.info("Subscibing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
+        logging.info("Subscribing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
+        return True
 
     def _wait_for_message(self, timeout_ms: int = None):
         wait_time = 0
@@ -120,33 +132,6 @@ class MQTTCommunicator:
             utime.sleep(0.1)
             wait_time += 100
         return False
-
-    def get_device_shadow(self, timeout_ms: int):
-
-        self.subscribe(topic=self.device_shadow_accepted_topic, callback=self._get_device_shadow_callback, qos=0)
-        self.publish(topic=self.device_shadow_get_topic, data='', qos=0)  # Empty msg triggers AWS response to /update
-
-        if self._wait_for_message(timeout_ms):
-            message = "Could not update device shadow, timed out! [{}]".format(timeout_ms)
-            try:
-                with open("errorlog.txt", "a") as file:
-                    file.write(message)
-            except:
-                logging.error(message)
-                logging.error("Can't write to errorlog.txt")
-            return False
-        return True
-
-    @staticmethod
-    def _get_device_shadow_callback(topic, msg):
-        shadow = ujson.loads(msg)
-        try:
-            new_config = shadow['state']['desired']['config']
-        except:
-            logging.info("There was no config in the 'desired' segment.")
-            return
-
-        config.update_config_dict(new_config)
 
     def publish_message(self, payload, topic, qos):
         mqtt_message = {
@@ -171,16 +156,4 @@ class MQTTCommunicator:
                 logging.error("Can't write to errorlog.txt")
             return False
 
-    def update_device_shadow_startup(self, power_on_timestamp):
-        logging.debug("MQTTCommunicator({})".format(power_on_timestamp))
-        updated_config = {'state': {}}
-        updated_config['state']['reported'] = {}
-        updated_config['state']['reported']['config'] = config.cfg.as_dictionary
-        updated_config['state']['reported']['power_on_timestamp'] = power_on_timestamp
-        #updated_config['state']['reported']['last_commit_info'] = utils.get_last_commit_info()
-        logging.info('Updating shadow device info and config')
-        data = ujson.dumps(updated_config)
-        logging.debug("data to send = {}".format(data))
-        self.publish(data, '$aws/things/{}/shadow/update'.format(self.client_id), 0)
-        utime.sleep(0.25)
 

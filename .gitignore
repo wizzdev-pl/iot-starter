@@ -4,6 +4,7 @@ terraform/.terraform/*
 
 # terraform bin
 terraform/terraform
+terraform/terraform.exe
 
 #JSON aws configuration file
 MicroPython/src/aws_config.json
@@ -12,6 +13,8 @@ MicroPython/src/aws_config.json
 *.pyc
 venv/
 .idea/
+*.vscode/
+.env
 
 
 Misc files

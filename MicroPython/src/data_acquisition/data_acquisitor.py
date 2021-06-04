@@ -1,6 +1,4 @@
-import dht
 import logging
-import machine
 
 from common import utils
 from common import config
@@ -11,37 +9,43 @@ MAX_SAMPLES = 10
 
 
 class DataAcquisitor:
-    data_storage = {}
-
+    """
+    Class to collect data from sensor DHT
+    """
     def __init__(self):
         self.dht = None
+        self.data = {}
 
         if config.cfg.use_dht:
-            self.data_storage['dht'] = []
             self.dht = DHTSensor(dht_type=config.cfg.dht_type,
                                  dht_measurement_pin_number=config.cfg.dht_measurement_pin,
                                  dht_power_pin_number=config.cfg.dht_power_pin)
 
-    def get_data(self):
-        return self.data_storage
 
-    def acquire_data(self):
+    def acquire_temp_humi(self) -> dict:
+        """
+        Get measurements of temperature and humidity.
+        :return: Measurements in form of dict
+        """
         acquisition_timestamp = utils.get_current_timestamp_ms()
         self.dht.turn_on()
+        self.data = {}
         if self.dht is not None:
             try:
                 self.dht.measure()
-                dht_entry = (acquisition_timestamp, self.dht.temperature(), self.dht.humidity())
-                if len(self.data_storage['dht']) < MAX_SAMPLES:
-                    self.data_storage['dht'].append(dht_entry)
-                else:
-                    self.data_storage['dht'].pop(0)
-                    self.data_storage['dht'].append(dht_entry)
+                self.data['dht_t'] = [[acquisition_timestamp, self.dht.temperature()]]
+                self.data['dht_h'] = [[acquisition_timestamp + 1, self.dht.humidity()]]
             except OSError:
                 logging.info("Error reading DHT sensor!")
-        self.dht.turn_off()
 
-    def get_single_measurement(self):
+        self.dht.turn_off()
+        return self.data
+
+    def get_single_measurement(self) -> int:
+        """
+        Return single measurement of temperature.
+        :return: Value of temperature.
+        """
         self.dht.turn_on()
         if self.dht is not None:
             try:
@@ -50,6 +54,6 @@ class DataAcquisitor:
                 self.dht.turn_off()
                 return temperature
             except OSError:
-                logging.info("Error reading DHT sensor!")
+                logging.error("Error reading DHT sensor!")
                 self.dht.turn_off()
                 return -1

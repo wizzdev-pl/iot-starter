@@ -2,30 +2,89 @@ import ntptime
 import utime
 import uos
 import machine
-import ujson
 import logging
+import esp32
 
+from communication.wirerless_connection_controller import WirelessConnectionController
 from data_upload.mqtt_communicator import MQTTCommunicator
 from communication import wirerless_connection_controller
 from common import config
 
-TIME_EPOCH_SHIFT = 946684800000  # in ms - embedded port of Unix time counts from year 2000, not 1970
+TIME_EPOCH_SHIFT = 946684800000
 NUMBER_OF_NTP_SYNCHRONIZATION_ATTEMPTS = 5
 
 
-# Print local time on ESP32 as human readable string
-def time_print():
+def button_irq(p: machine.Pin) -> None:
+    """
+    Callback of interrupt of BOOT button. Resets ESP.
+    :param p: BOOT pin.
+    :return: None
+    """
+    logging.debug("=== RESET BUTTON PRESSED ===")
+    config.ESPConfig.save()
+    machine.reset()
+
+
+def reset_config(p: machine.Pin) -> None:
+    """
+    Callback of interrupt of button on GPIO32. Resets configuration of ESP (config.json changes to default one).
+    :param p: GPIO32 pin.
+    :return: None
+    """
+    logging.debug("=== CONFIG BUTTON PRESSED ===")
+    config.cfg.ap_config_done = False
+    config.cfg.ssid = config.DEFAULT_VARIABLES['ssid']
+    config.cfg.password = config.DEFAULT_VARIABLES['password']
+    config.cfg.tested_connection_cloud = False
+    config.cfg.printed_time = False
+    config.cfg.got_sensor_date = False
+    config.cfg.published_to_cloud = False
+    config.ESPConfig.save()
+    machine.reset()
+
+
+def init() -> None:
+    """
+    Initialize ESP, reads or creates configuration, sets interrupts.
+    :return: None
+    """
+    logging.debug("config.py/init()")
+    config.cfg = config.ESPConfig()
+    config.cfg.load_from_file()
+
+    button = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_UP)
+    button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_irq)
+    esp32.wake_on_ext0(pin=button, level=False)
+
+    button2 = machine.Pin(32, machine.Pin.IN, machine.Pin.PULL_UP)
+    button2.irq(trigger=machine.Pin.IRQ_FALLING, handler=reset_config)
+    esp32.wake_on_ext0(pin=button2, level=esp32.WAKEUP_ALL_LOW)
+
+    logging.debug("Configuration loaded")
+
+
+def time_print() -> None:
+    """
+    Print local time of ESP.
+    :return: None
+    """
     time = utime.localtime()
-    logging.info("Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4], time[5]))
+    logging.info(
+        "Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4],
+                                                                    time[5]))
 
 
-def sync_time_with_ntpserver():
-    logging.debug("utils.py/sync_time_with_ntpserver()")
-    # TODO: check if time was actually synced
+def get_ntp_time() -> bool:
+    """
+    Get actual time via NTP.
+    :return: Error code (True -> OK, False -> Error).
+    """
+    logging.debug("utils.py/get_ntp_time()")
     ntptime.host = "3.pl.pool.ntp.org"
+    time_before = get_current_timestamp_ms()
+
     try:
-        time_before = get_current_timestamp_ms()
-        ntptime.settime()  # get current time from ntp server
+        ntptime.settime()
         time_after = get_current_timestamp_ms()
         print("Sync finished successful time before {} time after {}".format(time_before, time_after))
         return True
@@ -35,75 +94,64 @@ def sync_time_with_ntpserver():
         return False
 
 
-def synchronize_time():
+def synchronize_time() -> bool:
+    """
+    Synchronize time with help of NTP Server.
+    :return: Error code (True -> OK, False -> Error).
+    """
     logging.debug("utils.py/synchronize_time()")
     i = 0
     while i < NUMBER_OF_NTP_SYNCHRONIZATION_ATTEMPTS:
-        result = sync_time_with_ntpserver()
+        result = get_ntp_time()
         if result:
             return True
         i += 1
-    return False
+
+    raise Exception("Did not synchronize time")
 
 
-def get_current_timestamp_ms():
+def get_current_timestamp_ms() -> int:
+    """
+    Get current timestamp in UNIX notation.
+    :return: Value of timestamp.
+    """
     return int(round(utime.time() * 1000 + (utime.ticks_ms() % 1000) + TIME_EPOCH_SHIFT))
 
 
-def get_time_str():
-    logging.debug("utils.py/get_time_str()")
-    t = utime.ticks_ms()
-    return '%.3f' % (t/1000)
-
-
-def check_if_file_exists(path_to_file: str):
+def check_if_file_exists(path_to_file: str) -> int:
+    """
+    Checks if given file exists. Function check size of given file.
+    :param path_to_file: Path to file to check.
+    :return: Size of given file.
+    """
     logging.debug("utils.py/check_if_file_exists({})".format(path_to_file))
     try:
         return uos.stat(path_to_file)[6]
     except OSError:
         logging.error("No setup file: {}".format(path_to_file))
-        return False
+        return 0
 
 
-def set_ap_config_done(done: bool):
-    logging.debug("utils.py/set_ap_config_done({})".format(done))
-    file_path = 'config.json'
-    config_dict = {}
-    with open(file_path, "r", encoding="utf8") as infile:
-        config_dict = ujson.load(infile)
-    config_dict['AP_config_done'] = done
-    with open(file_path, "w", encoding="utf8") as infile:
-        ujson.dump(config_dict, infile)
-
-
-def restore_ap_mode():
-    logging.debug("utils.py/restore_ap_mode()")
-    touch = machine.TouchPad(machine.Pin(14))
-    threshold = 300
-    for i in range(50):
-        if touch.read() > threshold:
-            return
-        else:
-            utime.sleep(0.1)
-    print("Reseting to AP mode!")
-    set_ap_config_done(False)
-    led = machine.Pin(2, machine.Pin.OUT)
-    led.on()
-    utime.sleep(1)
-    led.off()
-
-
-def read_from_file(file_path):
+def read_from_file(file_path: str) -> (bool, str):
+    """
+    Return content of given file.
+    :param file_path: Path to file to read from.
+    :return: Error code (False -> no such file, True -> file exists), file content (if no file message is returned).
+    """
     logging.debug("utils.py/read_from_file({})".format(file_path))
     result = check_if_file_exists(file_path)
     if not result:
-       return False, "File not found"
+        return False, "File not found"
     with open(file_path, 'r') as f:
         data = f.read()
         return True, data
 
 
-def create_MQTT_communicator_from_config():
+def create_mqtt_communicator_from_config() -> MQTTCommunicator:
+    """
+    Create new instance od MQTTCommunicator.
+    :return: Instance of MQTTCommunicator.
+    """
     logging.debug("utils.py/create_MQTT_communicator_from_config()")
     return MQTTCommunicator(use_AWS=config.cfg.use_aws,
                             client_id=config.cfg.aws_client_id,
@@ -112,79 +160,72 @@ def create_MQTT_communicator_from_config():
                             timeout=config.cfg.mqtt_timeout)
 
 
-def connect_to_wifi_and_AWS(sync_time=False):
+def get_wifi_and_aws_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
+    """
+    Creates and returns connection handler to wifi and AWS.
+    :param sync_time: flag if time is synchronized.
+    :return: Error code (False - error, True - OK), error message, wifi and MQTT handlers.
+    """
+    logging.debug("utils.py/connect_to_wifi_and_aws({})".format(sync_time))
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-    logging.info("Connect to wifi and aws in if")
-    connect_to_wifi(wireless_controller, sync_time)
-    mqtt_communicator = create_MQTT_communicator_from_config()
 
-    result = mqtt_communicator.connect()
-    if not result[0]:
-        logging.info("Failed to connect to mqtt server! {}".format(result[1]))
+    try:
+        connect_to_wifi(wireless_controller, sync_time)
+        mqtt_communicator = MQTTCommunicator(use_AWS=config.cfg.use_aws,
+                                             client_id=config.cfg.aws_client_id,
+                                             endpoint=config.cfg.aws_endpoint,
+                                             port=config.cfg.mqtt_port_ssl,
+                                             timeout=config.cfg.mqtt_timeout)
+        mqtt_communicator.connect()
+    except Exception as e:
+        logging.error("Error wifi_get_adn_aws_handler(): {}".format(e))
         try:
             mqtt_communicator.disconnect()
-        except:
-            pass
-            # Probably not connected ignore
-
+        except Exception:
+            logging.error("Error in disconnecting MQTT communicator")
         try:
             wireless_controller.disconnect_station()
-        except:
-            # Probably not connected ignore
-            pass
+        except Exception:
+            logging.error("Error in disconnecting WiFi controller")
 
-        return result[0], result[1], None, None
+        logging.debug("RESETTING BOARD")
+        machine.reset()
 
-    return True, "", wireless_controller, mqtt_communicator
+    return wireless_controller, mqtt_communicator
 
 
-def connect_to_wifi(wireless_controller, sync_time=False):
-    logging.debug("utils.py/connect_to_wifi_and_AWS({})".format(sync_time))
+def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time: bool = False) -> None:
+    """
+    Connects ESP to wifi.
+    :param wireless_controller: Wifi handler
+    :param sync_time: flag if time is synced.
+    :return: None
+    """
+    logging.debug("utils.py/connect_to_wifi({})".format(sync_time))
     wireless_controller.setup_station(ssid=config.cfg.ssid, password=config.cfg.password)
 
     try:
-        result = wireless_controller.configure_station()
+        wireless_controller.configure_station()
     except Exception as e:
         logging.info("Failed to connect to wifi {}".format(e))
-        return False, "Failed to connect to wifi", None, None
-
-    print(result)
-    logging.debug("After configure station")
-    if not result[0]:
-        logging.info("Failed to connect to wifi!")
         try:
             wireless_controller.disconnect_station()
-        except:
-            # Probably not connected ignore
-            logging.debug("Not connected except")
+        except Exception:
             pass
-        return result[0], result[1], None, None
-    logging.debug("After disconnect station")
+        raise Exception(e)
 
     if sync_time:
-        result = synchronize_time()
-        if not result:
-            return result, "Failed to synchronize time with ntp server", None, None
+        try:
+            synchronize_time()
+        except Exception as e:
+            raise Exception(e)
 
 
-def get_last_commit_info():
-    logging.debug("utils.py/get_last_commit_info()")
-    file_path = 'commit_info.txt'
-
-    commit_info_dict = {}
-
-    if check_if_file_exists(path_to_file=file_path):
-        with open(file_path, 'r', encoding="utf8") as file:
-            commit_info_dict = ujson.load(file)
-    else:
-        commit_info_dict['hash'] = 'Unknown'
-        commit_info_dict['tag'] = 'Unknown'
-        print("File with hash of the last commit doesn't exist")
-
-    return commit_info_dict
-
-
-def print_reset_wake_state():
+def print_reset_wake_state() -> (int, int):
+    """
+    Gets cause of reset and wake and prints that on STDOUT.
+    :return: reset and wake cause.
+    """
     logging.debug("utils.py/print_reset_wake_state()")
     reset = machine.reset_cause()
     wake = machine.wake_reason()
@@ -218,21 +259,3 @@ def print_reset_wake_state():
 
     logging.debug("Wake Cause = %s" % wake_cause)
     return reset, wake
-
-
-def flash_blue_led(published_success):
-    logging.debug("utils.py/flash_blue_led({})".format(published_success))
-    blue_led_pin = machine.Pin(config.cfg.blue_led_pin, machine.Pin.OUT)
-
-    if published_success:
-        blue_led_pin.on()
-        utime.sleep(0.1)
-        blue_led_pin.off()
-    else:
-        blue_led_pin.on()
-        utime.sleep(0.07)  # 0.07s blinking is more visible
-        blue_led_pin.off()
-        utime.sleep(0.07)
-        blue_led_pin.on()
-        utime.sleep(0.07)
-        blue_led_pin.off()

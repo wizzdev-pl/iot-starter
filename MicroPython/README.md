@@ -1,64 +1,76 @@
 ### Requirements
-- Installed python3.6-dev
-- Installed python3.6-venv
-- Installed python3-pip
+- Created virtual environment
 - User added to dialup group
 - Configured AWS cloud
 
 
 ### To develop in PyCharm:
-1. Create and activate virtual environment with Python 3.6 using PyCharm GUI
-or do it manually.
-````bash
-cd Micropython
-virtualenv venv
-pip3 install -r requirements.txt
-````
+1. Activate previously created environment using venv or anaconda.
+
+    ```
+    cd Micropython
+    ```
+    This step is platform dependent:
+    #### Windows
+    * For anaconda:
+        ```
+        conda activate ENV_NAME
+        ```
+
+    * For venv:
+        ```
+        ../terraform/scripts/ENV_NAME/Scripts/activate.bat
+        ```
+
+    #### Linux/ Mac OS
+    * For anaconda:
+        ```
+        conda activate ENV_NAME
+        ```
+
+    * For venv:
+        ```
+        source ../terraform/scripts/ENV_NAME/bin/activate
+        ```
 
 2. Open the project MicroPython with PyCharm and mark *src* and *ulib_mocks* directory as Sources Root in Pycharm.
 
 ### AWS and terraform 
 Make sure that your AWS cloud is configured. For more information please go to 
-ReadMe in "terraform" directory [here](../terraform/README.md).
+README in "terraform" directory [here](../terraform/README.md).
 
 If you already have configured AWS infrastructure, make sure that:
-- terraform binaries (https://www.terraform.io/downloads.html) are in ".terraform" directory.
+- terraform exists either in ".terraform" directory or installed through the package manager
 - you have configured ssh connections with AWS (aws configure)
 
 ### Basic Setup of the ESP32
 To set up a new board or flash the old one. 
 Make sure that your AWS cloud is configured, and your computer has AWS credentials.
 
-#### Creating virtual environment 
-If you already have made virtual environment, you can skip this step.
-```bash
-cd Micropython
-python3 -m venv venv
-```
-
-#### Activating virtual environment
-This step is platform dependent
-###### Windows
-```bash
-venv/Scripts/activate.bat
-```
-
-###### Linux/ Mac OS
-```bash
-source venv/bin/activate
-```
-
-#### Install requirements
-```bash
-pip3 install -r requirements.txt
-```
 
 #### Flashing the board
-Make sure that your board is connected to computer. Check the port number.
+Make sure that your board is connected to the computer and you have activated your virtual environment. 
+Check the port number - on Linux system, port can be checked through the simple script which will list all usb devices and their ports:
 
 ```bash
-source venv/bin/activate
-python3 scripts/upload_all.py -p <port>
+#!/bin/sh
+
+for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
+    (
+        syspath="${sysdevpath%/dev}"
+        devname="$(udevadm info -q name -p $syspath)"
+        [[ "$devname" == "bus/"* ]] && exit
+        eval "$(udevadm info -q property --export -p $syspath)"
+        [[ -z "$ID_SERIAL" ]] && exit
+        echo "/dev/$devname - $ID_SERIAL"
+    )
+done
+```
+
+After finding the correct port, execute:
+
+```bash
+python scripts/upload_all.py -p <port>
 ```
 
 After flashing the board please reset it using button EN button.
@@ -80,40 +92,57 @@ http://192.168.4.1/web_pages/setup.html
 ```
 Next, type your WiFi network credentials into SSID and Password fields and press
 "Submit" button. Remember that this network should have an internet connection. 
-Otherwise, data will not be sent to the AWS.
+Otherwise, data will not be sent to the AWS. 
+If you’ve lost connection after submitting, don’t worry - that is supposed to happen.
 
 ### Logs from the device
 If you want to see logs from working device you should access serial port 
 communication with board. We recommend you programs listed below.
 
-#### Linux
+### Linux
 On Linux you can use picocom:
+
+* Ubuntu:
 ```bash
-sudo apt-get install picocom
-picocom port_name --baud 115200
+sudo apt-get install picocom 
 ```
 
-#### Windows 
+* Fedora:
+```bash
+sudo dnf install picocom 
+```
+
+To run:
+```bash
+picocom <port> --baud 115200
+```
+
+### Windows 
 On Windows you can use PuTTy _(https://www.putty.org/)_
 
-#### Mac 
+After installing connect to the device through:
+1. Select Session in Category
+2. Select Serial in Connection type
+3. Type in correct port (Serial line) and speed
+4. Open connection
+
+### Mac 
 On Linux you can also use picocom
 
 ### Checking measurement
-There are two ways to check measurements sent from the board. First is using AWS IoT core service,
-second is visualization page prepared by WizzDev.
+There are two ways to check measurements sent from the board. First is using AWS IoT core service, second is visualization page prepared by WizzDev.
 
 #### Using IoT Core
-Log in to your AWS account. Go to 'IoT Core' service. Next, choose "Test" and into "Subscription topic" 
-type:
+Log in to your AWS account. Go to 'IoT Core' service. Next, choose "Test" and into "Subscription topic" type:
 ```
 topic/data
 ```
 Finally, click "Subscribe to topic". After some time you should see dataframes send by ESP32 board.
 
 #### Visualization page
-Visualization page url is generated by AWS during infrastructure build. So URL is connected with your
-AWS account. You can find this URL in places listed below:
+Visualization page url is generated by AWS during infrastructure build. So URL is connected with your AWS account. 
+You can find this URL in places listed below:
 - in file MicroPython/src/aws_config.json as **visualization_url**
+- in the "CloudFront" service on your AWS account under the **Domain Name** field
 
 
