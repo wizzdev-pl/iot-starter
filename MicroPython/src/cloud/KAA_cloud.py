@@ -1,4 +1,5 @@
 import logging
+from random import randint
 
 import machine
 import ujson
@@ -6,14 +7,14 @@ from common import config, utils
 from communication import wirerless_connection_controller
 from controller.main_controller_event import (MainControllerEvent,
                                               MainControllerEventType)
+from utime import time
 
 from cloud.cloud_interface import CloudProvider
 
 
 class KAA_cloud(CloudProvider):
     def __init__(self) -> None:
-        # TODO: We need those topics but maybe load them from file
-        # instead of creating them from config???
+        # TODO: Only needed for checking if there are any messages
         self.publish_success_topic = config.cfg.kaa_success_topic
         self.publish_error_topic = config.cfg.kaa_error_topic
 
@@ -115,6 +116,25 @@ class KAA_cloud(CloudProvider):
 
         return config_dict
 
+    def _format_data(self, data: dict) -> dict:
+        """
+        Helper function for formatting data to match Kaa expected input
+        :param data: Data in dict to be formatted
+        :return dict: Formatted data
+        """
+        formatted_data = {}
+        for key, values in data.items():
+            # Unpack outer list and extract values to variables
+            (_, value), = values
+            # !!! UNCOMMENT ONLY FOR DEBUGGING
+            if value == -99:
+                # random.seed(time())
+                value = randint(10, 40)
+            # !!! UNCOMMENT ONLY FOR DEBUGGING
+            formatted_data[key] = value
+        
+        return formatted_data
+
     def publish_data(self, data):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
@@ -127,14 +147,14 @@ class KAA_cloud(CloudProvider):
 
         # TODO: Certificates?
 
+        data = self._format_data(data)
+
         logging.debug("data to send = {}".format(data))
         result = mqtt_communicator.publish_message(
             payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
         )
 
         # TODO: Do we need to wait here for confirmation from receive_message method?
-        # Boolean flag or sleep for a while may be needed if the following
-        # code returns error even though working connection is established
         if not result:
             logging.error(
                 "Does publish return result for KAA?? (MQTT in publish_data())")

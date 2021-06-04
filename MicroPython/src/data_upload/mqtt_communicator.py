@@ -78,14 +78,8 @@ class MQTTCommunicator:
         logging.debug("mqtt_communicator.py/connect()")
         try:
             gc.collect()
-            # result = self.MQTT_client.connect(clean_session=False)
             self.MQTT_client.connect(clean_session=False)
-            # self.is_connected = result
             self.is_connected = True
-            # if result:
-            #     return True, ""
-            # else:
-            #     raise Exception("Failed to connect to MQTT server")
         except ValueError as e:
             self.is_connected = False
             raise ValueError(e)
@@ -178,14 +172,18 @@ class MQTTCommunicator:
             wait_time += 100
         return False
 
-    # TODO: KAA doesn't need timestamp
     def publish_message(self, payload, topic, qos):
-        mqtt_message = {
-            'client_id': self.client_id,
-            'publish_timestamp': utils.get_current_timestamp_ms(),
-            'data': payload
-        }
-        gc.collect()  # run garbage collector to clean up memory
+        
+        if config.cfg.cloud_provider == Providers.AWS:
+            mqtt_message = {
+                'client_id': self.client_id,
+                'publish_timestamp': utils.get_current_timestamp_ms(),
+                'data': payload
+            }
+        else:
+            mqtt_message = payload
+        # Run garbage collector to clean up memory
+        gc.collect()
         try:
             # if qos == 1 it's a blocking method
             if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
