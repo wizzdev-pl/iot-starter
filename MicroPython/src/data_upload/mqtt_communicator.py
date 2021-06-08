@@ -187,7 +187,9 @@ class MQTTCommunicator:
         try:
             # if qos == 1 it's a blocking method
             if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
-                logging.debug("Publishing mesage succesfull")
+                if config.cfg.cloud_provider == Providers.AWS:
+                    # Kaa doesn't inform if it is successfull or not in the publish topic
+                    logging.debug("Publishing mesage succesfull")
                 return True
             else:
                 logging.debug("Problem with publishing mesage")

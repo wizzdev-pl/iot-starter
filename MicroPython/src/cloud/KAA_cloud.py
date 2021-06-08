@@ -1,4 +1,5 @@
 import logging
+import random
 from random import randint
 
 import machine
@@ -14,9 +15,8 @@ from cloud.cloud_interface import CloudProvider
 
 class KAA_cloud(CloudProvider):
     def __init__(self) -> None:
-        # TODO: Only needed for checking if there are any messages
-        self.publish_success_topic = config.cfg.kaa_success_topic
-        self.publish_error_topic = config.cfg.kaa_error_topic
+        self.publish_success_topic = config.cfg.kaa_topic + '/status'
+        self.publish_error_topic = config.cfg.kaa_topic + '/error'
 
     def receive_message(self, topic, msg) -> None:
         """
@@ -25,6 +25,7 @@ class KAA_cloud(CloudProvider):
         :param msg: Message received encoded as bytes
         :return: None 
         """
+        logging.debug('cloud/Kaa_cloud.py/receive_message()')
         topic = topic.decode()
 
         # Check if msg is in json format, if not decode as str
@@ -101,6 +102,9 @@ class KAA_cloud(CloudProvider):
             config.cfg.mqqt_request_id
         )
 
+        self.publish_success_topic = config.cfg.kaa_topic + '/status'
+        self.publish_error_topic = config.cfg.kaa_topic + '/error'
+
         config.cfg.save()
 
     def load_kaa_config_from_file(self) -> dict:
@@ -123,12 +127,14 @@ class KAA_cloud(CloudProvider):
         :return dict: Formatted data
         """
         formatted_data = {}
-        for key, values in data.items():
+        for ind, (key, values) in enumerate(data.items()):
             # Unpack outer list and extract values to variables
             (_, value), = values
             # !!! UNCOMMENT ONLY FOR DEBUGGING
             if value == -99:
-                # random.seed(time())
+                # For 'random' seed as enumerating is really fast and 
+                # time gives the same result
+                random.seed(time() * (8 * (ind + 1)))
                 value = randint(10, 40)
             # !!! UNCOMMENT ONLY FOR DEBUGGING
             formatted_data[key] = value
@@ -140,8 +146,13 @@ class KAA_cloud(CloudProvider):
             sync_time=False
         )
 
-        result = mqtt_communicator.set_callback(self.receive_message)
-        if not result:
+        result_suc_topic = mqtt_communicator.subscribe(
+            topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
+        )
+        result_err_topic = mqtt_communicator.subscribe(
+            topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
+        )
+        if not result_suc_topic or not result_err_topic:
             logging.error(
                 "Error subscribing to topics with MQTT in publish_data()")
 
@@ -150,14 +161,12 @@ class KAA_cloud(CloudProvider):
         data = self._format_data(data)
 
         logging.debug("data to send = {}".format(data))
-        result = mqtt_communicator.publish_message(
+        
+        mqtt_communicator.publish_message(
             payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
         )
 
-        # TODO: Do we need to wait here for confirmation from receive_message method?
-        if not result:
-            logging.error(
-                "Does publish return result for KAA?? (MQTT in publish_data())")
+        mqtt_communicator.MQTT_client.check_msg()
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()

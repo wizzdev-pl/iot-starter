@@ -174,6 +174,9 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
         connect_to_wifi(wireless_controller, sync_time)
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
                                              timeout=config.cfg.mqtt_timeout)
+        
+        while not wireless_controller.sta_handler.isconnected(): 
+            pass
         mqtt_communicator.connect()
     except Exception as e:
         logging.error("Error get_wifi_and_cloud_handlers(): {}".format(e))

@@ -1,9 +1,9 @@
-from ujson import dump, load
+from communication.wirerless_connection_controller import \
+    get_mac_address_as_string
 from lib import logging
+from ujson import dump, load
 
-from communication.wirerless_connection_controller import get_mac_address_as_string
 from common import utils
-
 
 cfg = None
 
@@ -13,7 +13,7 @@ DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
 
 # Connection
-DEFAULT_DATA_PUBLISHING_PERIOD_MS = 5000 # 120000
+DEFAULT_DATA_PUBLISHING_PERIOD_MS = 5000  # 120000
 DEFAULT_WIFI_TIMEOUT = 5000
 DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_REQUEST_ID = 42
@@ -70,8 +70,6 @@ DEFAULT_KAA_ENDPOINT = ""
 DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
     DEFAULT_KAA_APP_VERSION, DEFAULT_KAA_ENDPOINT, DEFAULT_MQTT_REQUEST_ID
 )
-DEFAULT_SUCCESS_TOPIC = DEFAULT_KAA_TOPIC + "/status"
-DEFAULT_ERROR_TOPIC = DEFAULT_KAA_TOPIC + "/error"
 
 
 class ESPConfig:
@@ -132,8 +130,6 @@ class ESPConfig:
         self.kaa_endpoint = DEFAULT_KAA_ENDPOINT
         self.kaa_app_version = DEFAULT_KAA_APP_VERSION
         self.kaa_topic = DEFAULT_KAA_TOPIC
-        self.kaa_success_topic = DEFAULT_SUCCESS_TOPIC
-        self.kaa_error_topic = DEFAULT_ERROR_TOPIC
 
     def load_from_file(self) -> None:
         """
