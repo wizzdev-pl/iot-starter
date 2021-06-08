@@ -10,10 +10,10 @@ _(via: https://www.terraform.io/intro/index.html)_
 
 ## Requirements
 ### Terraform
-Terraform can be installed in two ways:
+You will need terraform **0.14.9**. It can be installed in two ways:
 
-- You can download terraform binary from this [website](https://www.terraform.io/downloads.html). Downloaded file should be placed in this directory (iot-starter/terraform)
-- You can install terraform via package manager on Unix like systems (assuming it’s available). Fedora has the latest version available, so to install it on the Fedora Linux follow this [link](https://www.terraform.io/docs/cli/install/yum.html)
+- (**Perffered way**) You can download terraform binary from this [website](https://releases.hashicorp.com/terraform/0.14.9/) - please select appropriate version for Your OS. Downloaded file should be placed in this directory (iot-starter/terraform)
+- You can install terraform via package manager on Unix like systems (assuming it’s available). To install it on the Fedora Linux follow this [link](https://www.terraform.io/docs/cli/install/yum.html) (remember to install version **0.14.9**)
 
 You can check your installation with this command (if the terraform was downloaded as a binary file, remember to run this command from "iot-starter/terraform" directory):
 
