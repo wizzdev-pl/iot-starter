@@ -1,18 +1,20 @@
 import argparse
 import os
 import sys
+
 import git
 from git.refs.tag import TagReference
-from pathlib import Path
 
 import pyboard
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+ROOT_DIR = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..'))
 MICROPYTHON_FILESYSTEM_SEPARATOR = "/"
 
 esp_board = None
 
 DEVICE_RESOURCES_FILE_DIR = "/resources"
+
 AWS_CONFIG_DEVICE_FILE_PATH = DEVICE_RESOURCES_FILE_DIR + "/" + "aws_config.json"
 
 KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
@@ -27,11 +29,12 @@ def remove_some_dirs_from_path():
     for dir_to_remove in dirs_to_remove:
         full_path = os.path.join(ROOT_DIR, dir_to_remove)
         try:
-            sys.path.remove(full_path)  
+            sys.path.remove(full_path)
             python_path.remove(full_path)
         except:
             pass
     os.environ['PYTHONPATH'] = ':'.join(python_path)
+
 
 CACHE = {
     'dirs': [],
@@ -71,7 +74,8 @@ def _create_dir(path):
 def upload_file(full_repo_file_path, dev_file_path):
     modification_time = float(os.path.getmtime(full_repo_file_path))
     if CACHE['files'].get(dev_file_path, 0) >= modification_time:
-        print(f'File "{dev_file_path}" already in Cache after modification time')
+        print(
+            f'File "{dev_file_path}" already in Cache after modification time')
         return
 
     print(f'# Uploading file "{dev_file_path}"')
@@ -80,8 +84,8 @@ def upload_file(full_repo_file_path, dev_file_path):
         print("cp %s : %s" % (full_repo_file_path, dev_file_path))
         op(full_repo_file_path, dev_file_path)
     except pyboard.PyboardError as e:
-            print(str(e))
-            raise Exception('Failed to upload file!')
+        print(str(e))
+        raise Exception('Failed to upload file!')
     else:
         CACHE['files'][dev_file_path] = modification_time
 
@@ -112,13 +116,16 @@ def upload_dir(repo_path: str, device_path):
             else:
                 dev_file_path = file_name
             try:
-                upload_file(full_repo_file_path=full_repo_file_path, dev_file_path=dev_file_path)
+                upload_file(full_repo_file_path=full_repo_file_path,
+                            dev_file_path=dev_file_path)
             except:
                 print('!!!!!!!RETRYING!!!!')
-                upload_file(full_repo_file_path=full_repo_file_path, dev_file_path=dev_file_path)
+                upload_file(full_repo_file_path=full_repo_file_path,
+                            dev_file_path=dev_file_path)
 
         else:
-            devive_directory_name = device_path + MICROPYTHON_FILESYSTEM_SEPARATOR + file_name
+            devive_directory_name = device_path + \
+                MICROPYTHON_FILESYSTEM_SEPARATOR + file_name
 
             upload_dir(repo_path=full_repo_file_path,
                        device_path=devive_directory_name)
@@ -128,7 +135,8 @@ def _read_commit_info():
     repo = git.Repo(search_parent_directories=True)
 
     if repo is not None:
-        tagref = TagReference.list_items(repo)[-1]  # last tag on the list is the newest one
+        # last tag on the list is the newest one
+        tagref = TagReference.list_items(repo)[-1]
 
         hash_last_commit = repo.head.object.hexsha
 
@@ -141,7 +149,8 @@ def _read_commit_info():
             else:
                 return hash_last_commit, "None"  # return only hash of last commit otherwise
         else:
-            return hash_last_commit, "No tagged commits"  # return hash of last commit if there's no tags in repository
+            # return hash of last commit if there's no tags in repository
+            return hash_last_commit, "No tagged commits"
 
     else:
         print("Repository info not found")
@@ -177,8 +186,6 @@ def flash_scripts(port, aws_config_file_path):
 
     aws_config_file_path = os.path.abspath(aws_config_file_path)
     upload_file(aws_config_file_path, AWS_CONFIG_DEVICE_FILE_PATH)
-
-    # TODO: Rewrite temp solution for uploading kaa_config
     upload_file(KAA_CONFIG_SRC_PATH, KAA_CONFIG_DEVICE_FILE_PATH)
 
 

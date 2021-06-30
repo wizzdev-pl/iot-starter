@@ -44,6 +44,11 @@ class MainController:
         self.last_test_comment = ""
         self.last_test_end_time = None
 
+        # self.tested_connection_cloud = False
+        self.printed_time = False
+        self.got_sensor_data = False
+        self.published_to_cloud = False
+
         self.cloud_provider = self.get_cloud_provider()
 
         if config.cfg.cloud_provider == Providers.AWS:
@@ -139,38 +144,32 @@ class MainController:
             logging.debug("GOT TESTED CONNECTION CLOUD")
 
             self.print_time()
-
-            config.cfg.printed_time = True
-            config.cfg.save()
+            self.printed_time = True
 
         elif event.event_type == MainControllerEventType.GET_SENSOR_DATA:
             logging.debug("WAITING FOR PRINTED TIME")
-            while not config.cfg.printed_time:
+            while not self.printed_time:
                 pass
             logging.debug("GOT PRINTED TIME")
 
             logging.debug("GETTING SENSOR DATA")
 
             self.data_acquisitor.acquire_temp_humi()
-
-            config.cfg.got_sensor_data = True
-            config.cfg.save()
+            self.got_sensor_data = True
 
         elif event.event_type == MainControllerEventType.PUBLISH_DATA:
             logging.debug("WAITING FOR GOT SENSOR DATA")
-            while not config.cfg.got_sensor_data:
+            while not self.got_sensor_data:
                 pass
             logging.debug("GOT GOT SENSOR DATA")
             logging.debug("Publishing data to cloud")
 
             self.cloud_provider.publish_data(self.data_acquisitor.data)
-
-            config.cfg.published_to_cloud = True
-            config.cfg.save()
+            self.published_to_cloud = True
 
         elif event.event_type == MainControllerEventType.GO_TO_SLEEP:
             logging.debug("WAITING FOR PUBLISHED TO CLOUD")
-            while not config.cfg.published_to_cloud:
+            while not self.published_to_cloud:
                 pass
             logging.debug("GOT PUBLISHED TO CLOUD")
 
@@ -260,16 +259,14 @@ class MainController:
             "Actual time: {}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(time[0], time[1], time[2], time[3], time[4],
                                                                         time[5]))
 
-    @staticmethod
-    def go_to_sleep(event: MainControllerEvent) -> None:
+    def go_to_sleep(self, event: MainControllerEvent) -> None:
         """
         Go to deep sleep.
         """
         # Resets flag before sleep
-        config.cfg.printed_time = False
-        config.cfg.got_sensor_data = False
-        config.cfg.published_to_cloud = False
-        config.cfg.save()
+        self.printed_time = False
+        self.got_sensor_data = False
+        self.published_to_cloud = False
 
         logging.debug("sleep({})".format(event.data))
         ms = int(event.data['ms'])

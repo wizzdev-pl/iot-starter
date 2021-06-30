@@ -36,9 +36,6 @@ def reset_config(p: machine.Pin) -> None:
     config.cfg.ssid = config.DEFAULT_VARIABLES['ssid']
     config.cfg.password = config.DEFAULT_VARIABLES['password']
     config.cfg.tested_connection_cloud = False
-    config.cfg.printed_time = False
-    config.cfg.got_sensor_date = False
-    config.cfg.published_to_cloud = False
     config.ESPConfig.save()
     machine.reset()
 
@@ -148,17 +145,17 @@ def read_from_file(file_path: str) -> (bool, str):
 
 
 # TODO: Not needed?
-def create_mqtt_communicator_from_config() -> MQTTCommunicator:
-    """
-    Create new instance od MQTTCommunicator.
-    :return: Instance of MQTTCommunicator.
-    """
-    logging.debug("utils.py/create_MQTT_communicator_from_config()")
-    return MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
-                            client_id=config.cfg.aws_client_id,
-                            endpoint=config.cfg.aws_endpoint,
-                            port=config.cfg.mqtt_port_ssl,
-                            timeout=config.cfg.mqtt_timeout)
+# def create_mqtt_communicator_from_config() -> MQTTCommunicator:
+#     """
+#     Create new instance od MQTTCommunicator.
+#     :return: Instance of MQTTCommunicator.
+#     """
+#     logging.debug("utils.py/create_MQTT_communicator_from_config()")
+#     return MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
+#                             client_id=config.cfg.aws_client_id,
+#                             endpoint=config.cfg.aws_endpoint,
+#                             port=config.cfg.mqtt_port_ssl,
+#                             timeout=config.cfg.mqtt_timeout)
 
 
 def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
@@ -173,10 +170,11 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     try:
         connect_to_wifi(wireless_controller, sync_time)
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
-                                             timeout=config.cfg.mqtt_timeout)
+                                                timeout=config.cfg.mqtt_timeout)
         
         while not wireless_controller.sta_handler.isconnected(): 
             pass
+
         mqtt_communicator.connect()
     except Exception as e:
         logging.error("Error get_wifi_and_cloud_handlers(): {}".format(e))

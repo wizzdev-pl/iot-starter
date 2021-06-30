@@ -13,16 +13,14 @@ DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
 
 # Connection
-DEFAULT_DATA_PUBLISHING_PERIOD_MS = 5000  # 120000
+DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
 DEFAULT_WIFI_TIMEOUT = 5000
 DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_REQUEST_ID = 42
 DEFAULT_MQTT_PORT_SSL = 8883
 DEFAULT_MQTT_TIMEOUT = 400
 DEFAULT_QOS = 1
-DEFAULT_PRINTED_TIME = False
 DEFAULT_TESTED_CONNECTION_CLOUD = False
-DEFAULT_PUBLISHED_TO_CLOUD = False
 
 DEFAULT_PRIV_KEY = ""
 DEFAULT_CERT_PEM = ""
@@ -33,7 +31,6 @@ DEFAULT_USE_DHT = True
 DEFAULT_DHT_MEASUREMENT_PIN = 4
 DEFAULT_DHT_POWER_PIN = 26
 DEFAULT_DHT_TYPE = "DHT22"
-DEFAULT_GOT_SENSOR_DATA = False
 
 # Other
 DEFAULT_AP_CONFIG_DONE = False
@@ -63,10 +60,13 @@ CA_CERTIFICATE_PATH = "{}/{}".format(CERTIFICATES_DIR, "AWS.ca_certificate")
 DEFAULT_JSON_HEADER = {'Content-Type': 'application/json'}
 
 # KAA stuff
+KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
 KAA_CONFIG_PATH = "/resources/kaa_config.json"
 DEFAULT_KAA_KPC_HOST = "mqtt.cloud.kaaiot.com"
 DEFAULT_KAA_APP_VERSION = ""
 DEFAULT_KAA_ENDPOINT = ""
+DEFAULT_KAA_USER = ""
+DEFAULT_KAA_PASSWORD = ""
 DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
     DEFAULT_KAA_APP_VERSION, DEFAULT_KAA_ENDPOINT, DEFAULT_MQTT_REQUEST_ID
 )
@@ -96,10 +96,8 @@ class ESPConfig:
         self.mqqt_request_id = DEFAULT_MQTT_REQUEST_ID
         self.mqtt_port_ssl = DEFAULT_MQTT_PORT_SSL
         self.mqtt_timeout = DEFAULT_MQTT_TIMEOUT
-        self.printed_time = DEFAULT_PRINTED_TIME
         self.QOS = DEFAULT_QOS
         self.tested_connection_cloud = DEFAULT_TESTED_CONNECTION_CLOUD
-        self.published_to_cloud = DEFAULT_PUBLISHED_TO_CLOUD
 
         self.private_key = DEFAULT_PRIV_KEY
         self.cert_pem = DEFAULT_CERT_PEM
@@ -110,7 +108,6 @@ class ESPConfig:
         self.dht_measurement_pin = DEFAULT_DHT_MEASUREMENT_PIN
         self.dht_power_pin = DEFAULT_DHT_POWER_PIN
         self.dht_type = DEFAULT_DHT_TYPE
-        self.got_sensor_data = DEFAULT_GOT_SENSOR_DATA
 
         # Other
         self.ap_config_done = DEFAULT_AP_CONFIG_DONE
@@ -127,6 +124,8 @@ class ESPConfig:
         self.device_uid = ""
 
         # KAA
+        self.kaa_user = DEFAULT_KAA_USER
+        self.kaa_password = DEFAULT_KAA_PASSWORD
         self.kaa_endpoint = DEFAULT_KAA_ENDPOINT
         self.kaa_app_version = DEFAULT_KAA_APP_VERSION
         self.kaa_topic = DEFAULT_KAA_TOPIC
@@ -166,13 +165,9 @@ class ESPConfig:
                 'mqtt_port_ssl', DEFAULT_MQTT_PORT_SSL)
             self.mqtt_timeout = config_dict.get(
                 'mqtt_timeout', DEFAULT_MQTT_TIMEOUT)
-            self.printed_time = config_dict.get(
-                'printed_time', DEFAULT_PRINTED_TIME)
             self.QOS = config_dict.get('QOS', DEFAULT_QOS)
             self.tested_connection_cloud = config_dict.get(
                 'tested_connection_cloud', DEFAULT_TESTED_CONNECTION_CLOUD)
-            self.published_to_cloud = config_dict.get(
-                'published_to_cloud', DEFAULT_PUBLISHED_TO_CLOUD)
 
             self.private_key = config_dict.get('private_key', DEFAULT_PRIV_KEY)
             self.cert_pem = config_dict.get('cert_pem', DEFAULT_CERT_PEM)
@@ -185,8 +180,6 @@ class ESPConfig:
             self.dht_power_pin = config_dict.get(
                 'dht_power_pin', DEFAULT_DHT_POWER_PIN)
             self.dht_type = config_dict.get('dht_type', DEFAULT_DHT_TYPE)
-            self.got_sensor_data = config_dict.get(
-                'got_sensor_data', DEFAULT_GOT_SENSOR_DATA)
 
             # Other
             self.ap_config_done = config_dict.get(
@@ -203,6 +196,8 @@ class ESPConfig:
             self.aws_topic = config_dict.get('topic', DEFAULT_AWS_TOPIC)
 
             # KAA
+            self.kaa_user = config_dict.get('kaa_user', DEFAULT_KAA_USER)
+            self.kaa_password = config_dict.get('kaa_password', DEFAULT_KAA_PASSWORD)
             self.kaa_endpoint = config_dict.get(
                 'kaa_endpoint', DEFAULT_KAA_ENDPOINT)
             self.kaa_app_version = config_dict.get(
@@ -237,10 +232,8 @@ class ESPConfig:
         config_dict['mqtt_request_id'] = self.mqqt_request_id
         config_dict['mqtt_port_ssl'] = self.mqtt_port_ssl
         config_dict['mqtt_timeout'] = self.mqtt_timeout
-        config_dict['printed_time'] = self.printed_time
         config_dict['QOS'] = self.QOS
         config_dict['tested_connection_cloud'] = self.tested_connection_cloud
-        config_dict['published_to_cloud'] = self.published_to_cloud
 
         config_dict['private_key'] = self.private_key
         config_dict['cert_pem'] = self.cert_pem
@@ -251,7 +244,6 @@ class ESPConfig:
         config_dict['dht_measurement_pin'] = self.dht_measurement_pin
         config_dict['dht_power_pin'] = self.dht_power_pin
         config_dict['dht_type'] = self.dht_type
-        config_dict['got_sensor_data'] = self.got_sensor_data
 
         # Other
         config_dict['AP_config_done'] = self.ap_config_done
@@ -264,6 +256,8 @@ class ESPConfig:
         config_dict['device_uid'] = self.device_uid
 
         # KAA
+        config_dict['kaa_user'] = self.kaa_user
+        config_dict['kaa_password'] = self.kaa_password
         config_dict['kaa_endpoint'] = self.kaa_endpoint
         config_dict['kaa_app_version'] = self.kaa_app_version
         config_dict['kaa_topic'] = self.kaa_topic

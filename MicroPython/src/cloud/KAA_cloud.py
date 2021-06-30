@@ -89,6 +89,12 @@ class KAA_cloud(CloudProvider):
         logging.debug("KAA_cloud/configure_data()")
         kaa_configuration = self.load_kaa_config_from_file()
         
+        config.cfg.kaa_user = kaa_configuration.get(
+            "kaa_user", config.DEFAULT_KAA_USER)
+
+        config.cfg.kaa_password = kaa_configuration.get(
+            "kaa_password", config.DEFAULT_KAA_PASSWORD)
+
         config.cfg.kaa_app_version = kaa_configuration.get(
             "kaa_app_version", config.DEFAULT_KAA_APP_VERSION)
         
@@ -130,13 +136,6 @@ class KAA_cloud(CloudProvider):
         for ind, (key, values) in enumerate(data.items()):
             # Unpack outer list and extract values to variables
             (_, value), = values
-            # !!! UNCOMMENT ONLY FOR DEBUGGING
-            if value == -99:
-                # For 'random' seed as enumerating is really fast and 
-                # time gives the same result
-                random.seed(time() * (8 * (ind + 1)))
-                value = randint(10, 40)
-            # !!! UNCOMMENT ONLY FOR DEBUGGING
             formatted_data[key] = value
         
         return formatted_data
@@ -166,7 +165,7 @@ class KAA_cloud(CloudProvider):
             payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
         )
 
-        mqtt_communicator.MQTT_client.check_msg()
+        mqtt_communicator.MQTT_client.wait_msg()
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()

@@ -57,7 +57,9 @@ class MQTTCommunicator:
                 client_id=self.client_id,
                 server=self.server,
                 port=self.port,
-                keepalive=self.timeout
+                keepalive=self.timeout,
+                user=config.cfg.kaa_user,
+                password=config.cfg.kaa_password
             )
 
         else:
