@@ -259,8 +259,8 @@ class MainController:
         print(sensor_configuration)
         if 'publishing_period_ms' in sensor_configuration.keys():
             config.cfg.data_publishing_period_in_ms = int(sensor_configuration['publishing_period_ms'])
-        if 'dht_type' in sensor_configuration.keys():
-            config.cfg.dht_type = sensor_configuration['dht_type']
+        if 'sensor_type' in sensor_configuration.keys():
+            config.cfg.sensor_type = sensor_configuration['sensor_type']
 
     def get_status(self) -> dict:
         """

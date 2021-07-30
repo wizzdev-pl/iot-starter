@@ -260,7 +260,6 @@ class BME280:
     h = 419430400 if h > 419430400 else h
     return h >> 12
 
-  @property
   def temperature(self):
     "Return the temperature in degrees."
     t = self.read_temperature()
@@ -268,10 +267,14 @@ class BME280:
     td = t - ti * 100
     return float("{}.{:02d}".format(ti, td))
 
-  @property
   def humidity(self):
     "Return the humidity in percent."
     h = self.read_humidity()
     hi = h // 1024
     hd = h * 100 // 1024 - hi * 100
     return float("{}.{:02d}".format(hi, hd))
+
+  def measure(self):
+    self._load_calibration()
+    self._device.write8(BME280_REGISTER_CONTROL, 0x3F)
+    self.t_fine = 0

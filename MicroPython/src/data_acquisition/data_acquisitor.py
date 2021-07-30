@@ -2,8 +2,7 @@ import logging
 
 from common import utils
 from common import config
-from peripherals.dht_sensor import DHTSensor
-from peripherals.bme280_sensor import BME280Sensor
+from peripherals.sensor import Sensor
 
 ADC_TO_VOLTS_ATTN_11DB = 0.000878906
 MAX_SAMPLES = 10
@@ -18,13 +17,15 @@ class DataAcquisitor:
         self.data = {}
 
         if config.cfg.use_dht:
-            self.sensor = DHTSensor(dht_type=config.cfg.dht_type,
-                                 dht_measurement_pin_number=config.cfg.dht_measurement_pin,
-                                 dht_power_pin_number=config.cfg.sensor_power_pin)
+            self.sensor = Sensor(sensor_type=config.cfg.sensor_type,
+                                 sensor_measurement_pin_number=config.cfg.sensor_measurement_pin,
+                                 sensor_sda_pin_number=None, sensor_scl_pin_number=None,
+                                 sensor_power_pin_number=config.cfg.sensor_power_pin)
         else:
-            self.sensor = BME280Sensor(bme280_sda_pin_number=config.cfg.bme280_sda_pin, 
-                                    bme280_scl_pin_number=config.cfg.bme280_scl_pin, 
-                                    bme280_power_pin_number=config.cfg.sensor_power_pin)
+            self.sensor = Sensor(sensor_type=config.cfg.sensor_type,
+                                 sensor_measurement_pin_number=None, sensor_sda_pin_number=config.cfg.sensor_sda_pin,
+                                 sensor_scl_pin_number=config.cfg.sensor_scl_pin, 
+                                 sensor_power_pin_number=config.cfg.sensor_power_pin)
 
     def acquire_temp_humi(self) -> dict:
         """
