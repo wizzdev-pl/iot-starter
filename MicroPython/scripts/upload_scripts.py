@@ -179,6 +179,6 @@ def flash_scripts(port, aws_config_file_path):
 if __name__ == '__main__':
     args = parse_arguments()
 
-    flash_scripts(args['port'])
+    flash_scripts(args['port'], "src/aws_config.json")
 
     print('Finished!')

@@ -251,7 +251,7 @@ class MainController:
     @staticmethod
     def configure_sensor(sensor_configuration: dict) -> None:
         """
-        Create DHT part of config file.
+        Create sensor part of config file.
         :param sensor_configuration: Sensor's parameters.
         :return: None.
         """
