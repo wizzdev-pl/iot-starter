@@ -10,6 +10,7 @@ terraform/terraform.exe
 #JSON cloud configuration file
 MicroPython/src/aws_config.json
 MicroPython/src/kaa_config.json
+MicroPython/src/config.json
 
 # Python cache files
 *.pyc

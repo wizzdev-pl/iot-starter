@@ -7,7 +7,7 @@ from common import utils
 
 cfg = None
 
-DEFAULT_CLOUD_PROVIDER = 'KAA'
+DEFAULT_CLOUD_PROVIDER = 'AWS'
 
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'
@@ -205,8 +205,9 @@ class ESPConfig:
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
             if not self.device_uid:
-                self.device_uid = config_dict.get(
-                    'device_uid', DEFAULT_DEVICE_UID)
+                self.device_uid = get_mac_address_as_string()
+                # self.device_uid = config_dict.get(
+                #     'device_uid', DEFAULT_DEVICE_UID)
 
         if not config_file_exists:
             self.save()

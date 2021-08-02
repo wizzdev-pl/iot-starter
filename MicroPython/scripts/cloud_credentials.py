@@ -23,7 +23,7 @@ def set_credentials():
             config = json.load(infile)
     else:
         config = {}
-    
+    print("Please provide kaa credentials:")
     old_endpoint = config.get('kaa_endpoint', None)
     old_app_version = config.get('kaa_app_version', None)
     old_user = config.get('kaa_user', None)
@@ -33,6 +33,7 @@ def set_credentials():
     app_version = input("App version [{}]: ".format(old_app_version))
     user = input("User [{}]: ".format(old_user))
     password = input("Password [{}]: ".format(old_password))
+    print()
 
     # If values were not updated; leave the old ones
     config['kaa_endpoint'] = endpoint if endpoint else old_endpoint

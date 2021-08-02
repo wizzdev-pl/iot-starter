@@ -3,6 +3,7 @@ import os
 import sys
 
 import git
+from pathlib import Path
 from git.refs.tag import TagReference
 
 import pyboard
@@ -14,11 +15,6 @@ MICROPYTHON_FILESYSTEM_SEPARATOR = "/"
 esp_board = None
 
 DEVICE_RESOURCES_FILE_DIR = "/resources"
-
-AWS_CONFIG_DEVICE_FILE_PATH = DEVICE_RESOURCES_FILE_DIR + "/" + "aws_config.json"
-
-KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
-KAA_CONFIG_DEVICE_FILE_PATH = DEVICE_RESOURCES_FILE_DIR + "/" + "kaa_config.json"
 
 
 def remove_some_dirs_from_path():
@@ -157,10 +153,15 @@ def _read_commit_info():
         return "Unknown", "Unknown"
 
 
+
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--port', metavar='PORT', type=str, required=True,
                         help="Com port of the device")
+    parser.add_argument('--config-path', metavar='CONFIG', type=str, required=True, 
+                        help="Set credentials needed for cloud service")
     parser.add_argument('-f', '--force', action='store_true',
                         help='Upload all files again, even if not modified since caching')
 
@@ -168,7 +169,7 @@ def parse_arguments():
     return args
 
 
-def flash_scripts(port, aws_config_file_path):
+def flash_scripts(port, cloud_config_file_path):
     global esp_board
 
     remove_some_dirs_from_path()
@@ -184,14 +185,15 @@ def flash_scripts(port, aws_config_file_path):
     upload_dir(repo_path='src', device_path='')
     dev_create_dir(DEVICE_RESOURCES_FILE_DIR)
 
-    aws_config_file_path = os.path.abspath(aws_config_file_path)
-    upload_file(aws_config_file_path, AWS_CONFIG_DEVICE_FILE_PATH)
-    upload_file(KAA_CONFIG_SRC_PATH, KAA_CONFIG_DEVICE_FILE_PATH)
+    cloud_config_device_path = DEVICE_RESOURCES_FILE_DIR + "/" + Path(cloud_config_file_path).name
+    cloud_config_file_path = os.path.abspath(cloud_config_file_path)
+    print('From: {}    To: {}'.format(cloud_config_file_path, cloud_config_device_path))
+    upload_file(cloud_config_file_path, cloud_config_device_path)
 
 
 if __name__ == '__main__':
     args = parse_arguments()
 
-    flash_scripts(args['port'])
+    flash_scripts(args['port'], args['config_path'])
 
     print('Finished!')
