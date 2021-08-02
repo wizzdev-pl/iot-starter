@@ -27,13 +27,15 @@ class Sensor:
         """
         logging.debug("Sensor.__init__()")
         self.sensor_type = sensor_type
-        self.sensor_sda_pin = machine.Pin(sensor_sda_pin_number)
-        self.sensor_scl_pin = machine.Pin(sensor_scl_pin_number)
         self.sensor_power_pin = machine.Pin(sensor_power_pin_number, machine.Pin.OUT)
-        self.sensor_measurement_pin = sensor_measurement_pin_number
         self.sensor_power_on = False
         self.sensor_last_measure_status = False
-        self.i2c = machine.I2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000)
+        if "DHT" in self.sensor_type:
+            self.sensor_measurement_pin = sensor_measurement_pin_number
+        else:
+            self.sensor_sda_pin = machine.Pin(sensor_sda_pin_number)
+            self.sensor_scl_pin = machine.Pin(sensor_scl_pin_number)
+            self.i2c = machine.I2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000)
         
         if self.sensor_type == "DHT22":
             self.dht = dht.DHT22(machine.Pin(sensor_measurement_pin_number))

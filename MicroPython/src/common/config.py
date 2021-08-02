@@ -181,11 +181,11 @@ class ESPConfig:
         config_dict['use_aws'] = self.use_aws
         config_dict['data_publishing_period_ms'] = self.data_publishing_period_in_ms
         config_dict['use_dht'] = self.use_dht
-        config_dict['dht_measurement_pin'] = self.sensor_measurement_pin
+        config_dict['sensor_measurement_pin'] = self.sensor_measurement_pin
         config_dict['sensor_power_pin'] = self.sensor_power_pin
-        config_dict['dht_type'] = self.sensor_type
-        config_dict['bme280_sda_pin'] = self.sensor_sda_pin
-        config_dict['bme280_scl_pin'] = self.sensor_scl_pin
+        config_dict['sensor_type'] = self.sensor_type
+        config_dict['sensor_sda_pin'] = self.sensor_sda_pin
+        config_dict['sensor_scl_pin'] = self.sensor_scl_pin
         config_dict['wifi_connection_timeout'] = self.wifi_timeout
         config_dict['mqtt_port'] = self.mqtt_port
         config_dict['mqtt_port_ssl'] = self.mqtt_port_ssl
