@@ -149,7 +149,7 @@ class KAA_cloud(CloudProvider):
             topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
         )
         result_err_topic = mqtt_communicator.subscribe(
-            topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
+            topic=self.publish_error_topic, callback=self.receive_message, qos=config.cfg.QOS
         )
         if not result_suc_topic or not result_err_topic:
             logging.error(
