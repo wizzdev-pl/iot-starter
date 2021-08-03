@@ -1,13 +1,16 @@
 # terraform temps
 terraform/.tmp/**
 terraform/.terraform/*
+terraform/.terraform.lock.hcl
 
 # terraform bin
 terraform/terraform
 terraform/terraform.exe
 
-#JSON aws configuration file
+#JSON cloud configuration file
 MicroPython/src/aws_config.json
+MicroPython/src/kaa_config.json
+MicroPython/src/config.json
 
 # Python cache files
 *.pyc
@@ -16,8 +19,14 @@ venv/
 *.vscode/
 .env
 
+# Test
+kaa_test.py
+kaa_test_wifi.py
 
-Misc files
+# Ca
+ca.pem
+
+# Misc files
 *.info
 
 #Flash setup
