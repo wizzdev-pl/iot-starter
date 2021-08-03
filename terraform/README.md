@@ -150,7 +150,12 @@ Next, you should activate it. This step is platform dependent:
   ```
 
 ### 2. Install requirements
+
+You should go to the main directory of iot-starter<br>
+If You've followed steps, your current directory is iot-starter/terraform/scripts
+
 ```
+cd ../.. 
 pip install pyserial cryptography click future pyelftools setuptools
 pip install -r requirements.txt
 ```
