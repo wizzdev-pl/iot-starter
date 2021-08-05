@@ -32,6 +32,7 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
 
     - install [git](https://git-scm.com/downloads)
     - install [python](https://www.python.org/downloads/windows/) (3.6 / 3.7) with pip and virtualenv - no need to install if you've chosen anaconda-python
+    - install drivers for ESP32 from this [link](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) - make sure to select Universal WIndows Driver
 
 Make sure you have access to required hardware:
 
@@ -91,7 +92,7 @@ Depending on your choice of cloud service provider, you can:
 
 ### Device management
 
-Log in to your KAA account. From the side pane select "Device management" -> "Devices". Click on your device and there you should see "Device telemetry" time series plot where data is shown. Legend should show two colorful dots "auto~dht_h" and "auto~dht_t" which are respectetively humidity and temperature.
+Log in to your KAA account. From the side pane select "Device management" -> "Devices". Click on your device and there you should see "Device telemetry" time series plot where data is shown. Legend should show two colorful dots "auto-dht_h" and "auto-dht_t" which are respectetively humidity and temperature.
 
 ### Dashboard
 

@@ -44,7 +44,7 @@ Make sure that your KAA cloud is configured. For more information please go to R
 
 By now, you should have for things:
  - application version
- - device endpoint
+ - device endpoint token
  - username
  - password
 
@@ -100,8 +100,8 @@ For example:
 ```
 Wizzdev_IoT_8caab5b8c18c
 ```
-Network is open, so password will not be necessary. After successfull connection,
-please open your web browser and type in the Address Bar:
+If you are having difficulties connecting to the website, disable mobile data transfer and make sure that your phone does not reject the newly connected WiFi (as it may show it has no access to the internet).<br>
+Network is open, so password will not be necessary. After successfull connection, please open your web browser and type in the Address Bar:
 ```
 http://192.168.4.1/web_pages/setup.html
 ```

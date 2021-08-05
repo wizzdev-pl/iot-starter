@@ -94,7 +94,7 @@ Click at the "Use Kaa for free" button at top right corner and follow standard p
 
 ### 2. Create your first application and device endpoint
 
-After you log in into your new account, familiarize yourself with the UI and the options at the left side pane. 
+After you log in into your new account (as a root user!), familiarize yourself with the UI and the options at the left side pane. 
 
 #### **Application version and autoextract:**
 
@@ -109,6 +109,6 @@ After you log in into your new account, familiarize yourself with the UI and the
 
 After all steps above you should have saved four things:
  - application version
- - device endpoint
+ - device endpoint token
  - username
  - password
