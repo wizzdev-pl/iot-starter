@@ -105,26 +105,28 @@ If it's the latter, change 2017 to 2015 in above commands.
 ### 1. Create virtual environment:
 First, you need to create virtual environment (either with python venv module or anaconda-python):
 
+Note, that **"ENV_NAME"** is the name of the environment you’re creating.
+
+Enter main directory of the project (iot-starter):
+```bash
+cd iot-starter
+```
+
 * For anaconda (either in terminal - Linux or anaconda prompt - Windows):
   ```
-  cd scripts
   conda create --name ENV_NAME python=3.7 pip
   ```
 
 * For venv:
   * Linux:
   ```
-  cd terraform/scripts
   python3 -m venv ENV_NAME
   ```
 
   * Windows:
   ```
-  cd terraform/scripts
   python -m venv ENV_NAME
   ```
-
-where "ENV_NAME" is the name of the environment you’re creating.
 
 Next, you should activate it. This step is platform dependent:
 #### Windows
@@ -151,11 +153,9 @@ Next, you should activate it. This step is platform dependent:
 
 ### 2. Install requirements
 
-You should go to the main directory of iot-starter<br>
-If You've followed steps, your current directory is iot-starter/terraform/scripts
+If You've followed steps, your current directory is "iot-starter"
 
 ```
-cd ../.. 
 pip install pyserial cryptography click future pyelftools setuptools
 pip install -r requirements.txt
 ```
@@ -164,7 +164,7 @@ pip install -r requirements.txt
 1. Prepare `ACCESS_KEY` and `SECRET_KEY`, which can be obtained from AWS IAM console. Download AWS CLI from 
    https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html to connect AWS with your account and
    run following command:  
-```
+```bash
 aws configure
 ```
 If you have trouble generating 'credentials' see the Additional Information and Help section.
