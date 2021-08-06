@@ -1,11 +1,8 @@
 # Create cloud infrastructure and deploy packages
-This module can be used for building infrastructure for iot-project on the AWS. 
-It's also responsible for deployment process of cloud software.
+This module can be used for building infrastructure for iot-project on AWS. It's also responsible for the deployment process of cloud software.
 
 ## What is Terraform
-Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. 
-Terraform can manage existing and popular service providers as well as custom in-house solutions. 
-Configuration files describe to Terraform the components needed to run a single application or your entire datacenter.  
+Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular service providers as well as custom in-house solutions. Configuration files describe to Terraform the components needed to run a single application or your entire datacenter.  
 _(via: https://www.terraform.io/intro/index.html)_
 
 ## Requirements
