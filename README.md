@@ -1,16 +1,16 @@
 # WizzDev Mobile IoT Platform
 
 ## Overview
-This repository contains the WizzDev mobile IoT application in the "Starter" version.
-The project is based on ESP32 MCU and Amazon Web Services infrastructure. ESP32 is responsible for
-gathering data from the sensor (in this case DHT22), with a specified period of time, and send them to AWS 
-using the MQTT protocol. Data can be viewed directly on the AWS, or on the dedicated visualization page.
-The board was programmed using MicroPython, which is a Python implementation
-for embedded devices.
+This repository contains the WizzDev mobile IoT application in the "Starter" version. The project is based on ESP32 MCU and one of supported cloud service providers infrastructure. ESP32 is responsible for gathering data from the sensor (in this case DHT22), with a specified period of time, and sending them to the chosen cloud using the MQTT protocol. Depending on the chosen cloud, data can be viewed:
+
+- AWS: directly on the AWS, or on the dedicated visualization page.
+- KAA: directly on the Kaa on the created dashboard for a device.
+
+The board was programmed using MicroPython, which is a Python implementation for embedded devices. If you are a novice and / or just want to try a solution that works without putting much work into it, we recommend using Kaa cloud which is much faster to set up.
 
 
 ## Prerequisites
-Before compiling there are some packages required to install on the PC. Run the following command to install them (note that there is also a possibility to use [anaconda-python](https://www.anaconda.com/products/individual) virtual environment instead of python3-virtualenv. If one chooses so, then there is no need to install: “python3-virtualenv” and “python-setuptools”):
+Before building there are some packages required to install on the PC. Run the following command to install them (note that there is also a possibility to use [anaconda-python](https://www.anaconda.com/products/individual) virtual environment instead of python3-virtualenv. If one chooses so, then there is no need to install: “python3-virtualenv” and “python-setuptools”):
 
 * Ubuntu:
 
@@ -30,10 +30,11 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
 
     - install [git](https://git-scm.com/downloads)
     - install [python](https://www.python.org/downloads/windows/) (3.6 / 3.7) with pip and virtualenv - no need to install if you've chosen anaconda-python
+    - install drivers for ESP32 from this [link](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) - make sure to select Universal WIndows Driver
 
 Make sure you have access to required hardware:
 
-- AWS account with ACCESS_CODE and SECRET_CODE - [more info](https://github.com/wizzdev-pl/iot-starter/blob/devel/terraform/README.md#Additional-information-and-help)
+- **(For AWS only)** Account with ACCESS_CODE and SECRET_CODE - [more info](https://github.com/wizzdev-pl/iot-starter/blob/devel/terraform/README.md#Additional-information-and-help)
 - ESP32 MCU board (preferably ESP32 DevKitC v4)
 - MicroUSB cable
 - DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed)
@@ -58,28 +59,57 @@ To flash and debug device it is required to add user to dialout group:
 ```
 sudo usermod -a -G dialout $USER
 ```
+*Note that in some cases a logout is required 
+
+---
 
 ## Installing
-### AWS configuration 
-AWS's configuration is handled using terraform. Detailed description of this 
-procedure is available in the "terraform" directory [here](terraform/README.md).
+Depending on your cloud service provider: 
+
+### **KAA configuration:**
+KAA configuration is easy to set up and work with cloud. Detailed description of this procedure is available in the "KAA" directory [here](KAA/README.md).
+
+### **AWS configuration:** 
+AWS's configuration is handled using terraform. Detailed description of this procedure is available in the "terraform" directory [here](terraform/README.md).
+
+---
+## **After cloud setup:**
 
 ### Flashing the board 
-A dedicated Python script was prepared for this procedure. For more information,
-please go to the "MicroPython" directory [here](MicroPython/README.md).
+A dedicated Python script was prepared for this procedure. For more information, please go to the "MicroPython" directory [here](MicroPython/README.md).
+
+---
 
 ## Working with configured device
-After all these steps, the board should send data from the sensor into AWS.
-There are two ways to check the data from the board.
+After all these steps, the board should send data from the sensor into the chosen cloud. Depending on your choice of cloud service provider, you can:
 
-### AWS console
-Log in into your AWS console, go to the "IoT Core" service and choose "Test". 
-In the "Subscription topic" field, type "topic/data" and click "Subscribe to topic". 
-After some time you should be able to see data sent from the device. 
+## **For KAA:**
+
+### Device management
+
+Log in to your KAA account. From the side pane select "Device management" -> "Devices". Click on your device and there you should see the "Device telemetry" time series plot where data is shown. Legend should show two colorful dots "auto-dht_h" and "auto-dht_t" which are respectively humidity and temperature.
+
+### Dashboard
+
+Another way of visualization of the data is to create a dashboard. You can use already created widgets or create custom ones. For more information visit [documentation](https://docs.kaaiot.io/KAA/docs/v1.3.0/Features/Visualization/WD/Dashboards/).
+
+---
+
+## **For AWS:**
+
+### AWS console - IoT Core
+Log in to your AWS account. Go to 'IoT Core' service. Next, choose "Test" and into "Subscription topic" type:
+```
+topic/data
+```
+Finally, click "Subscribe to topic". After some time you should see dataframes send by ESP32 board. 
 
 ### Visualization page
-WizzDev prepares a more convenient way to view data- a dedicated visualization
-webpage. Using this page you can find charts of temperature and humidity for all
-devices registered to your AWS account. If you click on a specified device
-on the "All devices" list, you will be able to see a chart with data only 
-from this device
+WizzDev prepares a more convenient way to view data - a dedicated visualization webpage.
+Visualization page url is generated by AWS during infrastructure build. So the URL is connected with your AWS account.<br>
+You can find this URL in places listed below:
+
+- in file MicroPython/src/aws_config.json as **visualization_url**
+- in the "CloudFront" service on your AWS account under the **Domain Name** field
+
+Using this page you can find charts of temperature and humidity for all devices registered to your AWS account. If you click on a specified device on the "All devices" list, you will be able to see a chart with data only from this device.

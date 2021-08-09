@@ -7,7 +7,7 @@ from common import utils
 
 cfg = None
 
-DEFAULT_CLOUD_PROVIDER = 'AWS'
+DEFAULT_CLOUD_PROVIDER = 'KAA'
 
 DEFAULT_SSID = 'ssid'
 DEFAULT_PASSWORD = 'password'

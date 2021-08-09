@@ -165,7 +165,26 @@ class KAA_cloud(CloudProvider):
             payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
         )
 
-        mqtt_communicator.MQTT_client.wait_msg()
+        try:
+            mqtt_communicator.MQTT_client.wait_msg()
+        except OSError:
+            # Data probably did not arrive cloud
+            # Try to send data one more time up to three times
+            for _ in range(3):
+                mqtt_communicator.publish_message(
+                    payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
+                )
+                try:
+                    mqtt_communicator.MQTT_client.wait_msg()
+                except OSError:
+                    # Failed again, trying up to three times
+                    continue
+                break
+            else:
+                logging.debug(
+                    "Tried to send data three times, failed! Aborting current measurement."
+                )
+
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()

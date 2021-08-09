@@ -29,7 +29,7 @@ def set_credentials():
     old_user = config.get('kaa_user', None)
     old_password = config.get('kaa_password', None)
 
-    endpoint = input("Device endpoint [{}]: ".format(old_endpoint))
+    endpoint = input("Device endpoint token [{}]: ".format(old_endpoint))
     app_version = input("App version [{}]: ".format(old_app_version))
     user = input("User [{}]: ".format(old_user))
     password = input("Password [{}]: ".format(old_password))
