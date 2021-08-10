@@ -36,9 +36,6 @@ def reset_config(p: machine.Pin) -> None:
     config.cfg.ssid = config.DEFAULT_VARIABLES['ssid']
     config.cfg.password = config.DEFAULT_VARIABLES['password']
     config.cfg.tested_connection_cloud = False
-    config.cfg.printed_time = False
-    config.cfg.got_sensor_date = False
-    config.cfg.published_to_cloud = False
     config.ESPConfig.save()
     machine.reset()
 
@@ -147,38 +144,26 @@ def read_from_file(file_path: str) -> (bool, str):
         return True, data
 
 
-def create_mqtt_communicator_from_config() -> MQTTCommunicator:
+def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
     """
-    Create new instance od MQTTCommunicator.
-    :return: Instance of MQTTCommunicator.
-    """
-    logging.debug("utils.py/create_MQTT_communicator_from_config()")
-    return MQTTCommunicator(use_AWS=config.cfg.use_aws,
-                            client_id=config.cfg.aws_client_id,
-                            endpoint=config.cfg.aws_endpoint,
-                            port=config.cfg.mqtt_port_ssl,
-                            timeout=config.cfg.mqtt_timeout)
-
-
-def get_wifi_and_aws_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
-    """
-    Creates and returns connection handler to wifi and AWS.
+    Creates and returns connection handler to wifi and cloud.
     :param sync_time: flag if time is synchronized.
     :return: Error code (False - error, True - OK), error message, wifi and MQTT handlers.
     """
-    logging.debug("utils.py/connect_to_wifi_and_aws({})".format(sync_time))
+    logging.debug("utils.py/connect_to_wifi_and_cloud({})".format(sync_time))
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
     try:
         connect_to_wifi(wireless_controller, sync_time)
-        mqtt_communicator = MQTTCommunicator(use_AWS=config.cfg.use_aws,
-                                             client_id=config.cfg.aws_client_id,
-                                             endpoint=config.cfg.aws_endpoint,
-                                             port=config.cfg.mqtt_port_ssl,
-                                             timeout=config.cfg.mqtt_timeout)
+        mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
+                                                timeout=config.cfg.mqtt_timeout)
+        
+        while not wireless_controller.sta_handler.isconnected(): 
+            pass
+
         mqtt_communicator.connect()
     except Exception as e:
-        logging.error("Error wifi_get_adn_aws_handler(): {}".format(e))
+        logging.error("Error get_wifi_and_cloud_handlers(): {}".format(e))
         try:
             mqtt_communicator.disconnect()
         except Exception:
