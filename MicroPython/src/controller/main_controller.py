@@ -49,7 +49,7 @@ class MainController:
         self.got_sensor_data = False
         self.published_to_cloud = False
 
-        self.cloud_provider = self.get_cloud_provider()
+        self.cloud_provider = MainController.get_cloud_provider()
 
         if config.cfg.cloud_provider == Providers.AWS:
             web_app.setup(get_measurement_hook=self.get_measurement,
@@ -100,7 +100,8 @@ class MainController:
             self.lock.release()
             utime.sleep_ms(500)
 
-    def get_cloud_provider(self) -> CloudProvider:
+    @staticmethod
+    def get_cloud_provider() -> CloudProvider:
         """
         Returns cloud service provider based on current settings in config
         :return: CloudProvider

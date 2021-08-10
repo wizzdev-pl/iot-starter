@@ -144,20 +144,6 @@ def read_from_file(file_path: str) -> (bool, str):
         return True, data
 
 
-# TODO: Not needed?
-# def create_mqtt_communicator_from_config() -> MQTTCommunicator:
-#     """
-#     Create new instance od MQTTCommunicator.
-#     :return: Instance of MQTTCommunicator.
-#     """
-#     logging.debug("utils.py/create_MQTT_communicator_from_config()")
-#     return MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
-#                             client_id=config.cfg.aws_client_id,
-#                             endpoint=config.cfg.aws_endpoint,
-#                             port=config.cfg.mqtt_port_ssl,
-#                             timeout=config.cfg.mqtt_timeout)
-
-
 def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionController, MQTTCommunicator):
     """
     Creates and returns connection handler to wifi and cloud.

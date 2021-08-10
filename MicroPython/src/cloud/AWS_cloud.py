@@ -65,9 +65,7 @@ class AWS_cloud(CloudProvider):
         self.configure_data_from_terraform()
         logging.debug("Authorization request...")
         jwt_token = self.authorization_request()
-
         if jwt_token is not "":
-            
             cert_dict = self.configuration_request(jwt_token)
             self.save_certificates(cert_dict)
             logging.debug("Configuration done")

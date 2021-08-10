@@ -42,7 +42,7 @@ Open the project MicroPython with PyCharm and mark *src* and *ulib_mocks* direct
 ### - KAA
 Make sure that your KAA cloud is configured. For more information please go to README in "KAA" directory [here](../KAA/README.md).
 
-By now, you should have for things:
+By now, you should have four things:
  - application version
  - device endpoint token
  - username
