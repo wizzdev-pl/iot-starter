@@ -37,7 +37,7 @@ class Sensor:
         elif self.sensor_type == "DHT22":
             self.sensor_measurement_pin = sensor_measurement_pin_number
             self.sensor = dht.DHT22(machine.Pin(sensor_measurement_pin_number))
-        elif "BME280" in self.sensor_type:
+        elif self.sensor_type == "BME280":
             self.sensor_sda_pin = machine.Pin(sensor_sda_pin_number)
             self.sensor_scl_pin = machine.Pin(sensor_scl_pin_number)
             self.i2c = machine.I2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000)
