@@ -1,6 +1,4 @@
 import logging
-import random
-from random import randint
 
 import machine
 import ujson
@@ -8,7 +6,6 @@ from common import config, utils
 from communication import wirerless_connection_controller
 from controller.main_controller_event import (MainControllerEvent,
                                               MainControllerEventType)
-from utime import time
 
 from cloud.cloud_interface import CloudProvider
 

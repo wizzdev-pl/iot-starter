@@ -14,10 +14,6 @@ from cloud.cloud_interface import CloudProvider
 
 
 class AWS_cloud(CloudProvider):
-    def __init__(self) -> None:
-        # TODO: Any initialization at constructor for a given cloud?
-        pass
-
     def device_configuration(self, data: dict) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
