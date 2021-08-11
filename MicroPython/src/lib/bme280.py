@@ -149,10 +149,6 @@ class BME280:
     if i2c is None:
       raise ValueError('An I2C object is required.')
     self._device = Device(address, i2c)
-    # Load calibration values.
-    self._load_calibration()
-    self._device.write8(BME280_REGISTER_CONTROL, 0x3F)
-    self.t_fine = 0
 
   def _load_calibration(self):
 
@@ -275,6 +271,7 @@ class BME280:
     return float("{}.{:02d}".format(hi, hd))
 
   def measure(self):
+    # Load calibration values.
     self._load_calibration()
     self._device.write8(BME280_REGISTER_CONTROL, 0x3F)
     self.t_fine = 0

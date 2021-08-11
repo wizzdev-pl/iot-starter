@@ -27,7 +27,6 @@ DEFAULT_CERT_PEM = ""
 DEFAULT_CERT_CA = ""
 
 # Sensors
-DEFAULT_USE_DHT = True # DHT - True, BME280 - False
 DEFAULT_SENSOR_MEASUREMENT_PIN = 4
 DEFAULT_SENSOR_POWER_PIN = 26
 DEFAULT_SENSOR_TYPE = "DHT22"
@@ -106,7 +105,6 @@ class ESPConfig:
         self.cert_ca = DEFAULT_CERT_CA
 
         # Sensors
-        self.use_dht = DEFAULT_USE_DHT
         self.sensor_measurement_pin = DEFAULT_SENSOR_MEASUREMENT_PIN
         self.sensor_power_pin = DEFAULT_SENSOR_POWER_PIN
         self.sensor_type = DEFAULT_SENSOR_TYPE
@@ -178,7 +176,6 @@ class ESPConfig:
             self.cert_ca = config_dict.get('cert_ca', DEFAULT_CERT_CA)
 
             # Sensors
-            self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
             self.sensor_measurement_pin = config_dict.get('sensor_measurement_pin', DEFAULT_SENSOR_MEASUREMENT_PIN)
             self.sensor_power_pin = config_dict.get('sensor_power_pin', DEFAULT_SENSOR_POWER_PIN)
             self.sensor_type = config_dict.get('sensor_type', DEFAULT_SENSOR_TYPE)
@@ -245,7 +242,6 @@ class ESPConfig:
         config_dict['cert_ca'] = self.cert_ca
 
         # Sensors
-        config_dict['use_dht'] = self.use_dht
         config_dict['sensor_measurement_pin'] = self.sensor_measurement_pin
         config_dict['sensor_power_pin'] = self.sensor_power_pin
         config_dict['sensor_type'] = self.sensor_type

@@ -16,16 +16,11 @@ class DataAcquisitor:
         self.sensor = None
         self.data = {}
 
-        if config.cfg.use_dht:
-            self.sensor = Sensor(sensor_type=config.cfg.sensor_type,
-                                 sensor_measurement_pin_number=config.cfg.sensor_measurement_pin,
-                                 sensor_sda_pin_number=None, sensor_scl_pin_number=None,
-                                 sensor_power_pin_number=config.cfg.sensor_power_pin)
-        else:
-            self.sensor = Sensor(sensor_type=config.cfg.sensor_type,
-                                 sensor_measurement_pin_number=None, sensor_sda_pin_number=config.cfg.sensor_sda_pin,
-                                 sensor_scl_pin_number=config.cfg.sensor_scl_pin, 
-                                 sensor_power_pin_number=config.cfg.sensor_power_pin)
+        self.sensor = Sensor(sensor_type=config.cfg.sensor_type,
+                                sensor_measurement_pin_number=config.cfg.sensor_measurement_pin,
+                                sensor_sda_pin_number=config.cfg.sensor_sda_pin, sensor_scl_pin_number=config.cfg.sensor_scl_pin,
+                                sensor_power_pin_number=config.cfg.sensor_power_pin)
+
 
     def acquire_temp_humi(self) -> dict:
         """

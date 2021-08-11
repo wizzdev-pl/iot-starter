@@ -19,17 +19,22 @@ def parse_arguments():
                         help="Com port of the device")
     parser.add_argument('-c', '--cloud', metavar='CLOUD', type=str, required=True,
                         help="Cloud provider for IoT Starter")
+    parser.add_argument('-s', '--sensor', metavar='SENSOR', type=str, required=False,
+                        help="Sensor type in use (defaults to DHT22)")
 
     args = vars(parser.parse_args())
     return args
 
 
-def save_cloud_provider(cloud_provider):
+def save_additional_arguments(cloud_provider, sensor_type):
     """
-    Save cloud provider to use on device.
+    Save an additional arguments (cloud proviced and sensor in use)
     This script cannot access config file so it needs to create config file in advance
     """
-    cfg = {'cloud_provider': cloud_provider}
+    if sensor_type == None:
+        sensor_type = "DHT22"
+    
+    cfg = {'cloud_provider': cloud_provider, 'sensor_type': sensor_type}
     with open(CONFIG_OUTPUT_PATH, 'w') as outfile:
         json.dump(cfg, outfile)
 
@@ -50,7 +55,7 @@ if __name__ == '__main__':
         # TODO: How to avoid hardcoded values like these???
         raise Exception("Wrong cloud provider! Only: AWS, KAA are valid")
     
-    save_cloud_provider(args['cloud'])
+    save_additional_arguments(args['cloud'], args['sensor'])
     erase_chip(args['port'])
     flash_micropython(args['port'])
     time.sleep(4)

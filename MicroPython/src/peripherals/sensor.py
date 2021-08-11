@@ -30,20 +30,22 @@ class Sensor:
         self.sensor_power_pin = machine.Pin(sensor_power_pin_number, machine.Pin.OUT)
         self.sensor_power_on = False
         self.sensor_last_measure_status = False
-        if "DHT" in self.sensor_type:
+
+        if self.sensor_type == "DHT11":
             self.sensor_measurement_pin = sensor_measurement_pin_number
-        else:
+            self.sensor = dht.DHT11(machine.Pin(sensor_measurement_pin_number))
+        elif self.sensor_type == "DHT22":
+            self.sensor_measurement_pin = sensor_measurement_pin_number
+            self.sensor = dht.DHT22(machine.Pin(sensor_measurement_pin_number))
+        elif "BME280" in self.sensor_type:
             self.sensor_sda_pin = machine.Pin(sensor_sda_pin_number)
             self.sensor_scl_pin = machine.Pin(sensor_scl_pin_number)
             self.i2c = machine.I2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000)
-        
-        if self.sensor_type == "DHT22":
-            self.sensor = dht.DHT22(machine.Pin(sensor_measurement_pin_number))
-        elif self.sensor_type == "DHT11":
-            self.sensor = dht.DHT11(machine.Pin(sensor_measurement_pin_number))
-        else:
             self.sensor = bme280.BME280(i2c=self.i2c)
-
+        else:
+            raise Exception("Wrong sensor type provided! " + self.sensor_type + " is not supported")
+        
+        
     def measure(self) -> None:
         """
         Measure.
@@ -63,7 +65,7 @@ class Sensor:
         :return: Humidity
         """
         if self.sensor_last_measure_status:
-            logging.debug("Sensor.humidity() = {}".format(self.sensor.humidity))
+            logging.debug("Sensor.humidity() = {}".format(self.sensor.humidity()))
             return self.sensor.humidity()
         else:
             logging.debug("Sensor.humidity() = {}".format(FAILED_TO_MEASURE_VALUE))
@@ -75,7 +77,7 @@ class Sensor:
         :return: Temperature
         """
         if self.sensor_last_measure_status:
-            logging.debug("Sensor.temperature() = {}".format(self.sensor.temperature))
+            logging.debug("Sensor.temperature() = {}".format(self.sensor.temperature()))
             return self.sensor.temperature()
         else:
             logging.debug("Sensor.temperature() = {}".format(FAILED_TO_MEASURE_VALUE))
@@ -93,7 +95,7 @@ class Sensor:
                 utime.sleep(TIME_TO_DHT22_TO_WAKE_UP_S)
             elif self.sensor_type == "DHT11":
                 utime.sleep(TIME_TO_DHT11_TO_WAKE_UP_S)
-            else:
+            elif self.sensor_type == "BME280":
                 utime.sleep(TIME_TO_BME280_TO_WAKE_UP_S)
             self.sensor_power_on = True
 
