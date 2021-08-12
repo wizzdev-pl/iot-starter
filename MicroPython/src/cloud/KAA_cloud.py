@@ -112,7 +112,7 @@ class KAA_cloud(CloudProvider):
 
     def load_kaa_config_from_file(self) -> dict:
         """
-        Load configuration of AWS from file.
+        Load configuration of KAA from file.
         :return: Configuration in dict.
         """
         if utils.check_if_file_exists(config.KAA_CONFIG_PATH) == 0:

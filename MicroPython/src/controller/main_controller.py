@@ -17,6 +17,7 @@ from controller.main_controller_event import (MainControllerEvent,
 from controller.main_controller_state import MainControllerState
 
 ACCESS_POINT_BASE_NAME = "Wizzdev_IoT"
+FAILED_TO_MEASURE_VALUE = -99
 
 
 class MainController:
@@ -156,23 +157,25 @@ class MainController:
             logging.debug("GETTING SENSOR DATA")
 
             self.data_acquisitor.acquire_temp_humi()
-            self.got_sensor_data = True
+            if not any([FAILED_TO_MEASURE_VALUE in val for (val,) in self.data_acquisitor.data.values()]):
+                self.got_sensor_data = True   
 
         elif event.event_type == MainControllerEventType.PUBLISH_DATA:
             logging.debug("WAITING FOR GOT SENSOR DATA")
-            while not self.got_sensor_data:
-                pass
-            logging.debug("GOT GOT SENSOR DATA")
-            logging.debug("Publishing data to cloud")
-
-            self.cloud_provider.publish_data(self.data_acquisitor.data)
-            self.published_to_cloud = True
+            if self.got_sensor_data:
+                logging.debug("GOT SENSOR DATA")
+                logging.debug("Publishing data to cloud")
+                self.cloud_provider.publish_data(self.data_acquisitor.data)
+                self.published_to_cloud = True
+            else:
+                logging.debug("FAILED GETTING SENSOR DATA")
+                logging.debug("Skipping publish...")
 
         elif event.event_type == MainControllerEventType.GO_TO_SLEEP:
-            logging.debug("WAITING FOR PUBLISHED TO CLOUD")
-            while not self.published_to_cloud:
-                pass
-            logging.debug("GOT PUBLISHED TO CLOUD")
+
+            if self.published_to_cloud:
+                logging.debug("WAITING FOR PUBLISHED TO CLOUD")
+                logging.debug("GOT PUBLISHED TO CLOUD")
 
             self.go_to_sleep(event)
 
@@ -205,17 +208,16 @@ class MainController:
     @staticmethod
     def configure_sensor(sensor_configuration: dict) -> None:
         """
-        Create DHT part of config file.
+        Create sensor part of config file.
         :param sensor_configuration: Sensor's parameters.
         :return: None.
         """
         logging.debug("Configure sensor")
         print(sensor_configuration)
         if 'publishing_period_ms' in sensor_configuration.keys():
-            config.cfg.data_publishing_period_in_ms = int(
-                sensor_configuration['publishing_period_ms'])
-        if 'dht_type' in sensor_configuration.keys():
-            config.cfg.dht_type = sensor_configuration['dht_type']
+            config.cfg.data_publishing_period_in_ms = int(sensor_configuration['publishing_period_ms'])
+        if 'sensor_type' in sensor_configuration.keys():
+            config.cfg.sensor_type = sensor_configuration['sensor_type']
 
     def get_status(self) -> dict:
         """
