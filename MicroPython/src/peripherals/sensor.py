@@ -52,6 +52,7 @@ class Sensor:
         :return: None
         """
         logging.debug("Sensor.measure()")
+        # Trying to measure up to three times by the possibility of error while reading sensor
         for _ in range(3):
             try:
                 self.sensor.measure()
