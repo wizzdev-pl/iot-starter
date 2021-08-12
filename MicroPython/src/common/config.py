@@ -27,10 +27,11 @@ DEFAULT_CERT_PEM = ""
 DEFAULT_CERT_CA = ""
 
 # Sensors
-DEFAULT_USE_DHT = True
-DEFAULT_DHT_MEASUREMENT_PIN = 4
-DEFAULT_DHT_POWER_PIN = 26
-DEFAULT_DHT_TYPE = "DHT22"
+DEFAULT_SENSOR_MEASUREMENT_PIN = 4
+DEFAULT_SENSOR_POWER_PIN = 26
+DEFAULT_SENSOR_TYPE = "DHT22"
+DEFAULT_SENSOR_SDA_PIN = 21
+DEFAULT_SENSOR_SCL_PIN = 22
 
 # Other
 DEFAULT_AP_CONFIG_DONE = False
@@ -104,10 +105,11 @@ class ESPConfig:
         self.cert_ca = DEFAULT_CERT_CA
 
         # Sensors
-        self.use_dht = DEFAULT_USE_DHT
-        self.dht_measurement_pin = DEFAULT_DHT_MEASUREMENT_PIN
-        self.dht_power_pin = DEFAULT_DHT_POWER_PIN
-        self.dht_type = DEFAULT_DHT_TYPE
+        self.sensor_measurement_pin = DEFAULT_SENSOR_MEASUREMENT_PIN
+        self.sensor_power_pin = DEFAULT_SENSOR_POWER_PIN
+        self.sensor_type = DEFAULT_SENSOR_TYPE
+        self.sensor_sda_pin = DEFAULT_SENSOR_SDA_PIN
+        self.sensor_scl_pin = DEFAULT_SENSOR_SCL_PIN
 
         # Other
         self.ap_config_done = DEFAULT_AP_CONFIG_DONE
@@ -174,12 +176,11 @@ class ESPConfig:
             self.cert_ca = config_dict.get('cert_ca', DEFAULT_CERT_CA)
 
             # Sensors
-            self.use_dht = config_dict.get('use_dht', DEFAULT_USE_DHT)
-            self.dht_measurement_pin = config_dict.get(
-                'dht_measurement_pin', DEFAULT_DHT_MEASUREMENT_PIN)
-            self.dht_power_pin = config_dict.get(
-                'dht_power_pin', DEFAULT_DHT_POWER_PIN)
-            self.dht_type = config_dict.get('dht_type', DEFAULT_DHT_TYPE)
+            self.sensor_measurement_pin = config_dict.get('sensor_measurement_pin', DEFAULT_SENSOR_MEASUREMENT_PIN)
+            self.sensor_power_pin = config_dict.get('sensor_power_pin', DEFAULT_SENSOR_POWER_PIN)
+            self.sensor_type = config_dict.get('sensor_type', DEFAULT_SENSOR_TYPE)
+            self.sensor_sda_pin = config_dict.get('sensor_sda_pin', DEFAULT_SENSOR_SDA_PIN)
+            self.sensor_scl_pin = config_dict.get('sensor_scl_pin', DEFAULT_SENSOR_SCL_PIN)
 
             # Other
             self.ap_config_done = config_dict.get(
@@ -241,10 +242,11 @@ class ESPConfig:
         config_dict['cert_ca'] = self.cert_ca
 
         # Sensors
-        config_dict['use_dht'] = self.use_dht
-        config_dict['dht_measurement_pin'] = self.dht_measurement_pin
-        config_dict['dht_power_pin'] = self.dht_power_pin
-        config_dict['dht_type'] = self.dht_type
+        config_dict['sensor_measurement_pin'] = self.sensor_measurement_pin
+        config_dict['sensor_power_pin'] = self.sensor_power_pin
+        config_dict['sensor_type'] = self.sensor_type
+        config_dict['sensor_sda_pin'] = self.sensor_sda_pin
+        config_dict['sensor_scl_pin'] = self.sensor_scl_pin
 
         # Other
         config_dict['AP_config_done'] = self.ap_config_done

@@ -37,7 +37,7 @@ Make sure you have access to required hardware:
 - **(For AWS only)** Account with ACCESS_CODE and SECRET_CODE - [more info](https://github.com/wizzdev-pl/iot-starter/blob/devel/terraform/README.md#Additional-information-and-help)
 - ESP32 MCU board (preferably ESP32 DevKitC v4)
 - MicroUSB cable
-- DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed)
+- DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed) or BME280
 - WiFi connection
 
 

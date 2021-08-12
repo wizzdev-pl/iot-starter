@@ -52,5 +52,6 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
+    erase_chip(args['port'])
     flash_micropython(args['port'])
 
