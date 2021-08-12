@@ -28,7 +28,7 @@ def parse_arguments():
 
 def save_additional_arguments(cloud_provider, sensor_type):
     """
-    Save an additional arguments (cloud proviced and sensor in use)
+    Save additional arguments (cloud provided and sensor in use)
     This script cannot access config file so it needs to create config file in advance
     """
     if sensor_type == None:

@@ -52,10 +52,14 @@ class Sensor:
         :return: None
         """
         logging.debug("Sensor.measure()")
-        try:
-            self.sensor.measure()
-            self.sensor_last_measure_status = True
-        except OSError:
+        for _ in range(3):
+            try:
+                self.sensor.measure()
+                self.sensor_last_measure_status = True
+            except OSError:
+                continue
+            break
+        else:
             logging.error("Error while sensor measure. Check if your sensor is connected correctly")
             self.sensor_last_measure_status = False
 
