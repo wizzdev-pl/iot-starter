@@ -2,13 +2,13 @@ var DEFAULT_PLOT_RANGE_SAMPLES = 10;
 var DEFAULT_CSV_RANGE_SAMPLES = 20;
 var PAGE_TITLE = "WizzDev Mobile IoT";
 
-function setupPage () {
+function setupPage() {
     document.title = PAGE_TITLE;
     updateReading()
 
 }
 
-function setLoadTime () {
+function setLoadTime() {
     var additionalInformationsDiv = document.getElementById("additionalInformationsDiv");
 
     var currentdate = new Date();
@@ -17,12 +17,12 @@ function setLoadTime () {
     additionalInformationsDiv.innerHTML = "<center><small>Page load time: " + datetime + "</small></center>"
 }
 
-function setErrorForReading (errorText) {
+function setErrorForReading(errorText) {
     var reading_div = document.getElementById("reading_div");
     reading_div.innerHTML = "Something went wrong. <br />" + truncateString(errorText, 200, '...');
 }
 
-function setReading (data) {
+function setReading(data) {
     console.log(data)
 
     var reading_div = document.getElementById("reading_div");
@@ -30,7 +30,7 @@ function setReading (data) {
     setLoadTime()
 }
 
-function updateReading () {
+function updateReading() {
     data = null;
 
     var xhtmlobj = new XMLHttpRequest();
@@ -59,13 +59,27 @@ function updateReading () {
     xhtmlobj.send();
 }
 
-function sendWiFiConfiguration () {
-    var password = document.getElementById("formPassword").value;
-    var ssid = document.getElementById("formSsid").value;
+document.querySelector("#setup_form").addEventListener("submit", (e) => {
+    e.preventDefault();
 
-    console.log('Click ' + formPassword);
+    const loadingIndicator = document.getElementsByClassName("full-page-div")[0];
+    loadingIndicator.style.display = "flex";
+    loadingIndicator.style.opacity = "0.8";
 
-    var data = JSON.stringify({"wifi": {"ssid": ssid, "password": password}});
+    sendWiFiConfiguration();
+})
+
+function sendWiFiConfiguration() {
+    const accessPointCredentials = [];
+
+    const setupFormEntriesArray = document.querySelectorAll(".setup_form__entries");
+
+    setupFormEntriesArray.forEach((entry) => {
+        const credentials = entry.querySelectorAll("input");
+        accessPointCredentials.push({ssid: credentials[0].value, password: credentials[1].value})
+    });
+    
+    var data = JSON.stringify({"wifi": accessPointCredentials});
 
     var xhtmlobj = new XMLHttpRequest();
     xhtmlobj.open("POST", '/config', true);
@@ -92,7 +106,60 @@ function sendWiFiConfiguration () {
 
 }
 
-function truncateString (str, length, ending) {
+// Generate new entry section on "Add new AP" button click
+// Unique id is required for each label & input pair hence the "newElementsGenerated" variable
+let newElementsGenerated = 0;
+document.querySelector("#add-new-ap-button").addEventListener("click", () => {
+    newElementsGenerated++;
+
+    const newNode = document.querySelector(".setup_form__entries").cloneNode(true);
+
+    const newLabels = newNode.getElementsByTagName("label");
+    newLabels[0].setAttribute("for", "ssid" + newElementsGenerated);
+    newLabels[1].setAttribute("for", "password" + newElementsGenerated);
+
+    const newInputFields = newNode.getElementsByTagName("input");
+    newInputFields[0].setAttribute("id", "ssid" + newElementsGenerated);
+    newInputFields[1].setAttribute("id", "password" + newElementsGenerated);
+    newInputFields[0].value = "";
+    newInputFields[1].value = "";
+
+    // Insert element after last delete button or after the first entry field if no delete button exists
+    const allDeleteButtons = document.getElementsByClassName("delete-button");
+    if (allDeleteButtons.length !== 0) {
+        const lastDeleteButton = allDeleteButtons[allDeleteButtons.length - 1];
+        lastDeleteButton.insertAdjacentElement("afterend", newNode);
+    } else {
+        // There is only one entry section in the DOM if this code section is reached
+        const entrySection = document.getElementsByClassName("setup_form__entries")[0];
+        entrySection.insertAdjacentElement("afterend", newNode);
+    }
+
+    const deleteButton = document.createElement("div");
+    deleteButton.setAttribute("class", "delete-button");
+
+    const deleteButtonIcon = document.createElement("img");
+    deleteButtonIcon.setAttribute("src", "delete_icon.png");
+    deleteButtonIcon.setAttribute("alt", "delete-icon");
+    deleteButtonIcon.setAttribute("height", "14");
+
+    const deleteButtonText = document.createElement("p");
+    const deleteButtonTextContent = document.createTextNode("Delete");
+    deleteButtonText.appendChild(deleteButtonTextContent);
+
+    deleteButton.appendChild(deleteButtonIcon);
+    deleteButton.appendChild(deleteButtonText);
+
+    newNode.insertAdjacentElement("afterend", deleteButton);
+
+    deleteButton.addEventListener("click", (e) => {
+        const previousEntrySection = e.currentTarget.previousElementSibling;
+        previousEntrySection.remove();
+        e.currentTarget.remove();
+    })
+});
+
+function truncateString(str, length, ending) {
     str = String(str);
     if (length == null) {
         length = 100;
@@ -108,7 +175,7 @@ function truncateString (str, length, ending) {
 }
 
 
-function parseQuery (queryString) {
+function parseQuery(queryString) {
     var query = {};
     var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
     for (var i = 0; i < pairs.length; i++) {
