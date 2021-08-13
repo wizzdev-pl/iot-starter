@@ -72,6 +72,12 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
     DEFAULT_KAA_APP_VERSION, DEFAULT_KAA_ENDPOINT, DEFAULT_MQTT_REQUEST_ID
 )
 
+#ThingsBoard stuff
+THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
+THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
+DEFAULT_THINGSBOARD_HOST = 'localhost'
+DEFAULT_THINGSBOARD_ACCES_TOKEN = 'CefLMcXJBHfowm8KanrF'
+DEFAULT_THINGSBOARD_TOPIC = 'v1/devices/me/telemetry'
 
 class ESPConfig:
     """
@@ -131,6 +137,10 @@ class ESPConfig:
         self.kaa_endpoint = DEFAULT_KAA_ENDPOINT
         self.kaa_app_version = DEFAULT_KAA_APP_VERSION
         self.kaa_topic = DEFAULT_KAA_TOPIC
+
+        #ThingsBoard
+        self.thingsboard_acces_token = DEFAULT_THINGSBOARD_ACCES_TOKEN
+        self.thingsboard_topic = DEFAULT_THINGSBOARD_TOPIC
 
     def load_from_file(self) -> None:
         """
@@ -205,6 +215,12 @@ class ESPConfig:
                 'kaa_app_version', DEFAULT_KAA_APP_VERSION)
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
+            #ThingsBoard
+            self.thingsboard_acces_token = config_dict.get(
+                'thingsboard_acces_token', DEFAULT_THINGSBOARD_ACCES_TOKEN)
+            self.thingsboard_topic = config_dict.get(
+                'thingsboard_topic', DEFAULT_THINGSBOARD_TOPIC)
+
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
                 # self.device_uid = config_dict.get(
@@ -265,6 +281,9 @@ class ESPConfig:
         config_dict['kaa_app_version'] = self.kaa_app_version
         config_dict['kaa_topic'] = self.kaa_topic
 
+        #ThingsBoard
+        config_dict['thingsbard_acces_token'] = self.thingsboard_acces_token
+        config_dict['thingsbard_topic'] = self.thingsboard_topic
         return config_dict
 
     @staticmethod

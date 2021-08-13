@@ -50,6 +50,8 @@ if __name__ == '__main__':
     elif args['cloud'] == 'KAA':
         cloud_config_file_path = KAA_CONFIG_PATH
         set_credentials()
+    elif args['cloud'] == 'THINGSBOARD':
+        cloud_config_file_path = KAA_CONFIG_PATH
     else:
         # Hardcoded cloud providers, as we cannot access config file (CPyton vs MicroPython)
         # TODO: How to avoid hardcoded values like these???

@@ -7,6 +7,7 @@ import utime
 from cloud.AWS_cloud import AWS_cloud
 from cloud.cloud_interface import CloudProvider, Providers
 from cloud.KAA_cloud import KAA_cloud
+from cloud.Things_cloud import ThingsBoard
 from common import config, utils
 from communication import wirerless_connection_controller
 from data_acquisition import data_acquisitor
@@ -61,7 +62,7 @@ class MainController:
                         start_data_acquisition=self.start_data_acquisition_hook,
                         get_status_hook=self.get_status)
 
-        elif config.cfg.cloud_provider == Providers.KAA:
+        elif config.cfg.cloud_provider == Providers.KAA or config.cfg.cloud_provider == Providers.THINGSBOARD :
             web_app.setup(
                 get_measurement_hook=self.get_measurement,
                 configure_device_hook=self.cloud_provider.device_configuration,
@@ -112,6 +113,8 @@ class MainController:
 
         elif config.cfg.cloud_provider == Providers.KAA:
             return KAA_cloud()
+        elif config.cfg.cloud_provider == Providers.THINGSBOARD:
+            return ThingsBoard()
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
