@@ -110,7 +110,6 @@ class MainController:
         """
         if config.cfg.cloud_provider == Providers.AWS:
             return AWS_cloud()
-
         elif config.cfg.cloud_provider == Providers.KAA:
             return KAA_cloud()
         elif config.cfg.cloud_provider == Providers.THINGSBOARD:

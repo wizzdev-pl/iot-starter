@@ -61,12 +61,23 @@ class MQTTCommunicator:
                 user=config.cfg.kaa_user,
                 password=config.cfg.kaa_password
             )
+        elif cloud_provider == Providers.THINGSBOARD:
+            self.port = config.cfg.mqtt_port
+            self.server = config.DEFAULT_THINGSBOARD_HOST
 
+            self.MQTT_client = MQTTClient(
+                client_id='',
+                server=self.server,
+                port=self.port,
+                user=config.cfg.thingsboard_acces_token,
+                password=''
+            )
         else:
             # Not implemented for other clouds yet
-            self.MQTT_client = MQTTClient(client_id=self.client_id,
-                                          server=self.server,
-                                          port=self.port)
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port)
 
     def __del__(self):
         if self.is_connected:

@@ -12,38 +12,39 @@ from cloud.cloud_interface import CloudProvider
 
 class ThingsBoard(CloudProvider):
     def __init__(self) -> None:
-        self.publish_success_topic = ''
-        self.publish_error_topic = ''
+        self.rpc_response_topic = 'v1/devices/me/rpc/response/'
+        self.rpc_request_topic = 'v1/devices/me/rpc/request/'
+        self.publish_topic = 'v1/devices/me/telemetry'
 
-    # def receive_message(self, topic, msg) -> None:
-    #     """
-    #     Callback method for MQTT client
-    #     :param topic: Topic of the message received encoded as bytes
-    #     :param msg: Message received encoded as bytes
-    #     :return: None 
-    #     """
-    #     logging.debug('cloud/Kaa_cloud.py/receive_message()')
-    #     topic = topic.decode()
+    def receive_message(self, topic, msg) -> None:
+        """
+        Callback method for MQTT client
+        :param topic: Topic of the message received encoded as bytes
+        :param msg: Message received encoded as bytes
+        :return: None 
+        """
+        logging.debug('cloud/Things_cloud.py/receive_message()')
+        topic = topic.decode()
 
-    #     # Check if msg is in json format, if not decode as str
-    #     if b'{' in msg and b'}' in msg:
-    #         msg = ujson.loads(msg)
-    #     else:
-    #         msg = msg.decode()
+        # Check if msg is in json format, if not decode as str
+        if b'{' in msg and b'}' in msg:
+            msg = ujson.loads(msg)
+        else:
+            msg = msg.decode()
 
-    #     if topic == self.publish_success_topic:
-    #         if msg == '':
-    #             logging.info('Operation successful\n')
-    #         else:
-    #             logging.info('Operation successful with return code: {}\n'.format(msg))
-    #     elif topic == self.publish_error_topic:
-    #         status_code = msg['statusCode']
-    #         reason = msg['reasonPhrase']
-    #         logging.info('Operation failed with error code: {} - reason: {}\n'.format(
-    #             status_code, reason
-    #         ))
-    #     else:
-    #         logging.info('On topic: {} received msg: {}'.format(topic, msg))
+        if topic == self.rpc_response_topic:
+            if msg == '':
+                logging.info('Operation successful\n')
+            else:
+                logging.info('Operation successful with return code: {}\n'.format(msg))
+        elif topic == self.rpc_request_topic:
+            status_code = msg['statusCode']
+            reason = msg['reasonPhrase']
+            logging.info('Operation failed with error code: {} - reason: {}\n'.format(
+                status_code, reason
+            ))
+        else:
+            logging.info('On topic: {} received msg: {}'.format(topic, msg))
 
     def device_configuration(self, data: dict) -> int:
         """
@@ -65,7 +66,7 @@ class ThingsBoard(CloudProvider):
         try:
             utils.connect_to_wifi(wireless_controller)
             logging.info(wireless_controller.sta_handler.ifconfig())
-            self.configure_data()
+            #self.configure_data()
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
             event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
@@ -125,7 +126,7 @@ class ThingsBoard(CloudProvider):
 
     def _format_data(self, data: dict) -> dict:
         """
-        Helper function for formatting data to match Kaa expected input
+        Helper function for formatting data to match ThingsBoard expected input
         :param data: Data in dict to be formatted
         :return dict: Formatted data
         """
@@ -142,14 +143,14 @@ class ThingsBoard(CloudProvider):
             sync_time=False
         )
 
-        # result_suc_topic = mqtt_communicator.subscribe(
-        #     topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
-        # )
-        # result_err_topic = mqtt_communicator.subscribe(
-        #     topic=self.publish_error_topic, callback=self.receive_message, qos=config.cfg.QOS
-        # )
-        # if not result_suc_topic or not result_err_topic:
-        #     logging.error("Error subscribing to topics with MQTT in publish_data()")
+        result_suc_topic = mqtt_communicator.subscribe(
+            topic=self.rpc_response_topic, callback=self.receive_message, qos=config.cfg.QOS
+        )
+        result_err_topic = mqtt_communicator.subscribe(
+            topic=self.rpc_request_topic, callback=self.receive_message, qos=config.cfg.QOS
+        )
+        if not result_suc_topic or not result_err_topic:
+            logging.error("Error subscribing to topics with MQTT in publish_data()")
 
         # TODO: Certificates?
 
@@ -157,7 +158,7 @@ class ThingsBoard(CloudProvider):
 
         logging.debug("data to send = {}".format(data))
         
-        mqtt_communicator.publish_message(payload=data, topic=config.cfg.thingsboard_topic, qos=config.cfg.QOS)
+        mqtt_communicator.publish_message(payload=data, topic=self.publish_topic, qos=config.cfg.QOS)
 
         try:
             mqtt_communicator.MQTT_client.wait_msg()
@@ -166,7 +167,7 @@ class ThingsBoard(CloudProvider):
             # Try to send data one more time up to three times
             for _ in range(3):
                 mqtt_communicator.publish_message(
-                    payload=data, topic=config.cfg.thingsboard_topic, qos=config.cfg.QOS
+                    payload=data, topic=self.publish_topic, qos=config.cfg.QOS
                 )
                 try:
                     mqtt_communicator.MQTT_client.wait_msg()

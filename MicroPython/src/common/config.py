@@ -76,8 +76,7 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
-DEFAULT_THINGSBOARD_ACCES_TOKEN = 'CefLMcXJBHfowm8KanrF'
-DEFAULT_THINGSBOARD_TOPIC = 'v1/devices/me/telemetry'
+DEFAULT_THINGSBOARD_ACCES_TOKEN = ''
 
 class ESPConfig:
     """
@@ -140,7 +139,6 @@ class ESPConfig:
 
         #ThingsBoard
         self.thingsboard_acces_token = DEFAULT_THINGSBOARD_ACCES_TOKEN
-        self.thingsboard_topic = DEFAULT_THINGSBOARD_TOPIC
 
     def load_from_file(self) -> None:
         """
@@ -218,8 +216,6 @@ class ESPConfig:
             #ThingsBoard
             self.thingsboard_acces_token = config_dict.get(
                 'thingsboard_acces_token', DEFAULT_THINGSBOARD_ACCES_TOKEN)
-            self.thingsboard_topic = config_dict.get(
-                'thingsboard_topic', DEFAULT_THINGSBOARD_TOPIC)
 
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
@@ -283,7 +279,6 @@ class ESPConfig:
 
         #ThingsBoard
         config_dict['thingsbard_acces_token'] = self.thingsboard_acces_token
-        config_dict['thingsbard_topic'] = self.thingsboard_topic
         return config_dict
 
     @staticmethod
