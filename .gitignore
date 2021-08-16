@@ -11,6 +11,7 @@ terraform/terraform.exe
 MicroPython/src/aws_config.json
 MicroPython/src/kaa_config.json
 MicroPython/src/config.json
+MicroPython/src/thingsboard_config.json
 
 # Python cache files
 *.pyc
