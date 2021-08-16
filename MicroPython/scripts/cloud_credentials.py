@@ -36,11 +36,15 @@ def set_credentials():
     print()
 
     # If values were not updated; leave the old ones
-    config['kaa_endpoint'] = endpoint if endpoint else old_endpoint
-    config['kaa_app_version'] = app_version if app_version else old_app_version
-    config['kaa_user'] = user if user else old_user
-    config['kaa_password'] = password if password else old_password
-
+    if endpoint:
+        config['kaa_endpoint'] = endpoint
+    if app_version:
+        config['kaa_app_version'] = app_version
+    if user:
+        config['kaa_user'] = user
+    if password:
+        config['kaa_password'] = password
+        
     with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
         json.dump(config, outfile)
 
@@ -49,7 +53,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--set-credentials', required=True, action='store_true',
+        '--set-credentials', action='store_true',
         dest='creds', help="Set credentials needed for cloud service"
     )
 

@@ -155,7 +155,7 @@ class KAA_cloud(CloudProvider):
             logging.error(
                 "Error subscribing to topics with MQTT in publish_data()")
 
-        # TODO: Certificates?
+        # TODO: Add SSL connection
 
         data = self._format_data(data)
 
