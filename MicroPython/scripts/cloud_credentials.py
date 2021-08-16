@@ -34,7 +34,6 @@ def set_credentials(cloud):
         app_version = input("App version [{}]: ".format(old_app_version))
         user = input("User [{}]: ".format(old_user))
         password = input("Password [{}]: ".format(old_password))
-        print()
 
         # If values were not updated; leave the old ones
         config['kaa_endpoint'] = endpoint if endpoint else old_endpoint
@@ -54,12 +53,17 @@ def set_credentials(cloud):
         
         print("Please provide ThingsBoard credentials:")
         old_host = config.get('thingsboard_host', None)
+        old_server_public = config.get('server_public', None)
+        old_client_public = config.get('client_public', None)
 
         host = input("Hostname [{}]: ".format(old_host))
-        print()
+        server_public = input("Public server certificate path [{}]: ".format(old_server_public))
+        client_public = input("Public client certificate path [{}]: ".format(old_client_public))
 
         # If values were not updated; leave the old ones
         config['thingsboard_host'] = host if host else old_host
+        config['server_public'] = server_public if server_public else old_server_public
+        config['client_public'] = client_public if client_public else old_client_public
 
         with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
@@ -68,10 +72,8 @@ def set_credentials(cloud):
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        '--set-credentials', required=True, action='store_true',
-        dest='creds', help="Set credentials needed for cloud service"
-    )
+    parser.add_argument('-c', '--cloud', metavar='CLOUD', type=str, required=True,
+                        help="Cloud provider for IoT Starter")
 
     args = vars(parser.parse_args())
     return args
@@ -80,8 +82,8 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    if args['creds']:
-        set_credentials()
+    if args['cloud'] not in ('AWS', 'KAA', 'THINGSBOARD'):
+        print('Invalid choice! Only: AWS / KAA / THINGSBOARD clouds are supported!')
     else:
-        logging.info('Please run the script with "--set-credentials" flag!')
+        set_credentials(args['cloud'])
 

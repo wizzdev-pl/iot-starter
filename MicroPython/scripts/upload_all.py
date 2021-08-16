@@ -57,7 +57,7 @@ if __name__ == '__main__':
     else:
         # Hardcoded cloud providers, as we cannot access config file (CPyton vs MicroPython)
         # TODO: How to avoid hardcoded values like these???
-        raise Exception("Wrong cloud provider! Only: AWS, KAA are valid")
+        raise Exception("Wrong cloud provider! Only: AWS, KAA, THINGSBOARD are valid")
     
     save_additional_arguments(args['cloud'], args['sensor'])
     erase_chip(args['port'])
