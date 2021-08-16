@@ -66,6 +66,9 @@ document.querySelector("#setup_form").addEventListener("submit", (e) => {
     loadingIndicator.style.display = "flex";
     loadingIndicator.style.opacity = "0.8";
 
+    const submitButton = document.getElementsByClassName("setup_form__submit")[0];
+    submitButton.textContent = "Connecting...";
+
     sendWiFiConfiguration();
 })
 
@@ -78,7 +81,7 @@ function sendWiFiConfiguration() {
         const credentials = entry.querySelectorAll("input");
         accessPointCredentials.push({ssid: credentials[0].value, password: credentials[1].value})
     });
-    
+
     var data = JSON.stringify({"wifi": accessPointCredentials});
 
     var xhtmlobj = new XMLHttpRequest();

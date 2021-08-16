@@ -18,21 +18,22 @@ class AWS_cloud(CloudProvider):
         # TODO: Any initialization at constructor for a given cloud?
         pass
 
-    def device_configuration(self, data: dict) -> int:
+    def device_configuration(self, data: list[dict]) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-        ssid = data['ssid']
-        password = data['password']
 
-        config.cfg.ssid = ssid
-        config.cfg.password = password
+        access_points = data
+
+        config.cfg.access_points = access_points
         config.cfg.save()
 
-        logging.info(
-            "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
+        logging.info("Wifi access point configuration:")
+
+        for access_point in access_points:
+            logging.info("Ssid: {} Password: {}".format(access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:

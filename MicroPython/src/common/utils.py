@@ -33,8 +33,6 @@ def reset_config(p: machine.Pin) -> None:
     """
     logging.debug("=== CONFIG BUTTON PRESSED ===")
     config.cfg.ap_config_done = False
-    config.cfg.ssid = config.DEFAULT_VARIABLES['ssid']
-    config.cfg.password = config.DEFAULT_VARIABLES['password']
     config.cfg.tested_connection_cloud = False
     config.ESPConfig.save()
     machine.reset()
@@ -156,9 +154,9 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     try:
         connect_to_wifi(wireless_controller, sync_time)
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
-                                                timeout=config.cfg.mqtt_timeout)
-        
-        while not wireless_controller.sta_handler.isconnected(): 
+                                             timeout=config.cfg.mqtt_timeout)
+
+        while not wireless_controller.sta_handler.isconnected():
             pass
 
         mqtt_communicator.connect()
@@ -187,7 +185,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time
     :return: None
     """
     logging.debug("utils.py/connect_to_wifi({})".format(sync_time))
-    wireless_controller.setup_station(ssid=config.cfg.ssid, password=config.cfg.password)
+    wireless_controller.setup_station(access_points=config.cfg.access_points)
 
     try:
         wireless_controller.configure_station()

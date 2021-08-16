@@ -3,7 +3,6 @@ import logging
 import time
 import ubinascii
 
-
 wireless_connection_controller_instance = None
 
 
@@ -54,15 +53,13 @@ class WirelessConnectionController:
             logging.debug("Disabling AP")
             self.ap_handler.active(False)
 
-    def setup_station(self, ssid: str, password: str) -> None:
+    def setup_station(self, access_points: list[dict]) -> None:
         """
         Change default ssid and password to given ones.
-        :param ssid: New ssid.
-        :param password: New password.
+        :param access_points: list of ssid & password pairs
         :return: None.
         """
-        self.sta_ssid = ssid
-        self.sta_password = password
+        self.sta_access_points = access_points
 
     def configure_station(self) -> (bool, str):
         """
@@ -79,28 +76,59 @@ class WirelessConnectionController:
 
         self.sta_handler.active(True)
         existing_networks = self.sta_handler.scan()
-        print(existing_networks)
-        print("Connect to wifi: {}, pass: {}".format(self.sta_ssid, self.sta_password))
-        try:
-            self.sta_handler.connect(self.sta_ssid, self.sta_password)
-        except Exception:
-            raise Exception("Failed to connect to access point (wifi ssid='{}')".format(self.sta_ssid))
 
-        number_of_retires = 0
-        while not self.sta_handler.isconnected():
-            logging.info("Reconnection while loop")
-            time.sleep(self.WIFI_CONNECTION_CHECK_SLEEP_TIME_S)
-            number_of_retires += 1
-            if number_of_retires >= self.WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES:
-                logging.info("Too many reconnections")
-                break
+        # Sort detected networks according to signal strength in descending order and filter out the ones to
+        # which credentials were not given
+        existing_networks.sort(reverse=True, key=lambda ap: ap[3])
+        logging.info("Networks detected: {}".format(existing_networks))
 
-        if self.sta_handler.isconnected():
-            self.sta_handler.ifconfig()
-            return True, ""
-        else:
-            self.disconnect_station()
-            raise Exception("Failed to connect to access point v2 (wifi ssid='{}')".format(self.sta_ssid))
+        existing_networks_also_on_AP_list_sorted = []
+        for ap in existing_networks:
+            for credential_pair in self.sta_access_points:
+                if ap[0].decode('ascii') == credential_pair[
+                    "ssid"] and ap not in existing_networks_also_on_AP_list_sorted:
+                    existing_networks_also_on_AP_list_sorted.append(ap)
+
+        logging.info("Networks detected that are also on AP ssid & password list: {}".format(
+            existing_networks_also_on_AP_list_sorted))
+
+        for ap in existing_networks_also_on_AP_list_sorted:
+
+            # There could be many SSID & Password pairs saved for a single network therefore a list
+            # of pairs is used and looped over instead of a single SSID & Password pair variable
+            credentials_for_ap = []
+
+            for credential_pair in self.sta_access_points:
+                if ap[0].decode('ascii') == credential_pair["ssid"]:
+                    credentials_for_ap.append(credential_pair)
+
+            for credential_pair in credentials_for_ap:
+
+                print(
+                    "Connecting to wifi: {}, pass: {}".format(credential_pair["ssid"],
+                                                              credential_pair["password"]))
+                try:
+                    self.sta_handler.connect(credential_pair["ssid"], credential_pair["password"])
+                except Exception:
+                    raise Exception(
+                        "Failed to connect to access point (wifi ssid='{}')".format(credential_pair["ssid"]))
+
+                number_of_retires = 0
+                while not self.sta_handler.isconnected():
+                    logging.info("Reconnection while loop")
+                    time.sleep(self.WIFI_CONNECTION_CHECK_SLEEP_TIME_S)
+                    number_of_retires += 1
+                    if number_of_retires >= self.WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES:
+                        logging.info("Too many reconnections")
+                        break
+
+                if self.sta_handler.isconnected():
+                    self.sta_handler.ifconfig()
+                    return True, ""
+                else:
+                    logging.info("Failed to connect to AP: {}".format(credential_pair["ssid"]))
+        self.disconnect_station()
+        raise Exception("Failed to connect to any AP")
 
     def disconnect_station(self) -> bool:
         """
@@ -158,4 +186,3 @@ def get_mac_address_as_string() -> str:
     mac_address_string = ubinascii.hexlify(mac_address).decode('asci')
     print("Mac address {}".format(mac_address_string))
     return mac_address_string
-

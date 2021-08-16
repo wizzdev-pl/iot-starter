@@ -9,8 +9,7 @@ cfg = None
 
 DEFAULT_CLOUD_PROVIDER = 'KAA'
 
-DEFAULT_SSID = 'ssid'
-DEFAULT_PASSWORD = 'password'
+DEFAULT_ACCESS_POINTS = []
 
 # Connection
 DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
@@ -87,8 +86,7 @@ class ESPConfig:
 
         self.cloud_provider = DEFAULT_CLOUD_PROVIDER
 
-        self.ssid = DEFAULT_SSID
-        self.password = DEFAULT_PASSWORD
+        self.access_points = DEFAULT_ACCESS_POINTS
 
         # Connection
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
@@ -152,8 +150,7 @@ class ESPConfig:
             self.cloud_provider = config_dict.get(
                 'cloud_provider', DEFAULT_CLOUD_PROVIDER)
 
-            self.ssid = config_dict.get('ssid', DEFAULT_SSID)
-            self.password = config_dict.get('password', DEFAULT_PASSWORD)
+            self.access_points = config_dict.get('access_points', DEFAULT_ACCESS_POINTS)
 
             # Connection
             self.data_publishing_period_in_ms = config_dict.get(
@@ -224,8 +221,7 @@ class ESPConfig:
 
         config_dict['cloud_provider'] = self.cloud_provider
 
-        config_dict['ssid'] = self.ssid
-        config_dict['password'] = self.password
+        config_dict['access_points'] = self.access_points
 
         # Connection
         config_dict['data_publishing_period_ms'] = self.data_publishing_period_in_ms
