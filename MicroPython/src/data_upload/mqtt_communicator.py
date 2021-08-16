@@ -1,3 +1,6 @@
+from cloud.AWS_cloud import AWS_cloud
+from cloud.KAA_cloud import KAA_cloud
+from cloud.cloud_interface import Providers
 import utime
 import logging
 import ujson
@@ -12,37 +15,57 @@ import gc
 
 class MQTTCommunicator:
     def __init__(self,
-                 use_AWS,
-                 client_id,
-                 endpoint,
-                 port,
+                 cloud_provider,
                  timeout,
                  ):
         self.is_connected = False
-        self.use_AWS = use_AWS
-        self.client_id = client_id
-        self.endpoint = endpoint
-        self.port = port
+        self.cloud_provider = cloud_provider
         self.timeout = timeout
-        if use_AWS:
-            result, aws_certificate, aws_key = config.ESPConfig.read_certificates(True)
+
+        if cloud_provider == Providers.AWS:
+            # Secure socket layer MQTT communication
+            
+            result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
+            
             ssl_parameters = {
                 "server_side": False,
                 "key": aws_key,
                 "cert": aws_certificate
             }
-            self.MQTT_client = MQTTClient(client_id=self.client_id,
-                                          server=self.endpoint,
-                                          port=self.port,
-                                          ssl=True,
-                                          keepalive=self.timeout,
-                                          ssl_params=ssl_parameters)
+            self.server = config.cfg.aws_endpoint
+            self.client_id = config.cfg.aws_client_id
+            self.port = config.cfg.mqtt_port_ssl
+
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port,
+                ssl=True,
+                keepalive=self.timeout,
+                ssl_params=ssl_parameters
+            )
+
+        elif cloud_provider == Providers.KAA:
+            # Default MQTT port
+            self.port = config.cfg.mqtt_port
+            self.server = config.DEFAULT_KAA_KPC_HOST
+            self.client_id = config.cfg.kaa_endpoint
+
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port,
+                keepalive=self.timeout,
+                user=config.cfg.kaa_user,
+                password=config.cfg.kaa_password
+            )
 
         else:
+            # Not implemented for other clouds yet
             self.MQTT_client = MQTTClient(client_id=self.client_id,
-                                          server=self.endpoint,
+                                          server=self.server,
                                           port=self.port)
 
     def __del__(self):
@@ -54,14 +77,11 @@ class MQTTCommunicator:
         Connect to MQTT Server.
         :return: Error code (True - OK, False - Error).
         """
+        logging.debug("mqtt_communicator.py/connect()")
         try:
             gc.collect()
-            result = self.MQTT_client.connect(clean_session=False)
-            self.is_connected = result
-            if result:
-                return True, ""
-            else:
-                raise Exception("Failed to connect to MQTT server")
+            self.MQTT_client.connect(clean_session=False)
+            self.is_connected = True
         except ValueError as e:
             self.is_connected = False
             raise ValueError(e)
@@ -96,7 +116,8 @@ class MQTTCommunicator:
         gc.collect()
         try:
             self.MQTT_client.publish(topic=topic, msg=data, qos=qos)
-            logging.info("Publishing with MQTT at %s:%d" % (self.MQTT_client.server, self.MQTT_client.port))
+            logging.info("Publishing with MQTT at %s:%d" %
+                         (self.MQTT_client.server, self.MQTT_client.port))
         except Exception as e:
             try:
                 self.disconnect()
@@ -104,6 +125,25 @@ class MQTTCommunicator:
                               (self.MQTT_client.server, self.MQTT_client.port, e))
             except:
                 pass  # probably not connected
+        return True
+
+    def set_callback(self, callback) -> bool:
+        """
+        Sets callback to MQTT client for all received messages for all topics
+        :param callback: Callback function for received message
+        :return: Error code (True - OK, False - Error)
+        """
+        if not self.is_connected:
+            logging.info(
+                "Setting callback called but not connected to MQTT broker!"
+            )
+            return False
+
+        self.MQTT_client.set_callback(callback)
+        logging.info("Setting callback for all topics with MQTT at {}:{}".format(
+            self.server, self.port
+        ))
+
         return True
 
     def subscribe(self, topic, callback, qos) -> bool:
@@ -120,7 +160,8 @@ class MQTTCommunicator:
 
         self.MQTT_client.set_callback(callback)
         self.MQTT_client.subscribe(topic=topic, qos=qos)
-        logging.info("Subscribing to {} with MQTT at {}:{}".format(topic, self.endpoint, self.port))
+        logging.info("Subscribing to {} with MQTT at {}:{}".format(
+            topic, self.server, self.port))
         return True
 
     def _wait_for_message(self, timeout_ms: int = None):
@@ -134,15 +175,23 @@ class MQTTCommunicator:
         return False
 
     def publish_message(self, payload, topic, qos):
-        mqtt_message = {
-            'client_id': self.client_id,
-            'publish_timestamp': utils.get_current_timestamp_ms(),
-            'data': payload
-        }
-        gc.collect()  # run garbage collector to clean up memory
+        
+        if config.cfg.cloud_provider == Providers.AWS:
+            mqtt_message = {
+                'client_id': self.client_id,
+                'publish_timestamp': utils.get_current_timestamp_ms(),
+                'data': payload
+            }
+        else:
+            mqtt_message = payload
+        # Run garbage collector to clean up memory
+        gc.collect()
         try:
-            if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):  # if qos == 1 it's a blocking method
-                logging.debug("Publishing mesage succesfull")
+            # if qos == 1 it's a blocking method
+            if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
+                if config.cfg.cloud_provider == Providers.AWS:
+                    # Kaa doesn't inform if it is successfull or not in the publish topic
+                    logging.debug("Publishing mesage succesfull")
                 return True
             else:
                 logging.debug("Problem with publishing mesage")
@@ -155,5 +204,3 @@ class MQTTCommunicator:
                 logging.error(str(e))
                 logging.error("Can't write to errorlog.txt")
             return False
-
-
