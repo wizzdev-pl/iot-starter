@@ -2,6 +2,7 @@ import logging
 
 import machine
 import ujson
+import urequests
 from common import config, utils
 from communication import wirerless_connection_controller
 from controller.main_controller_event import (MainControllerEvent,
@@ -15,6 +16,25 @@ class ThingsBoard(CloudProvider):
         self.rpc_response_topic = 'v1/devices/me/rpc/response/'
         self.rpc_request_topic = 'v1/devices/me/rpc/request/'
         self.publish_topic = 'v1/devices/me/telemetry'
+
+    def get_sleep_time(self) -> int:
+        """
+        """
+        url_token = 'http://{}:{}/api/auth/login'.format(config.cfg.thingsboard_host, 8080)
+        data_token = '{"username":"tenant@thingsboard.org", "password":"tenant"}'
+        headers_token = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        device_id = '0e83ec60-fa70-11eb-9356-1bd74a2fdb60'
+        token_post = urequests.post(url=url_token, data=data_token, headers=headers_token).text
+        token = ujson.loads(token_post)['token']
+
+        url_values = 'http://{}:{}/api/plugins/telemetry/DEVICE/{}/values/attributes/SERVER_SCOPE'.format(
+            config.cfg.thingsboard_host, 8080, device_id)
+        headers_values = {'x-authorization': 'Bearer {}', 'content-type': 'application/json'}.format(token)
+
+        get_dict = urequests.get(url=url_values, headers=headers_values).text
+        conv_to_dict = ujson.loads(get_dict)
+        sleep_time_dict = next(item for item in conv_to_dict if item['key'] == "SleepTime")
+        return sleep_time_dict['value']
 
     # def receive_message(self, topic, msg) -> None:
     #     """
@@ -123,7 +143,7 @@ class ThingsBoard(CloudProvider):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
-
+        config.cfg.data_publishing_period_in_ms = self.get_attributes()*1000
         # result_suc_topic = mqtt_communicator.subscribe(
         #     topic=self.rpc_response_topic, callback=self.receive_message, qos=config.cfg.QOS
         # )
