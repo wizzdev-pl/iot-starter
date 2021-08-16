@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
-
+THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
 
 def file_exists(path):
     if Path(path).is_file():
@@ -14,35 +14,55 @@ def file_exists(path):
         return False
 
 
-def set_credentials():
+def set_credentials(cloud):
     """
-    Asks user for credentials for Kaa cloud similar to "awscli"
+    Asks user for credentials for cloud similar to "awscli"
     """
-    if file_exists(KAA_CONFIG_SRC_PATH):
-        with open(KAA_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
-            config = json.load(infile)
-    else:
-        config = {}
-    print("Please provide kaa credentials:")
-    old_endpoint = config.get('kaa_endpoint', None)
-    old_app_version = config.get('kaa_app_version', None)
-    old_user = config.get('kaa_user', None)
-    old_password = config.get('kaa_password', None)
+    if cloud == "KAA":
+        if file_exists(KAA_CONFIG_SRC_PATH):
+            with open(KAA_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
+                config = json.load(infile)
+        else:
+            config = {}
+        print("Please provide kaa credentials:")
+        old_endpoint = config.get('kaa_endpoint', None)
+        old_app_version = config.get('kaa_app_version', None)
+        old_user = config.get('kaa_user', None)
+        old_password = config.get('kaa_password', None)
 
-    endpoint = input("Device endpoint token [{}]: ".format(old_endpoint))
-    app_version = input("App version [{}]: ".format(old_app_version))
-    user = input("User [{}]: ".format(old_user))
-    password = input("Password [{}]: ".format(old_password))
-    print()
+        endpoint = input("Device endpoint token [{}]: ".format(old_endpoint))
+        app_version = input("App version [{}]: ".format(old_app_version))
+        user = input("User [{}]: ".format(old_user))
+        password = input("Password [{}]: ".format(old_password))
+        print()
 
-    # If values were not updated; leave the old ones
-    config['kaa_endpoint'] = endpoint if endpoint else old_endpoint
-    config['kaa_app_version'] = app_version if app_version else old_app_version
-    config['kaa_user'] = user if user else old_user
-    config['kaa_password'] = password if password else old_password
+        # If values were not updated; leave the old ones
+        config['kaa_endpoint'] = endpoint if endpoint else old_endpoint
+        config['kaa_app_version'] = app_version if app_version else old_app_version
+        config['kaa_user'] = user if user else old_user
+        config['kaa_password'] = password if password else old_password
 
-    with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
-        json.dump(config, outfile)
+        with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
+            json.dump(config, outfile)
+
+    elif cloud == "THINGSBOARD":
+        if file_exists(THINGSBOARD_CONFIG_SRC_PATH):
+            with open(THINGSBOARD_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
+                config = json.load(infile)
+        else:
+            config = {}
+        
+        print("Please provide ThingsBoard credentials:")
+        old_host = config.get('thingsboard_host', None)
+
+        host = input("Hostname [{}]: ".format(old_host))
+        print()
+
+        # If values were not updated; leave the old ones
+        config['thingsboard_host'] = host if host else old_host
+
+        with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
+            json.dump(config, outfile)
 
 
 def parse_arguments():

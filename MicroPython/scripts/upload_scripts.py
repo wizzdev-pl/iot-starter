@@ -188,6 +188,8 @@ def flash_scripts(port, cloud_config_file_path):
     cloud_config_device_path = DEVICE_RESOURCES_FILE_DIR + "/" + Path(cloud_config_file_path).name
     cloud_config_file_path = os.path.abspath(cloud_config_file_path)
     upload_file(cloud_config_file_path, cloud_config_device_path)
+    
+    print('Finished!')
 
 
 if __name__ == '__main__':
@@ -195,4 +197,3 @@ if __name__ == '__main__':
 
     flash_scripts(args['port'], args['config_path'])
 
-    print('Finished!')

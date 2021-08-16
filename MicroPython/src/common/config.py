@@ -73,7 +73,6 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 )
 
 #ThingsBoard stuff
-THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
 DEFAULT_THINGSBOARD_ACCES_TOKEN = ''
@@ -138,6 +137,7 @@ class ESPConfig:
         self.kaa_topic = DEFAULT_KAA_TOPIC
 
         #ThingsBoard
+        self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
         self.thingsboard_acces_token = DEFAULT_THINGSBOARD_ACCES_TOKEN
 
     def load_from_file(self) -> None:
@@ -216,6 +216,8 @@ class ESPConfig:
             #ThingsBoard
             self.thingsboard_acces_token = config_dict.get(
                 'thingsboard_acces_token', DEFAULT_THINGSBOARD_ACCES_TOKEN)
+            self.thingsboard_host = config_dict.get(
+                'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
 
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
@@ -278,7 +280,9 @@ class ESPConfig:
         config_dict['kaa_topic'] = self.kaa_topic
 
         #ThingsBoard
-        config_dict['thingsbard_acces_token'] = self.thingsboard_acces_token
+        config_dict['thingsboard_acces_token'] = self.thingsboard_acces_token
+        config_dict['thingsboard_host'] = self.thingsboard_host
+
         return config_dict
 
     @staticmethod

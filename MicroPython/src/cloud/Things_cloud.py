@@ -16,35 +16,35 @@ class ThingsBoard(CloudProvider):
         self.rpc_request_topic = 'v1/devices/me/rpc/request/'
         self.publish_topic = 'v1/devices/me/telemetry'
 
-    def receive_message(self, topic, msg) -> None:
-        """
-        Callback method for MQTT client
-        :param topic: Topic of the message received encoded as bytes
-        :param msg: Message received encoded as bytes
-        :return: None 
-        """
-        logging.debug('cloud/Things_cloud.py/receive_message()')
-        topic = topic.decode()
+    # def receive_message(self, topic, msg) -> None:
+    #     """
+    #     Callback method for MQTT client
+    #     :param topic: Topic of the message received encoded as bytes
+    #     :param msg: Message received encoded as bytes
+    #     :return: None
+    #     """
+    #     logging.debug('cloud/Things_cloud.py/receive_message()')
+    #     topic = topic.decode()
 
-        # Check if msg is in json format, if not decode as str
-        if b'{' in msg and b'}' in msg:
-            msg = ujson.loads(msg)
-        else:
-            msg = msg.decode()
+    #     # Check if msg is in json format, if not decode as str
+    #     if b'{' in msg and b'}' in msg:
+    #         msg = ujson.loads(msg)
+    #     else:
+    #         msg = msg.decode()
 
-        if topic == self.rpc_response_topic:
-            if msg == '':
-                logging.info('Operation successful\n')
-            else:
-                logging.info('Operation successful with return code: {}\n'.format(msg))
-        elif topic == self.rpc_request_topic:
-            status_code = msg['statusCode']
-            reason = msg['reasonPhrase']
-            logging.info('Operation failed with error code: {} - reason: {}\n'.format(
-                status_code, reason
-            ))
-        else:
-            logging.info('On topic: {} received msg: {}'.format(topic, msg))
+    #     if topic == self.rpc_response_topic:
+    #         if msg == '':
+    #             logging.info('Operation successful\n')
+    #         else:
+    #             logging.info('Operation successful with return code: {}\n'.format(msg))
+    #     elif topic == self.rpc_request_topic:
+    #         status_code = msg['statusCode']
+    #         reason = msg['reasonPhrase']
+    #         logging.info('Operation failed with error code: {} - reason: {}\n'.format(
+    #             status_code, reason
+    #         ))
+    #     else:
+    #         logging.info('On topic: {} received msg: {}'.format(topic, msg))
 
     def device_configuration(self, data: dict) -> int:
         """
@@ -79,50 +79,31 @@ class ThingsBoard(CloudProvider):
 
         return 0
 
-    # def configure_data(self) -> None:
-    #     """
-    #     Setup data from kaa_config file and save it to general config file
-    #     :return: None
-    #     """
-    #     logging.debug("KAA_cloud/configure_data()")
-    #     kaa_configuration = self.load_kaa_config_from_file()
+    def configure_data(self) -> None:
+        """
+        Setup data from thingsboard_config file and save it to general config file
+        :return: None
+        """
+        logging.debug("ThingsBoard_config/configure_data()")
+        thingsboard_configuration = self.load_thingsboard_config_from_file()
         
-    #     config.cfg.kaa_user = kaa_configuration.get(
-    #         "kaa_user", config.DEFAULT_KAA_USER)
+        config.cfg.thingsboard_host = thingsboard_configuration.get(
+            "thingsboard_host", config.DEFAULT_THINGSBOARD_HOST)
 
-    #     config.cfg.kaa_password = kaa_configuration.get(
-    #         "kaa_password", config.DEFAULT_KAA_PASSWORD)
+        config.cfg.save()
 
-    #     config.cfg.kaa_app_version = kaa_configuration.get(
-    #         "kaa_app_version", config.DEFAULT_KAA_APP_VERSION)
-        
-    #     config.cfg.kaa_endpoint = kaa_configuration.get(
-    #         "kaa_endpoint", config.DEFAULT_KAA_APP_VERSION)
+    def load_thingsboard_config_from_file(self) -> dict:
+        """
+        Load configuration of KAA from file.
+        :return: Configuration in dict.
+        """
+        if utils.check_if_file_exists(config.THINGSBOARD_CONFIG_PATH) == 0:
+            raise Exception("Create thingsboard_config.json file first!")
 
-    #     # Update in case app_version of kaa_endpoint changed
-    #     config.cfg.kaa_topic = 'kp1/{}/dcx/{}/json/{}'.format(
-    #         config.cfg.kaa_app_version, 
-    #         config.cfg.kaa_endpoint, 
-    #         config.cfg.mqqt_request_id
-    #     )
+        with open(config.THINGSBOARD_CONFIG_PATH, "r", encoding="utf8") as infile:
+            config_dict = ujson.load(infile)
 
-    #     self.publish_success_topic = config.cfg.kaa_topic + '/status'
-    #     self.publish_error_topic = config.cfg.kaa_topic + '/error'
-
-    #     config.cfg.save()
-
-    # def load_kaa_config_from_file(self) -> dict:
-    #     """
-    #     Load configuration of KAA from file.
-    #     :return: Configuration in dict.
-    #     """
-    #     if utils.check_if_file_exists(config.KAA_CONFIG_PATH) == 0:
-    #         raise Exception("Create kaa_config.json file first!")
-
-    #     with open(config.KAA_CONFIG_PATH, "r", encoding="utf8") as infile:
-    #         config_dict = ujson.load(infile)
-
-    #     return config_dict
+        return config_dict
 
     def _format_data(self, data: dict) -> dict:
         """
@@ -143,14 +124,14 @@ class ThingsBoard(CloudProvider):
             sync_time=False
         )
 
-        result_suc_topic = mqtt_communicator.subscribe(
-            topic=self.rpc_response_topic, callback=self.receive_message, qos=config.cfg.QOS
-        )
-        result_err_topic = mqtt_communicator.subscribe(
-            topic=self.rpc_request_topic, callback=self.receive_message, qos=config.cfg.QOS
-        )
-        if not result_suc_topic or not result_err_topic:
-            logging.error("Error subscribing to topics with MQTT in publish_data()")
+        # result_suc_topic = mqtt_communicator.subscribe(
+        #     topic=self.rpc_response_topic, callback=self.receive_message, qos=config.cfg.QOS
+        # )
+        # result_err_topic = mqtt_communicator.subscribe(
+        #     topic=self.rpc_request_topic, callback=self.receive_message, qos=config.cfg.QOS
+        # )
+        # if not result_suc_topic or not result_err_topic:
+        #     logging.error("Error subscribing to topics with MQTT in publish_data()")
 
         # TODO: Certificates?
 

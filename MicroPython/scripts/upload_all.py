@@ -10,6 +10,7 @@ from generate_terraform import save_terraform_output_as_file
 
 TERRAFORM_OUTPUT_PATH = "src/aws_config.json"
 KAA_CONFIG_PATH = 'src/kaa_config.json'
+THINGSBOARD_CONFIG_PATH = 'src/thingsboard_config.json'
 CONFIG_OUTPUT_PATH = "src/config.json"
 
 
@@ -49,9 +50,10 @@ if __name__ == '__main__':
         cloud_config_file_path = TERRAFORM_OUTPUT_PATH
     elif args['cloud'] == 'KAA':
         cloud_config_file_path = KAA_CONFIG_PATH
-        set_credentials()
+        set_credentials(args['cloud'])
     elif args['cloud'] == 'THINGSBOARD':
-        cloud_config_file_path = KAA_CONFIG_PATH
+        cloud_config_file_path = THINGSBOARD_CONFIG_PATH
+        set_credentials(args['cloud'])
     else:
         # Hardcoded cloud providers, as we cannot access config file (CPyton vs MicroPython)
         # TODO: How to avoid hardcoded values like these???
