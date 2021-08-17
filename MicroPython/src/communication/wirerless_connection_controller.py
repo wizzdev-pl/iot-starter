@@ -6,6 +6,15 @@ import ubinascii
 wireless_connection_controller_instance = None
 
 
+class NetworkParams:
+    SSID = 0
+    BSSID = 1
+    CHANNEL = 2
+    RSSI = 3
+    AUTHMODE = 4
+    HIDDEN = 5
+
+
 class WirelessConnectionController:
     """
     Wifi handler class.
@@ -75,31 +84,29 @@ class WirelessConnectionController:
             raise Exception("STA Already connected")
 
         self.sta_handler.active(True)
-        existing_networks = self.sta_handler.scan()
+        detected_networks = self.sta_handler.scan()
 
         # Sort detected networks according to signal strength in descending order and filter out the ones to
         # which credentials were not given
-        existing_networks.sort(reverse=True, key=lambda ap: ap[3])
-        logging.info("Networks detected: {}".format(existing_networks))
+        detected_networks.sort(reverse=True, key=lambda network_: network_[NetworkParams.RSSI])
+        logging.info("Networks detected: {}".format(detected_networks))
 
-        existing_networks_also_on_AP_list_sorted = []
-        for network_ in existing_networks:
+        networks_authorized = []
+        for network_ in detected_networks:
             for credential_pair in self.sta_access_points:
-                network_ssid = network_[0].decode('ascii')
-                if network_ssid == credential_pair["ssid"] and\
-                        network_ssid not in existing_networks_also_on_AP_list_sorted:
-                    existing_networks_also_on_AP_list_sorted.append(network_ssid)
+                network_ssid = network_[NetworkParams.SSID].decode('ascii')
+                if network_ssid == credential_pair["ssid"] and \
+                        network_ssid not in networks_authorized:
+                    networks_authorized.append(network_ssid)
 
-        logging.info("Networks detected that are also on AP ssid & password list: {}".format(
-            existing_networks_also_on_AP_list_sorted))
+        logging.info("Networks detected that are also on AP ssid & password list: {}".format(networks_authorized))
 
-        for network_ in existing_networks_also_on_AP_list_sorted:
+        for network_ssid in networks_authorized:
             # There could be many SSID & Password pairs saved for a single network therefore a list
             # of pairs is used and looped over instead of a single SSID & Password pair variable
             credentials_for_ap = []
 
             for credential_pair in self.sta_access_points:
-                network_ssid = network_[0].decode('ascii')
                 if network_ssid == credential_pair["ssid"]:
                     credentials_for_ap.append(credential_pair)
 
@@ -111,12 +118,12 @@ class WirelessConnectionController:
                     raise Exception(
                         "Failed to connect to access point (wifi ssid='{}')".format(credential_pair["ssid"]))
 
-                number_of_retires = 0
+                number_of_retries = 0
                 while not self.sta_handler.isconnected():
                     logging.info("Reconnection while loop")
                     time.sleep(self.WIFI_CONNECTION_CHECK_SLEEP_TIME_S)
-                    number_of_retires += 1
-                    if number_of_retires > self.WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES:
+                    number_of_retries += 1
+                    if number_of_retries > self.WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES:
                         logging.info("Too many reconnections")
                         break
 
