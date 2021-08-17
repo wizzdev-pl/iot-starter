@@ -11,7 +11,7 @@ class WirelessConnectionController:
     Wifi handler class.
     """
     WIFI_CONNECTION_CHECK_SLEEP_TIME_S = 5
-    WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES = 3
+    WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES = 1
 
     def __init__(self, sta_ssid: str = "", sta_password: str = ""):
         """
@@ -83,30 +83,28 @@ class WirelessConnectionController:
         logging.info("Networks detected: {}".format(existing_networks))
 
         existing_networks_also_on_AP_list_sorted = []
-        for ap in existing_networks:
+        for network_ in existing_networks:
             for credential_pair in self.sta_access_points:
-                if ap[0].decode('ascii') == credential_pair[
-                    "ssid"] and ap not in existing_networks_also_on_AP_list_sorted:
-                    existing_networks_also_on_AP_list_sorted.append(ap)
+                network_ssid = network_[0].decode('ascii')
+                if network_ssid == credential_pair["ssid"] and\
+                        network_ssid not in existing_networks_also_on_AP_list_sorted:
+                    existing_networks_also_on_AP_list_sorted.append(network_ssid)
 
         logging.info("Networks detected that are also on AP ssid & password list: {}".format(
             existing_networks_also_on_AP_list_sorted))
 
-        for ap in existing_networks_also_on_AP_list_sorted:
-
+        for network_ in existing_networks_also_on_AP_list_sorted:
             # There could be many SSID & Password pairs saved for a single network therefore a list
             # of pairs is used and looped over instead of a single SSID & Password pair variable
             credentials_for_ap = []
 
             for credential_pair in self.sta_access_points:
-                if ap[0].decode('ascii') == credential_pair["ssid"]:
+                network_ssid = network_[0].decode('ascii')
+                if network_ssid == credential_pair["ssid"]:
                     credentials_for_ap.append(credential_pair)
 
             for credential_pair in credentials_for_ap:
-
-                print(
-                    "Connecting to wifi: {}, pass: {}".format(credential_pair["ssid"],
-                                                              credential_pair["password"]))
+                print("Connecting to wifi: {}, pass: {}".format(credential_pair["ssid"], credential_pair["password"]))
                 try:
                     self.sta_handler.connect(credential_pair["ssid"], credential_pair["password"])
                 except Exception:
@@ -118,7 +116,7 @@ class WirelessConnectionController:
                     logging.info("Reconnection while loop")
                     time.sleep(self.WIFI_CONNECTION_CHECK_SLEEP_TIME_S)
                     number_of_retires += 1
-                    if number_of_retires >= self.WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES:
+                    if number_of_retires > self.WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES:
                         logging.info("Too many reconnections")
                         break
 

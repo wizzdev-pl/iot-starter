@@ -55,14 +55,12 @@ class KAA_cloud(CloudProvider):
         :return: Error code (0 - OK, 1 - Error).
         """
 
-        access_points = data
-
-        config.cfg.access_points = access_points
+        config.cfg.access_points = data
         config.cfg.save()
 
         logging.info("Wifi access point configuration:")
 
-        for access_point in access_points:
+        for access_point in data:
             logging.info("Ssid: {} Password: {}".format(access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
