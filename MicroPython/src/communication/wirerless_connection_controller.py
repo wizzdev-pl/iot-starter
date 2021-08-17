@@ -11,7 +11,7 @@ class WirelessConnectionController:
     Wifi handler class.
     """
     WIFI_CONNECTION_CHECK_SLEEP_TIME_S = 5
-    WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES = 10
+    WIFI_CONNECTION_MAX_NUMBER_OF_RETRIES = 3
 
     def __init__(self, sta_ssid: str = "", sta_password: str = ""):
         """
