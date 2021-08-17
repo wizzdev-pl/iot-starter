@@ -62,18 +62,29 @@ class MQTTCommunicator:
                 user=config.cfg.kaa_user,
                 password=config.cfg.kaa_password
             )
+
         elif cloud_provider == Providers.THINGSBOARD:
             self.port = config.cfg.mqtt_port_ssl
             self.server = config.cfg.thingsboard_host
-            self.client_id =''
+            self.client_id ="WizzDev_starter"
+
+            # TODO: read certificates
+
+            ssl_parameters = {
+                "server_side": False,
+                "certfile": ..., # server public cert
+                "ca_certs": ... # client nopass cert
+            }
 
             self.MQTT_client = MQTTClient(
                 client_id=self.client_id,
                 server=self.server,
                 port=self.port,
-                user=config.cfg.thingsboard_acces_token
-                # TODO SSL
+                ssl=True,
+                keepalive=self.timeout,
+                ssl_params=ssl_parameters
             )
+
         else:
             # Not implemented for other clouds yet
             self.MQTT_client = MQTTClient(

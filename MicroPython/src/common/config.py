@@ -75,11 +75,8 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 #ThingsBoard stuff
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
-DEFAULT_THINGSBOARD_ACCES_TOKEN = ''
 DEFAULT_SERVER_PUBLIC_PATH = ''
-DEFAULT_CLIENT_PUBLIC_PATH = ''
-DEFAULT_PROVISION_DEVICE_KEY = ''
-DEFAULT_PROVISION_DEVICE_SECRET = ''
+DEFAULT_CLIENT_NOPASS_PATH = ''
 
 
 class ESPConfig:
@@ -143,7 +140,8 @@ class ESPConfig:
 
         #ThingsBoard
         self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
-        self.thingsboard_acces_token = DEFAULT_THINGSBOARD_ACCES_TOKEN
+        self.server_public_path = DEFAULT_SERVER_PUBLIC_PATH
+        self.client_nopass_path = DEFAULT_CLIENT_NOPASS_PATH
 
     def load_from_file(self) -> None:
         """
@@ -219,15 +217,15 @@ class ESPConfig:
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
             #ThingsBoard
-            self.thingsboard_acces_token = config_dict.get(
-                'thingsboard_acces_token', DEFAULT_THINGSBOARD_ACCES_TOKEN)
+            self.server_public_path = config_dict.get(
+                'server_public_path', DEFAULT_SERVER_PUBLIC_PATH)
+            self.client_nopass_path = config_dict.get(
+                'client_nopass_path', DEFAULT_CLIENT_NOPASS_PATH)
             self.thingsboard_host = config_dict.get(
                 'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
 
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
-                # self.device_uid = config_dict.get(
-                #     'device_uid', DEFAULT_DEVICE_UID)
 
         if not config_file_exists:
             self.save()
@@ -285,8 +283,9 @@ class ESPConfig:
         config_dict['kaa_topic'] = self.kaa_topic
 
         #ThingsBoard
-        config_dict['thingsboard_acces_token'] = self.thingsboard_acces_token
         config_dict['thingsboard_host'] = self.thingsboard_host
+        config_dict['server_public_path'] = self.server_public_path
+        config_dict['client_nopass_path'] = self.client_nopass_path
 
         return config_dict
 

@@ -16,35 +16,10 @@ class ThingsBoard(CloudProvider):
         self.rpc_request_topic = 'v1/devices/me/rpc/request/'
         self.publish_topic = 'v1/devices/me/telemetry'
 
-    # def receive_message(self, topic, msg) -> None:
-    #     """
-    #     Callback method for MQTT client
-    #     :param topic: Topic of the message received encoded as bytes
-    #     :param msg: Message received encoded as bytes
-    #     :return: None
-    #     """
-    #     logging.debug('cloud/Things_cloud.py/receive_message()')
-    #     topic = topic.decode()
+    def receive_message(self, topic, msg) -> None:
+        # TODO
 
-    #     # Check if msg is in json format, if not decode as str
-    #     if b'{' in msg and b'}' in msg:
-    #         msg = ujson.loads(msg)
-    #     else:
-    #         msg = msg.decode()
-
-    #     if topic == self.rpc_response_topic:
-    #         if msg == '':
-    #             logging.info('Operation successful\n')
-    #         else:
-    #             logging.info('Operation successful with return code: {}\n'.format(msg))
-    #     elif topic == self.rpc_request_topic:
-    #         status_code = msg['statusCode']
-    #         reason = msg['reasonPhrase']
-    #         logging.info('Operation failed with error code: {} - reason: {}\n'.format(
-    #             status_code, reason
-    #         ))
-    #     else:
-    #         logging.info('On topic: {} received msg: {}'.format(topic, msg))
+        raise NotImplementedError
 
     def device_configuration(self, data: dict) -> int:
         """
@@ -66,7 +41,7 @@ class ThingsBoard(CloudProvider):
         try:
             utils.connect_to_wifi(wireless_controller)
             logging.info(wireless_controller.sta_handler.ifconfig())
-            #self.configure_data()
+            self.configure_data()
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
             event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
@@ -86,9 +61,15 @@ class ThingsBoard(CloudProvider):
         """
         logging.debug("ThingsBoard_config/configure_data()")
         thingsboard_configuration = self.load_thingsboard_config_from_file()
-        
+
         config.cfg.thingsboard_host = thingsboard_configuration.get(
             "thingsboard_host", config.DEFAULT_THINGSBOARD_HOST)
+
+        config.cfg.server_public_path = thingsboard_configuration.get(
+            "server_public_path", config.DEFAULT_SERVER_PUBLIC_PATH)
+
+        config.cfg.client_nopass_path = thingsboard_configuration.get(
+            "client_nopass_path", config.DEFAULT_CLIENT_NOPASS_PATH)
 
         config.cfg.save()
 
@@ -111,56 +92,15 @@ class ThingsBoard(CloudProvider):
         :param data: Data in dict to be formatted
         :return dict: Formatted data
         """
-        formatted_data = {}
-        for ind, (key, values) in enumerate(data.items()):
-            # Unpack outer list and extract values to variables
-            (_, value), = values
-            formatted_data[key] = value
-        
-        return formatted_data
+        # TODO
+
+        raise NotImplementedError
 
     def publish_data(self, data):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
+        # TODO
 
-        # result_suc_topic = mqtt_communicator.subscribe(
-        #     topic=self.rpc_response_topic, callback=self.receive_message, qos=config.cfg.QOS
-        # )
-        # result_err_topic = mqtt_communicator.subscribe(
-        #     topic=self.rpc_request_topic, callback=self.receive_message, qos=config.cfg.QOS
-        # )
-        # if not result_suc_topic or not result_err_topic:
-        #     logging.error("Error subscribing to topics with MQTT in publish_data()")
+        raise NotImplementedError
 
-        # TODO: Certificates?
-
-        data = self._format_data(data)
-
-        logging.debug("data to send = {}".format(data))
-        
-        mqtt_communicator.publish_message(payload=data, topic=self.publish_topic, qos=config.cfg.QOS)
-
-        try:
-            mqtt_communicator.MQTT_client.wait_msg()
-        except OSError:
-            # Data probably did not arrive cloud
-            # Try to send data one more time up to three times
-            for _ in range(3):
-                mqtt_communicator.publish_message(
-                    payload=data, topic=self.publish_topic, qos=config.cfg.QOS
-                )
-                try:
-                    mqtt_communicator.MQTT_client.wait_msg()
-                except OSError:
-                    # Failed again, trying up to three times
-                    continue
-                break
-            else:
-                logging.debug(
-                    "Tried to send data three times, failed! Aborting current measurement."
-                )
-
-
-        mqtt_communicator.disconnect()
-        wireless_controller.disconnect_station()
