@@ -1,15 +1,13 @@
 import gc
 import logging
+import urequests
+import machine
+from ujson import dumps, load
 from os import mkdir
 
-import machine
-import urequests
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import (MainControllerEvent,
-                                              MainControllerEventType)
-from ujson import dumps, load
-
+from controller.main_controller_event import MainControllerEvent, MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -165,11 +163,12 @@ class AWS_cloud(CloudProvider):
         logging.debug("Authorization request function")
         headers = config.DEFAULT_JSON_HEADER
         url = config.cfg.api_url + config.AWS_API_AUTHORIZATION_URL
-        body = {}
-        body['is_removed'] = True
-        body['created_at'] = 0
-        body['username'] = config.cfg.api_login
-        body['password'] = config.cfg.api_password
+        body = {
+            'is_removed': True,
+            'created_at': 0,
+            'username': config.cfg.api_login,
+            'password': config.cfg.api_password
+        }
 
         logging.debug('LOGIN: {}, password: {}'.format(
             config.cfg.api_login, config.cfg.api_password))
@@ -201,14 +200,15 @@ class AWS_cloud(CloudProvider):
         headers = config.ESPConfig.get_header_with_authorization(_jwt_token)
         url = config.cfg.api_url + config.AWS_API_CONFIG_URL
         thing_name = config.AWS_THING_NAME_PREFIX + config.cfg.device_uid
-        body = {}
-        body['is_removed'] = True
-        body['created_at'] = 0
-        body['device_id'] = thing_name
-        body['description'] = 'Full configuration test'
-        body['device_type'] = 'configuration_test'
-        body['device_group'] = 'configuration_test'
-        body['settings'] = {}
+        body = {
+            'is_removed': True,
+            'created_at': 0,
+            'device_id': thing_name,
+            'description': 'Full configuration test',
+            'device_type': 'configuration_test',
+            'device_group': 'configuration_test',
+            'settings': {}
+        }
 
         body = dumps(body)
         response = urequests.post(url, data=body, headers=headers)
