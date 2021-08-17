@@ -1,17 +1,10 @@
 import argparse
-import logging
 import json
-from pathlib import Path
 
+from common.utilities import file_exists
 
 KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
 THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
-
-def file_exists(path):
-    if Path(path).is_file():
-        return True
-    else:
-        return False
 
 
 def set_credentials(cloud):
@@ -36,10 +29,14 @@ def set_credentials(cloud):
         password = input("Password [{}]: ".format(old_password))
 
         # If values were not updated; leave the old ones
-        config['kaa_endpoint'] = endpoint if endpoint else old_endpoint
-        config['kaa_app_version'] = app_version if app_version else old_app_version
-        config['kaa_user'] = user if user else old_user
-        config['kaa_password'] = password if password else old_password
+        if endpoint:
+            config['kaa_endpoint'] = endpoint
+        if app_version:
+            config['kaa_app_version'] = app_version
+        if user:
+            config['kaa_user'] = user
+        if password:
+            config['kaa_password'] = password
 
         with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
@@ -50,20 +47,25 @@ def set_credentials(cloud):
                 config = json.load(infile)
         else:
             config = {}
-        
+
         print("Please provide ThingsBoard credentials:")
         old_host = config.get('thingsboard_host', None)
         old_server_public = config.get('server_public', None)
         old_client_public = config.get('client_public', None)
 
         host = input("Hostname [{}]: ".format(old_host))
-        server_public = input("Public server certificate path [{}]: ".format(old_server_public))
-        client_public = input("Public client certificate path [{}]: ".format(old_client_public))
+        server_public = input(
+            "Public server certificate path [{}]: ".format(old_server_public))
+        client_public = input(
+            "Public client certificate path [{}]: ".format(old_client_public))
 
         # If values were not updated; leave the old ones
-        config['thingsboard_host'] = host if host else old_host
-        config['server_public'] = server_public if server_public else old_server_public
-        config['client_public'] = client_public if client_public else old_client_public
+        if host:
+            config['thingsboard_host'] = host
+        if server_public:
+            config['server_public'] = server_public
+        if client_public:
+            config['client_public'] = client_public
 
         with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
@@ -86,4 +88,3 @@ if __name__ == '__main__':
         print('Invalid choice! Only: AWS / KAA / THINGSBOARD clouds are supported!')
     else:
         set_credentials(args['cloud'])
-
