@@ -1,70 +1,18 @@
 import logging
-
 import machine
-import ujson
 import urequests
+
+from ujson import loads, dumps
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import (MainControllerEvent,
-                                              MainControllerEventType)
-
+from controller.main_controller_event import MainControllerEvent, MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
 class ThingsBoard(CloudProvider):
-    def __init__(self) -> None:
-        self.rpc_response_topic = 'v1/devices/me/rpc/response/'
-        self.rpc_request_topic = 'v1/devices/me/rpc/request/'
-        self.publish_topic = 'v1/devices/me/telemetry'
-
-    def get_sleep_time(self) -> int:
-        """
-        """
-        url_token = 'http://{}:{}/api/auth/login'.format(config.cfg.thingsboard_host, 8080)
-        data_token = '{"username":"tenant@thingsboard.org", "password":"tenant"}'
-        headers_token = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        device_id = '0e83ec60-fa70-11eb-9356-1bd74a2fdb60'
-        token_post = urequests.post(url=url_token, data=data_token, headers=headers_token).text
-        token = ujson.loads(token_post)['token']
-
-        url_values = 'http://{}:{}/api/plugins/telemetry/DEVICE/{}/values/attributes/SERVER_SCOPE'.format(
-            config.cfg.thingsboard_host, 8080, device_id)
-        headers_values = {'x-authorization': 'Bearer {}', 'content-type': 'application/json'}.format(token)
-
-        get_dict = urequests.get(url=url_values, headers=headers_values).text
-        conv_to_dict = ujson.loads(get_dict)
-        sleep_time_dict = next(item for item in conv_to_dict if item['key'] == "SleepTime")
-        return sleep_time_dict['value']
-
-    # def receive_message(self, topic, msg) -> None:
-    #     """
-    #     Callback method for MQTT client
-    #     :param topic: Topic of the message received encoded as bytes
-    #     :param msg: Message received encoded as bytes
-    #     :return: None
-    #     """
-    #     logging.debug('cloud/Things_cloud.py/receive_message()')
-    #     topic = topic.decode()
-
-    #     # Check if msg is in json format, if not decode as str
-    #     if b'{' in msg and b'}' in msg:
-    #         msg = ujson.loads(msg)
-    #     else:
-    #         msg = msg.decode()
-
-    #     if topic == self.rpc_response_topic:
-    #         if msg == '':
-    #             logging.info('Operation successful\n')
-    #         else:
-    #             logging.info('Operation successful with return code: {}\n'.format(msg))
-    #     elif topic == self.rpc_request_topic:
-    #         status_code = msg['statusCode']
-    #         reason = msg['reasonPhrase']
-    #         logging.info('Operation failed with error code: {} - reason: {}\n'.format(
-    #             status_code, reason
-    #         ))
-    #     else:
-    #         logging.info('On topic: {} received msg: {}'.format(topic, msg))
+    # def __init__(self) -> None:
+    #     self.rpc_response_topic = 'v1/devices/me/rpc/response/'
+    #     self.rpc_request_topic = 'v1/devices/me/rpc/request/'
 
     def device_configuration(self, data: dict) -> int:
         """
@@ -98,6 +46,97 @@ class ThingsBoard(CloudProvider):
         machine.reset()
 
         return 0
+    
+    def authorization_request(self) -> str:
+        """
+        Register your ESP in cloud. It takes password and login from aws_config.json
+        :return: JSON Web Token
+        """
+        logging.debug("Authorization request function")
+        headers = {
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json'
+        }
+        url = 'http://{}:{}/api/auth/login'.format(config.cfg.thingsboard_host, 8080)
+
+        data = {
+            "username": config.cfg.thingsboard_username,
+            "password": config.cfg.thingsboard_password
+        }
+
+        logging.debug('LOGIN: {}, password: {}'.format(config.cfg.thingsboard_username, config.cfg.thingsboard_password))
+        data = dumps(data)
+        
+        try:
+            response = urequests.post(url, data=data, headers=headers)
+        except IndexError as e:
+            logging.info("No internet connection: {}".format(e))
+            return ""
+        except Exception as e:
+            logging.info("Failed to authorize in API {}".format(e))
+            return ""
+
+        if response.status_code != '200' and response.status_code != 200:
+            logging.error(response.text)
+            return ""
+
+        response_dict = response.json()
+        jwt_token = response_dict.get("token")
+        return jwt_token
+
+    def get_sleep_time(self, jwt_token) -> int:
+        """
+        """
+        logging.debug("Acquisition of new attributes...")
+        
+        if jwt_token is not "":
+            url = 'http://{}:{}/api/plugins/telemetry/DEVICE/{}/values/attributes/SERVER_SCOPE'.format(
+                config.cfg.thingsboard_host, 8080, device_id)
+            headers = {
+                'x-authorization': 'Bearer {}'.format(jwt_token), 
+                'content-type': 'application/json'
+                }
+    
+            get_dict = urequests.get(url=url, headers=headers).text
+            conv_to_dict = loads(get_dict)
+            for item in conv_to_dict:
+                if item['key'] == 'SleepTime':
+                    sleep_time_dict = item
+
+            return sleep_time_dict['value']
+        else:
+            logging.error("Problem with authorization")
+            return 0
+
+    # def receive_message(self, topic, msg) -> None:
+    #     """
+    #     Callback method for MQTT client
+    #     :param topic: Topic of the message received encoded as bytes
+    #     :param msg: Message received encoded as bytes
+    #     :return: None
+    #     """
+    #     logging.debug('cloud/Things_cloud.py/receive_message()')
+    #     topic = topic.decode()
+
+    #     # Check if msg is in json format, if not decode as str
+    #     if b'{' in msg and b'}' in msg:
+    #         msg = ujson.loads(msg)
+    #     else:
+    #         msg = msg.decode()
+
+    #     if topic == self.rpc_response_topic:
+    #         if msg == '':
+    #             logging.info('Operation successful\n')
+    #         else:
+    #             logging.info('Operation successful with return code: {}\n'.format(msg))
+    #     elif topic == self.rpc_request_topic:
+    #         status_code = msg['statusCode']
+    #         reason = msg['reasonPhrase']
+    #         logging.info('Operation failed with error code: {} - reason: {}\n'.format(
+    #             status_code, reason
+    #         ))
+    #     else:
+    #         logging.info('On topic: {} received msg: {}'.format(topic, msg))
 
     def configure_data(self) -> None:
         """
@@ -121,7 +160,7 @@ class ThingsBoard(CloudProvider):
             raise Exception("Create thingsboard_config.json file first!")
 
         with open(config.THINGSBOARD_CONFIG_PATH, "r", encoding="utf8") as infile:
-            config_dict = ujson.load(infile)
+            config_dict = loads(infile)
 
         return config_dict
 
@@ -143,7 +182,10 @@ class ThingsBoard(CloudProvider):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
-        config.cfg.data_publishing_period_in_ms = self.get_attributes()*1000
+
+        if self.get_sleep_time() is not 0:
+            config.cfg.data_publishing_period_in_ms = self.get_attributes()*1000
+
         # result_suc_topic = mqtt_communicator.subscribe(
         #     topic=self.rpc_response_topic, callback=self.receive_message, qos=config.cfg.QOS
         # )

@@ -76,6 +76,9 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
 DEFAULT_THINGSBOARD_ACCES_TOKEN = ''
+DEFAULT_THINGSBOARD_PUBLISH_TOPIC = 'v1/devices/me/telemetry'
+DEFAULT_THINGSBOARD_USERNAME = ""
+DEFAULT_THINGSBOARD_PASSWORD = ""
 
 class ESPConfig:
     """
@@ -139,6 +142,8 @@ class ESPConfig:
         #ThingsBoard
         self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
         self.thingsboard_acces_token = DEFAULT_THINGSBOARD_ACCES_TOKEN
+        self.thingsboard_username = DEFAULT_THINGSBOARD_USERNAME
+        self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
 
     def load_from_file(self) -> None:
         """
@@ -218,7 +223,11 @@ class ESPConfig:
                 'thingsboard_acces_token', DEFAULT_THINGSBOARD_ACCES_TOKEN)
             self.thingsboard_host = config_dict.get(
                 'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
-
+            self.thingsboard_username = config_dict.get(
+                'thingsboard_username', DEFAULT_THINGSBOARD_USERNAME)
+            self.thingsboard_password = config_dict.get(
+                'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
+            
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
                 # self.device_uid = config_dict.get(
@@ -282,6 +291,8 @@ class ESPConfig:
         #ThingsBoard
         config_dict['thingsboard_acces_token'] = self.thingsboard_acces_token
         config_dict['thingsboard_host'] = self.thingsboard_host
+        config_dict['thingsboard_username'] = self.thingsboard_username
+        config_dict['thingsboard_password'] = self.thingsboard_password
 
         return config_dict
 
