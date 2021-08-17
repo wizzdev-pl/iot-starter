@@ -7,7 +7,6 @@ from os import mkdir
 
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import MainControllerEvent, MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -23,9 +22,6 @@ class AWS_cloud(CloudProvider):
         :return: Error code (0 - OK, 1 - Error).
         """
 
-        config.cfg.access_points = data
-        config.cfg.save()
-
         logging.info("Wifi access point configuration:")
 
         for access_point in data:
@@ -33,14 +29,16 @@ class AWS_cloud(CloudProvider):
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:
-            utils.connect_to_wifi(wireless_controller)
+            utils.connect_to_wifi(wireless_controller, data)
             logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_aws_thing()
+            config.cfg.access_points = data
+            config.cfg.save()
         except Exception as e:
-            logging.error("Exception catched: {}".format(e))
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
-            return 1
+            logging.error("Exception caught: {}".format(e))
+            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
+            config.cfg.save()
+            machine.reset()
 
         config.cfg.ap_config_done = True
         config.cfg.save()
