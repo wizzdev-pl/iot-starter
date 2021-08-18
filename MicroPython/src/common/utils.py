@@ -152,11 +152,11 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
     try:
-        connect_to_wifi(wireless_controller, sync_time)
-        mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider, 
+        connect_to_wifi(wireless_controller, config.cfg.access_points, sync_time)
+        mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
                                              timeout=config.cfg.mqtt_timeout)
-        
-        while not wireless_controller.sta_handler.isconnected(): 
+
+        while not wireless_controller.sta_handler.isconnected():
             utime.sleep_ms(1)
 
         mqtt_communicator.connect()
@@ -171,21 +171,24 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
         except Exception:
             logging.error("Error in disconnecting WiFi controller")
 
-        logging.debug("RESETTING BOARD")
-        machine.reset()
+        logging.debug("Unable to publish data - no WIFI connection available. Retrying in {}ms".format(
+            config.cfg.data_publishing_period_in_ms))
+        machine.deepsleep(config.cfg.data_publishing_period_in_ms)
 
     return wireless_controller, mqtt_communicator
 
 
-def connect_to_wifi(wireless_controller: WirelessConnectionController, sync_time: bool = False) -> None:
+def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_credentials: list[dict],
+                    sync_time: bool = False) -> None:
     """
     Connects ESP to wifi.
     :param wireless_controller: Wifi handler
+    :param wifi_credentials: list of ssid & password pairs
     :param sync_time: flag if time is synced.
     :return: None
     """
     logging.debug("utils.py/connect_to_wifi({})".format(sync_time))
-    wireless_controller.setup_station(access_points=config.cfg.access_points)
+    wireless_controller.setup_station(access_points=wifi_credentials)
 
     try:
         wireless_controller.configure_station()

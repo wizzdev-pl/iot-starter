@@ -24,9 +24,8 @@ def main():
         logging.debug("Access points saved:")
         for ap in config.cfg.access_points:
             logging.debug("SSID: {} Password: {}".format(ap["ssid"], ap["password"]))
-        if config.cfg.access_points != []:
+        if config.cfg.access_points != config.DEFAULT_ACCESS_POINTS:
             logging.debug("Access points aren't default. Try to connect")
-            pass
         else:
             logging.debug("=== Entering configuration mode ===")
 
