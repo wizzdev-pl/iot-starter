@@ -171,7 +171,8 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
         except Exception:
             logging.error("Error in disconnecting WiFi controller")
 
-        logging.debug("sleep({})".format(config.cfg.data_publishing_period_in_ms))
+        logging.debug("Unable to publish data - no WIFI connection available. Retrying in {}ms".format(
+            config.cfg.data_publishing_period_in_ms))
         machine.deepsleep(config.cfg.data_publishing_period_in_ms)
 
     return wireless_controller, mqtt_communicator
@@ -192,7 +193,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_cred
     try:
         wireless_controller.configure_station()
     except Exception as e:
-        logging.info(e)
+        logging.info("Failed to connect to wifi {}".format(e))
         try:
             wireless_controller.disconnect_station()
         except Exception:

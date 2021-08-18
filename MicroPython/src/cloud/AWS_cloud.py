@@ -33,7 +33,6 @@ class AWS_cloud(CloudProvider):
             logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_aws_thing()
             config.cfg.access_points = data
-            config.cfg.save()
         except Exception as e:
             logging.error("Exception caught: {}".format(e))
             config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
