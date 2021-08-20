@@ -1,5 +1,4 @@
 import _thread
-import gc
 import logging
 
 import machine
@@ -160,7 +159,10 @@ class MainController:
 
             self.data_acquisitor.acquire_temp_humi()
             if not any([FAILED_TO_MEASURE_VALUE in val for (val,) in self.data_acquisitor.data.values()]):
-                self.got_sensor_data = True   
+                self.got_sensor_data = True
+            else:
+                logging.debug("Sensors measured values: {} and {}".format(
+                    *self.data_acquisitor.data.values()))
 
         elif event.event_type == MainControllerEventType.PUBLISH_DATA:
             logging.debug("WAITING FOR GOT SENSOR DATA")
