@@ -50,22 +50,24 @@ def set_credentials(cloud):
 
         print("Please provide ThingsBoard credentials:")
         old_host = config.get('thingsboard_host', None)
-        old_server_public = config.get('server_public', None)
-        old_client_public = config.get('client_public', None)
+        old_client_id = config.get('thingsboard_client_id', None)
+        old_user = config.get('thingsboard_user', None)
+        old_password = config.get('thingsboard_password', None)
 
-        host = input("Hostname [{}]: ".format(old_host))
-        server_public = input(
-            "Public server certificate path [{}]: ".format(old_server_public))
-        client_public = input(
-            "Public client certificate path [{}]: ".format(old_client_public))
+        host = input("Hostname  [{}]: ".format(old_host))
+        client_id = input("Client ID [{}]: ".format(old_client_id))
+        user = input("Username  [{}]: ".format(old_user))
+        password = input("Password  [{}]: ".format(old_password))
 
         # If values were not updated; leave the old ones
         if host:
             config['thingsboard_host'] = host
-        if server_public:
-            config['server_public'] = server_public
-        if client_public:
-            config['client_public'] = client_public
+        if user:
+            config['thingsboard_client_id'] = client_id
+        if user:
+            config['thingsboard_user'] = user
+        if password:
+            config['thingsboard_password'] = password
 
         with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)

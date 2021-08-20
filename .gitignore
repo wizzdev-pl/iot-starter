@@ -20,9 +20,9 @@ venv/
 *.vscode/
 .env
 
-# Certs
+# Certs and creds
+*credentials.txt
 ca.pem
-MicroPython/certs/*
 
 # Misc files
 *.info
