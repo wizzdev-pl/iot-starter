@@ -1,5 +1,6 @@
 from cloud.AWS_cloud import AWS_cloud
 from cloud.KAA_cloud import KAA_cloud
+from cloud.Things_cloud import ThingsBoard
 from cloud.cloud_interface import Providers
 import utime
 import logging
@@ -35,6 +36,7 @@ class MQTTCommunicator:
                 "key": aws_key,
                 "cert": aws_certificate
             }
+
             self.server = config.cfg.aws_endpoint
             self.client_id = config.cfg.aws_client_id
             self.port = config.cfg.mqtt_port_ssl
@@ -64,25 +66,19 @@ class MQTTCommunicator:
             )
 
         elif cloud_provider == Providers.THINGSBOARD:
-            self.port = config.cfg.mqtt_port_ssl
+            self.port = config.cfg.mqtt_port
             self.server = config.cfg.thingsboard_host
-            self.client_id ="WizzDev_starter"
-
-            # TODO: read certificates
-
-            ssl_parameters = {
-                "server_side": False,
-                "certfile": ..., # server public cert
-                "ca_certs": ... # client nopass cert
-            }
+            self.client_id = config.cfg.thingsboard_client_id
+            self.user = config.cfg.thingsboard_user
+            self.password = config.cfg.thingsboard_password
 
             self.MQTT_client = MQTTClient(
                 client_id=self.client_id,
                 server=self.server,
                 port=self.port,
-                ssl=True,
                 keepalive=self.timeout,
-                ssl_params=ssl_parameters
+                user=self.user,
+                password=self.password
             )
 
         else:
@@ -104,7 +100,7 @@ class MQTTCommunicator:
         logging.debug("mqtt_communicator.py/connect()")
         try:
             gc.collect()
-            self.MQTT_client.connect(clean_session=False)
+            self.MQTT_client.connect(False)
             self.is_connected = True
         except ValueError as e:
             self.is_connected = False

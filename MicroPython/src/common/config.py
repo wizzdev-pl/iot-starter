@@ -75,8 +75,9 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 #ThingsBoard stuff
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
-DEFAULT_SERVER_PUBLIC_PATH = ''
-DEFAULT_CLIENT_NOPASS_PATH = ''
+DEFAULT_THINGSBOARD_CLIENT_ID = ''
+DEFAULT_THINGSBOARD_USER = ''
+DEFAULT_THINGSBOARD_PASSWORD = ''
 
 
 class ESPConfig:
@@ -140,8 +141,9 @@ class ESPConfig:
 
         #ThingsBoard
         self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
-        self.server_public_path = DEFAULT_SERVER_PUBLIC_PATH
-        self.client_nopass_path = DEFAULT_CLIENT_NOPASS_PATH
+        self.thingsboard_client_id = DEFAULT_THINGSBOARD_CLIENT_ID
+        self.thingsboard_user = DEFAULT_THINGSBOARD_USER
+        self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
 
     def load_from_file(self) -> None:
         """
@@ -217,12 +219,14 @@ class ESPConfig:
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
             #ThingsBoard
-            self.server_public_path = config_dict.get(
-                'server_public_path', DEFAULT_SERVER_PUBLIC_PATH)
-            self.client_nopass_path = config_dict.get(
-                'client_nopass_path', DEFAULT_CLIENT_NOPASS_PATH)
             self.thingsboard_host = config_dict.get(
                 'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
+            self.thingsboard_client_id = config_dict.get(
+                'thingsboard_client_id', DEFAULT_THINGSBOARD_CLIENT_ID)
+            self.thingsboard_user = config_dict.get(
+                'thingsboard_user', DEFAULT_THINGSBOARD_USER)
+            self.thingsboard_password = config_dict.get(
+                'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
 
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
@@ -284,8 +288,9 @@ class ESPConfig:
 
         #ThingsBoard
         config_dict['thingsboard_host'] = self.thingsboard_host
-        config_dict['server_public_path'] = self.server_public_path
-        config_dict['client_nopass_path'] = self.client_nopass_path
+        config_dict['thingsboard_client_id'] = self.thingsboard_client_id
+        config_dict['thingsboard_user'] = self.thingsboard_user
+        config_dict['thingsboard_password'] = self.thingsboard_password
 
         return config_dict
 

@@ -44,9 +44,7 @@ class ThingsBoard(CloudProvider):
             self.configure_data()
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
-            return 1
+            return -1
 
         config.cfg.ap_config_done = True
         config.cfg.save()
@@ -65,11 +63,14 @@ class ThingsBoard(CloudProvider):
         config.cfg.thingsboard_host = thingsboard_configuration.get(
             "thingsboard_host", config.DEFAULT_THINGSBOARD_HOST)
 
-        config.cfg.server_public_path = thingsboard_configuration.get(
-            "server_public_path", config.DEFAULT_SERVER_PUBLIC_PATH)
+        config.cfg.thingsboard_client_id = thingsboard_configuration.get(
+            "thingsboard_client_id", config.DEFAULT_THINGSBOARD_CLIENT_ID)
+            
+        config.cfg.thingsboard_user = thingsboard_configuration.get(
+            "thingsboard_user", config.DEFAULT_THINGSBOARD_USER)
 
-        config.cfg.client_nopass_path = thingsboard_configuration.get(
-            "client_nopass_path", config.DEFAULT_CLIENT_NOPASS_PATH)
+        config.cfg.thingsboard_password = thingsboard_configuration.get(
+            "thingsboard_password", config.DEFAULT_THINGSBOARD_PASSWORD)
 
         config.cfg.save()
 
@@ -92,15 +93,30 @@ class ThingsBoard(CloudProvider):
         :param data: Data in dict to be formatted
         :return dict: Formatted data
         """
-        # TODO
+        formatted_data = {}
+        for key, values in data.items():
+            # Unpack outer list and extract values to variables
+            (_, value), = values
+            formatted_data[key] = value
+        
+        return formatted_data
 
-        raise NotImplementedError
-
-    def publish_data(self, data):
+    def publish_data(self, data: dict):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
-        # TODO
 
-        raise NotImplementedError
+        # TODO: topic subscribe
 
+        data = self._format_data(data)
+
+        logging.debug("data to send = {}".format(data))
+
+        mqtt_communicator.publish_message(
+            payload=data, topic=self.publish_topic, qos=config.cfg.QOS
+        )
+
+        # mqtt_communicator.MQTT_client.wait_msg()
+
+        mqtt_communicator.disconnect()
+        wireless_controller.disconnect_station()
