@@ -37,9 +37,7 @@ class AWS_cloud(CloudProvider):
             self.configure_aws_thing()
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
-            return 1
+            return -1
 
         config.cfg.ap_config_done = True
         config.cfg.save()
@@ -131,7 +129,8 @@ class AWS_cloud(CloudProvider):
             with open(config.CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(ca_certificate_string)
 
-    def read_certificates(self, parse: bool = False) -> tuple(bool, str, str):
+    @staticmethod
+    def read_certificates(parse: bool = False) -> tuple(bool, str, str):
         """
         Read certificates from files.
         :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
