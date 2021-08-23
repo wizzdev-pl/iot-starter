@@ -210,11 +210,11 @@ class MQTTCommunicator:
             # if qos == 1 it's a blocking method
             if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
                 if config.cfg.cloud_provider in (Providers.AWS, Providers.THINGSBOARD):
-                    logging.info("Publishing mesage succesfull!")
+                    logging.info("Publishing message successful!")
                 # Kaa subscribes to specific topics to know if publish is successful or not
                 return True
             else:
-                logging.error("Problem with publishing mesage!")
+                logging.error("Problem with publishing message!")
                 return False
         except MemoryError as e:
             try:

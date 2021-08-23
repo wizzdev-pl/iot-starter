@@ -21,23 +21,21 @@ class ThingsBoard(CloudProvider):
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-        ssid = data['ssid']
-        password = data['password']
+        logging.info("Wifi access point configuration:")
 
-        config.cfg.ssid = ssid
-        config.cfg.password = password
-        config.cfg.save()
-
-        logging.info(
-            "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
+        for access_point in data:
+            logging.info("Ssid: {} Password: {}".format(access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:
-            utils.connect_to_wifi(wireless_controller)
+            utils.connect_to_wifi(wireless_controller, data)
             logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_data()
+            config.cfg.access_points = data
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
+            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
+            config.cfg.save()
             return -1
 
         config.cfg.ap_config_done = True

@@ -49,7 +49,6 @@ class KAA_cloud(CloudProvider):
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-
         logging.info("Wifi access point configuration:")
 
         for access_point in data:
