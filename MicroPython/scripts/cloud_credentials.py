@@ -1,4 +1,5 @@
 import argparse
+import logging
 import json
 
 from common.utilities import file_exists

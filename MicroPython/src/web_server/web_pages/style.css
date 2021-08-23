@@ -21,8 +21,8 @@ a {
 .container {
     border-radius: 3pt;
     min-height: calc(100vh - 200pt);
-    width: 50%;
-    min-width: 300pt;
+    width: 35vw;
+    min-width: 250px;
     margin: 100pt auto 100pt auto;
     background-color: white;
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, .2),
@@ -32,8 +32,10 @@ a {
 
 /* Header */
 .header {
+    display: flex;
+    flex-wrap: wrap;
     font-size: 16px;
-    padding: 16px;
+    padding: 16px 24px;
     background-color: rgb(33, 33, 33);
     color: rgb(255, 255, 255);
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, .2),
@@ -46,28 +48,24 @@ a {
 }
 
 .header__nav {
-    padding: 4px;
-    display: inline-block;
-    justify-content: space-around;
+    flex-shrink: 0;
 }
 
-.header__nav__link {
+.header__nav__link__right {
     margin-left: 8px;
-    padding: 16px 8px;
-    font-weight: 400;
-    letter-spacing: 0.16px;
 }
 
 .header__title {
     display: inline-block;
-    margin-left: 8px;
+    flex-shrink: 0;
+    margin-right: 36px;
     letter-spacing: 0.4pt;
     font-weight: 500;
     font-size: 18px;
 }
 
 .hero--padding {
-    padding: 20pt;
+    padding: 20pt 0;
 }
 
 /* Hero */
@@ -114,34 +112,92 @@ a {
 
 .setup_form_title {
     font-size: 120%;
-    width: 100%; display: block;
+    width: 100%;
+    display: block;
+}
+
+#add-new-ap-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #b5b5b5;
+    margin: 12px 0;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#add-new-ap-button:hover {
+    background-color: #949494;
+}
+
+
+#add-new-ap-button p {
+    margin: 0 8px;
+}
+
+.setup_form__entries {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 12px 0;
 }
 
 .setup_form__entry {
-    padding: 7pt;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
     width: 100%;
 }
 
 .setup_form__entry > input {
-    box-sizing:content-box;
-    float: right;
+    box-sizing: content-box;
+    width: 125px;
     padding: 2pt;
     border-width: 0 0 1pt 0;
+    margin-left: 10pt;
+}
+
+.delete-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e86666;
+    margin: 0 0 12px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #b35050;
+}
+
+.delete-button p {
+    margin: 0 6px;
+    font-size: 0.8rem;
 }
 
 .setup_form__submit {
     width: 100%;
-    margin: 13pt 7pt 7pt 7pt;
+    height: 36px;
+    margin: 12px 0;
     border: none;
     padding: 4pt;
-    font-weight: 600;
-    background-color: #007bff;
-    border-radius: 3pt;
+    font-weight: 500;
+    background-color: #52b1ff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.setup_form__submit:hover {
+    background-color: #5988ba;
 }
 
 /* Footer */
 footer {
-    position: absolute;
+    position: fixed;
     bottom: 5pt;
     width: 100%;
     text-align: right;
@@ -149,6 +205,60 @@ footer {
 
 footer > small {
     padding: 4pt;
+}
+
+.full-page-div {
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    flex-direction: column;
+}
+
+.loader {
+    border: 8px solid #4f4f4f;
+    border-top: 8px solid #52b1ff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+.full-page-div p {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.no-js-div {
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.no-js-div h1 {
+    color: white;
 }
 
 /* Animations */
@@ -165,13 +275,8 @@ footer > small {
 }
 
 /* Mobile friendly */
-@media (max-width: 1315px) {
-    .header__nav {
-        padding-left: 0 !important;
-    }
-
-    .header__nav__link:first-of-type {
-        margin-left: 0 !important;
+@media (max-width: 850px) {
+    .container {
+        width: 90vw;
     }
 }
-
