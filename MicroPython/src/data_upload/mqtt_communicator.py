@@ -63,16 +63,16 @@ class MQTTCommunicator:
                 password=config.cfg.kaa_password
             )
         elif cloud_provider == Providers.THINGSBOARD:
-            self.port = config.cfg.mqtt_port_ssl
+            self.port = config.cfg.mqtt_port
             self.server = config.cfg.thingsboard_host
-            self.client_id =''
+            self.client_id = 'test'
 
             self.MQTT_client = MQTTClient(
                 client_id=self.client_id,
                 server=self.server,
                 port=self.port,
-                user=config.cfg.thingsboard_acces_token
-                # TODO SSL
+                user='test',
+                password='test'
             )
         else:
             # Not implemented for other clouds yet

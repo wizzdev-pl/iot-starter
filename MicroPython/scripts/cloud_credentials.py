@@ -54,12 +54,21 @@ def set_credentials(cloud):
         
         print("Please provide ThingsBoard credentials:")
         old_host = config.get('thingsboard_host', None)
+        old_username = config.get('thingsboard_username', None)
+        old_password = config.get('thingsboard_password', None)
 
         host = input("Hostname [{}]: ".format(old_host))
+        username = input("Username [{}]: ".format(old_username))
+        password = input("Password [{}]: ".format(old_password))
         print()
 
         # If values were not updated; leave the old ones
-        config['thingsboard_host'] = host if host else old_host
+        if host:
+            config['thingsboard_host'] = host
+        if username:
+            config['thingsboard_username'] = username
+        if password:
+            config['thingsboard_password'] = password
 
         with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)

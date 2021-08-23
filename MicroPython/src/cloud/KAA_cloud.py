@@ -68,8 +68,6 @@ class KAA_cloud(CloudProvider):
             self.configure_data()
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
             return 1
 
         config.cfg.ap_config_done = True
