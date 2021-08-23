@@ -4,22 +4,16 @@ import machine
 import ujson
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import (MainControllerEvent,
-                                              MainControllerEventType)
 
 from cloud.cloud_interface import CloudProvider
 
 
 class ThingsBoard(CloudProvider):
     def __init__(self) -> None:
-        self.rpc_response_topic = 'v1/devices/me/rpc/response/'
-        self.rpc_request_topic = 'v1/devices/me/rpc/request/'
         self.publish_topic = 'v1/devices/me/telemetry'
 
-    def receive_message(self, topic, msg) -> None:
-        # TODO
-
-        raise NotImplementedError
+    def receive_message(self, client, userdata, msg) -> None:
+        logging.info('Topic: ' + msg.topic + '\nMessage: ' + msg.payload.decode("UTF-8"))
 
     def device_configuration(self, data: dict) -> int:
         """
@@ -93,30 +87,29 @@ class ThingsBoard(CloudProvider):
         :param data: Data in dict to be formatted
         :return dict: Formatted data
         """
-        formatted_data = {}
+        formatted_data = {
+            "ts": None,
+            "values": {}
+        }
+
         for key, values in data.items():
             # Unpack outer list and extract values to variables
-            (_, value), = values
-            formatted_data[key] = value
-        
+            (ts, value), = values
+            formatted_data['values'][key] = value
+        formatted_data['ts'] = ts
+
         return formatted_data
 
     def publish_data(self, data: dict):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
-            sync_time=False
-        )
-
-        # TODO: topic subscribe
+            sync_time=False)
 
         data = self._format_data(data)
 
         logging.debug("data to send = {}".format(data))
 
         mqtt_communicator.publish_message(
-            payload=data, topic=self.publish_topic, qos=config.cfg.QOS
-        )
-
-        # mqtt_communicator.MQTT_client.wait_msg()
+            payload=data, topic=self.publish_topic, qos=config.cfg.QOS)
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
