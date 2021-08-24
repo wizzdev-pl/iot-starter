@@ -14,7 +14,6 @@ class ThingsBoard(CloudProvider):
         self.rpc_request_topic = 'v1/devices/me/rpc/request/+'
         self.publish_topic = 'v1/devices/me/telemetry'
 
-
     def device_configuration(self, data: dict) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
@@ -88,24 +87,23 @@ class ThingsBoard(CloudProvider):
         logging.debug("Acquisition of new attributes...")
         
         url = 'http://{}:{}/api/plugins/telemetry/DEVICE/{}/values/attributes/SERVER_SCOPE'.format(
-            config.cfg.thingsboard_host, 8080, 'DEVICE ID HERE')
+            config.cfg.thingsboard_host, 8080, '679d1b20-04af-11ec-985f-3f02f351a5e2')
         headers = {
             'x-authorization': 'Bearer {}'.format(jwt_token), 
             'content-type': 'application/json'
         }
 
-        get_dict = urequests.get(url=url, headers=headers).text
-        conv_to_dict = loads(get_dict)
+        get_dict = urequests.get(url=url, headers=headers)
+
+        conv_to_dict = loads(get_dict.text)
+
         for item in conv_to_dict:
             if item['key'] == 'SleepTime':
-                sleep_time_dict = item
-
-        if sleep_time_dict:
-            logging.debug("Got new attributes")
-            return sleep_time_dict['value']
-        else:
-            logging.debug("Did not find any new attributes")
-            return 0
+                logging.debug("Got new attributes")
+                return item['value']
+        
+        logging.debug("Did not find any new attributes")
+        return 0
 
     def receive_message(self, topic, msg) -> None:
         """
@@ -138,16 +136,18 @@ class ThingsBoard(CloudProvider):
 
         config.cfg.thingsboard_host = thingsboard_configuration.get(
             "thingsboard_host", config.DEFAULT_THINGSBOARD_HOST)
+
+        config.cfg.thingsboard_device_client_id = thingsboard_configuration.get(
+            "thingsboard_device_client_id", config.DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID)
+
+        config.cfg.thingsboard_device_username = thingsboard_configuration.get(
+            "thingsboard_device_username", config.DEFAULT_THINGSBOARD_DEVICE_USERNAME)
+
+        config.cfg.thingsboard_device_password = thingsboard_configuration.get(
+            "thingsboard_device_password", config.DEFAULT_THINGSBOARD_DEVICE_PASSWORD)
+
         config.cfg.thingsboard_username = thingsboard_configuration.get(
             "thingsboard_username", config.DEFAULT_THINGSBOARD_USERNAME)
-        config.cfg.thingsboard_password = thingsboard_configuration.get(
-            "thingsboard_password", config.DEFAULT_THINGSBOARD_PASSWORD)
-
-        config.cfg.thingsboard_client_id = thingsboard_configuration.get(
-            "thingsboard_client_id", config.DEFAULT_THINGSBOARD_CLIENT_ID)
-            
-        config.cfg.thingsboard_user = thingsboard_configuration.get(
-            "thingsboard_user", config.DEFAULT_THINGSBOARD_USER)
 
         config.cfg.thingsboard_password = thingsboard_configuration.get(
             "thingsboard_password", config.DEFAULT_THINGSBOARD_PASSWORD)
@@ -189,10 +189,14 @@ class ThingsBoard(CloudProvider):
     def publish_data(self, data: dict):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False)
+
         jwt_token = self.authorization_request()
+
         if jwt_token:
-            config.cfg.data_publishing_period_in_ms = self.get_sleep_time(jwt_token)*1000
-            config.cfg.save()
+            sleep_time = self.get_sleep_time(jwt_token)
+            if sleep_time:
+                config.cfg.data_publishing_period_in_ms = self.get_sleep_time(jwt_token)*1000
+                config.cfg.save()
 
         result_request_topic = mqtt_communicator.subscribe(
             topic=self.rpc_request_topic, callback=self.receive_message, qos=config.cfg.QOS)
@@ -206,7 +210,7 @@ class ThingsBoard(CloudProvider):
 
         logging.debug("data to send = {}".format(data))
         
-        mqtt_communicator.publish_message(payload=data, topic=config.DEFAULT_THINGSBOARD_PUBLISH_TOPIC, qos=config.cfg.QOS)
+        mqtt_communicator.publish_message(payload=data, topic=self.publish_topic, qos=config.cfg.QOS)
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()

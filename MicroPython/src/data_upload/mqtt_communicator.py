@@ -68,16 +68,16 @@ class MQTTCommunicator:
         elif cloud_provider == Providers.THINGSBOARD:
             self.port = config.cfg.mqtt_port
             self.server = config.cfg.thingsboard_host
-            self.client_id = config.cfg.thingsboard_client_id
-            self.user = config.cfg.thingsboard_user
-            self.password = config.cfg.thingsboard_password
+            self.client_id = config.cfg.thingsboard_device_client_id
+            self.username = config.cfg.thingsboard_device_username
+            self.password = config.cfg.thingsboard_device_password
 
             self.MQTT_client = MQTTClient(
                 client_id=self.client_id,
                 server=self.server,
                 port=self.port,
                 keepalive=self.timeout,
-                user=self.user,
+                user=self.username,
                 password=self.password
             )
 

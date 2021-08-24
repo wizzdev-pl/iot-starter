@@ -51,30 +51,30 @@ def set_credentials(cloud):
 
         print("Please provide ThingsBoard credentials:")
         old_host = config.get('thingsboard_host', None)
+        old_client_id = config.get('thingsboard_device_client_id', None)
+        old_device_username = config.get('thingsboard_device_username', None)
+        old_device_password = config.get('thingsboard_device_password', None)
         old_username = config.get('thingsboard_username', None)
-        old_password = config.get('thingsboard_password', None)
-        old_client_id = config.get('thingsboard_client_id', None)
-        old_user = config.get('thingsboard_user', None)
         old_password = config.get('thingsboard_password', None)
 
         host = input("Hostname  [{}]: ".format(old_host))
         client_id = input("Client ID [{}]: ".format(old_client_id))
-        user = input("Username  [{}]: ".format(old_user))
-        username = input("Username [{}]: ".format(old_username))
-        password = input("Password [{}]: ".format(old_password))
-        password = input("Password  [{}]: ".format(old_password))
+        device_username = input("Device username  [{}]: ".format(old_device_username))
+        device_password = input("Device password [{}]: ".format(old_device_password))
+        username = input("ThingsBoard username [{}]: ".format(old_username))
+        password = input("ThingsBoard password  [{}]: ".format(old_password))
 
         # If values were not updated; leave the old ones
         if host:
             config['thingsboard_host'] = host
-        if user:
-            config['thingsboard_client_id'] = client_id
-        if user:
-            config['thingsboard_user'] = user
+        if client_id:
+            config['thingsboard_device_client_id'] = client_id
+        if device_username:
+            config['thingsboard_device_username'] = device_username
+        if device_password:
+            config['thingsboard_device_password'] = device_password
         if username:
             config['thingsboard_username'] = username
-        if password:
-            config['thingsboard_password'] = password
         if password:
             config['thingsboard_password'] = password
 

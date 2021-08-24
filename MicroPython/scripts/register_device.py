@@ -24,9 +24,9 @@ def collect_data():
     config = {
         'thingsboard_host': config.get('thingsboard_host', 'localhost'),
         'port': config.get('port', 1883),
-        'thingsboard_client_id': credentials.get('clientId', None),
-        'thingsboard_user': credentials.get('userName', None),
-        'thingsboard_password': credentials.get('password', None)
+        'thingsboard_device_client_id': credentials.get('clientID', None),
+        'thingsboard_device_username': credentials.get('username', None),
+        'thingsboard_device_password': credentials.get('password', None)
     }
 
     host = input("\nPlease write your ThingsBoard \033[93mhost\033[0m or leave it blank to use default [{}]: ".format(
@@ -42,19 +42,19 @@ def collect_data():
     config["provision_device_key"] = input("Please write \033[93mprovision device key\033[0m: ")
     config["provision_device_secret"] = input("Please write \033[93mprovision device secret\033[0m: ")
 
-    clientID = input("Please write your ThingsBoard \033[93mclient ID\033[0m [{}]: ".format(
-        config['thingsboard_client_id']))
-    user = input("Please write your ThingsBoard \033[93musername\033[0m [{}]: ".format(
-        config['thingsboard_user']))
-    password = input("Please write your ThingsBoard \033[93mpassword\033[0m [{}]: ".format(
-        config['thingsboard_password']))
+    clientID = input("Please write ThingsBoard \033[93mclient ID\033[0m for your device [{}]: ".format(
+        config['thingsboard_device_client_id']))
+    device_username = input("Please write ThingsBoard \033[93musername\033[0m [{}]: ".format(
+        config['thingsboard_device_username']))
+    device_password = input("Please write ThingsBoard \033[93mpassword\033[0m [{}]: ".format(
+        config['thingsboard_device_password']))
 
     if clientID:
-        config['thingsboard_client_id'] = clientID
-    if user:
-        config['thingsboard_user'] = user
-    if password:
-        config['thingsboard_password'] = password
+        config['thingsboard_device_client_id'] = clientID
+    if device_username:
+        config['thingsboard_device_username'] = device_username
+    if device_password:
+        config['thingsboard_device_password'] = device_password
 
     device_name = input("Please write \033[93mdevice name\033[0m or leave it blank to generate: ")
     if device_name:
@@ -100,9 +100,9 @@ if __name__ == '__main__':
         "provisionDeviceKey": config["provision_device_key"],
         "provisionDeviceSecret": config["provision_device_secret"],
         "credentialsType": "MQTT_BASIC",
-        "clientId": config["thingsboard_client_id"],
-        "username": config["thingsboard_user"],
-        "password": config["thingsboard_password"]
+        "clientID": config["thingsboard_device_client_id"],
+        "username": config["thingsboard_device_username"],
+        "password": config["thingsboard_device_password"]
     }
 
     if config.get('thingsboard_device_name', None) is not None:

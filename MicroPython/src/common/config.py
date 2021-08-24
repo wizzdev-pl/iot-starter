@@ -74,12 +74,11 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 #ThingsBoard stuff
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
-DEFAULT_THINGSBOARD_CLIENT_ID = ''
-DEFAULT_THINGSBOARD_PUBLISH_TOPIC = 'v1/devices/me/telemetry'
+DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID = ''
+DEFAULT_THINGSBOARD_DEVICE_USERNAME = ''
+DEFAULT_THINGSBOARD_DEVICE_PASSWORD = ''
 DEFAULT_THINGSBOARD_USERNAME = "tenant@thingsboard.org"
 DEFAULT_THINGSBOARD_PASSWORD = "tenant"
-DEFAULT_THINGSBOARD_USER = ''
-DEFAULT_THINGSBOARD_PASSWORD = ''
 
 
 class ESPConfig:
@@ -142,9 +141,10 @@ class ESPConfig:
 
         #ThingsBoard
         self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
-        self.thingsboard_client_id = DEFAULT_THINGSBOARD_CLIENT_ID
+        self.thingsboard_device_client_id = DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID
+        self.thingsboard_device_username = DEFAULT_THINGSBOARD_DEVICE_USERNAME
+        self.thingsboard_device_password = DEFAULT_THINGSBOARD_DEVICE_PASSWORD
         self.thingsboard_username = DEFAULT_THINGSBOARD_USERNAME
-        self.thingsboard_user = DEFAULT_THINGSBOARD_USER
         self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
 
     def load_from_file(self) -> None:
@@ -222,14 +222,14 @@ class ESPConfig:
             #ThingsBoard
             self.thingsboard_host = config_dict.get(
                 'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
+            self.thingsboard_device_client_id = config_dict.get(
+                'thingsboard_device_client_id', DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID)
+            self.thingsboard_device_username = config_dict.get(
+                'thingsboard_device_username', DEFAULT_THINGSBOARD_DEVICE_USERNAME)
+            self.thingsboard_device_password = config_dict.get(
+                'thingsboard_device_password', DEFAULT_THINGSBOARD_DEVICE_PASSWORD)
             self.thingsboard_username = config_dict.get(
                 'thingsboard_username', DEFAULT_THINGSBOARD_USERNAME)
-            self.thingsboard_password = config_dict.get(
-                'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
-            self.thingsboard_client_id = config_dict.get(
-                'thingsboard_client_id', DEFAULT_THINGSBOARD_CLIENT_ID)
-            self.thingsboard_user = config_dict.get(
-                'thingsboard_user', DEFAULT_THINGSBOARD_USER)
             self.thingsboard_password = config_dict.get(
                 'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
             
@@ -292,10 +292,10 @@ class ESPConfig:
 
         #ThingsBoard
         config_dict['thingsboard_host'] = self.thingsboard_host
-        config_dict['thingsboard_client_id'] = self.thingsboard_client_id
-        config_dict['thingsboard_user'] = self.thingsboard_user
+        config_dict['thingsboard_device_client_id'] = self.thingsboard_device_client_id
+        config_dict['thingsboard_device_username'] = self.thingsboard_device_username
+        config_dict['thingsboard_device_password'] = self.thingsboard_device_password
         config_dict['thingsboard_username'] = self.thingsboard_username
-        config_dict['thingsboard_password'] = self.thingsboard_password
         config_dict['thingsboard_password'] = self.thingsboard_password
 
         return config_dict
