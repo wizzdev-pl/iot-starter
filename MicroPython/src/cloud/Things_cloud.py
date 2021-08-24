@@ -53,7 +53,7 @@ class ThingsBoard(CloudProvider):
             'Content-Type': 'application/json'
         }
         
-        url = 'http://{}:{}/api/auth/login'.format(config.cfg.thingsboard_host, 8080)
+        url = 'http://{}:{}/api/auth/login'.format(config.cfg.thingsboard_host, config.DEFAULT_HTTP_PORT)
 
         data = {
             "username": config.cfg.thingsboard_username,
@@ -87,23 +87,27 @@ class ThingsBoard(CloudProvider):
         logging.debug("Acquisition of new attributes...")
         
         url = 'http://{}:{}/api/plugins/telemetry/DEVICE/{}/values/attributes/SERVER_SCOPE'.format(
-            config.cfg.thingsboard_host, 8080, '679d1b20-04af-11ec-985f-3f02f351a5e2')
+            config.cfg.thingsboard_host, config.DEFAULT_HTTP_PORT, 'device id')
         headers = {
             'x-authorization': 'Bearer {}'.format(jwt_token), 
             'content-type': 'application/json'
         }
 
-        get_dict = urequests.get(url=url, headers=headers)
+        response = urequests.get(url=url, headers=headers)
 
-        conv_to_dict = loads(get_dict.text)
+        if response.status_code == 200:
+            response_dict = response.json()
 
-        for item in conv_to_dict:
-            if item['key'] == 'SleepTime':
-                logging.debug("Got new attributes")
-                return item['value']
-        
-        logging.debug("Did not find any new attributes")
-        return 0
+            for item in response_dict:
+                if item['key'] == 'SleepTime':
+                    logging.debug("Got new attributes")
+                    return item['value']
+            
+            logging.debug("Did not find any new attributes")
+            return 0
+        else:
+            logging.error("Wrong device id!")
+            return 0
 
     def receive_message(self, topic, msg) -> None:
         """
@@ -195,7 +199,7 @@ class ThingsBoard(CloudProvider):
         if jwt_token:
             sleep_time = self.get_sleep_time(jwt_token)
             if sleep_time:
-                config.cfg.data_publishing_period_in_ms = self.get_sleep_time(jwt_token)*1000
+                config.cfg.data_publishing_period_in_ms = sleep_time*1000
                 config.cfg.save()
 
         result_request_topic = mqtt_communicator.subscribe(

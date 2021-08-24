@@ -44,9 +44,9 @@ def collect_data():
 
     clientID = input("Please write ThingsBoard \033[93mclient ID\033[0m for your device [{}]: ".format(
         config['thingsboard_device_client_id']))
-    device_username = input("Please write ThingsBoard \033[93musername\033[0m [{}]: ".format(
+    device_username = input("Please write ThingsBoard \033[93musername\033[0m for your device [{}]: ".format(
         config['thingsboard_device_username']))
-    device_password = input("Please write ThingsBoard \033[93mpassword\033[0m [{}]: ".format(
+    device_password = input("Please write ThingsBoard \033[93mpassword\033[0m for your device [{}]: ".format(
         config['thingsboard_device_password']))
 
     if clientID:
