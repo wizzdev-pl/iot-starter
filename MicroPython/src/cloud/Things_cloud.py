@@ -10,8 +10,7 @@ from cloud.cloud_interface import CloudProvider
 
 class ThingsBoard(CloudProvider):
     def __init__(self) -> None:
-        self.rpc_response_topic = 'v1/devices/me/rpc/response/'
-        self.rpc_request_topic = 'v1/devices/me/rpc/request/+'
+        self.request_topic = 'v1/devices/me/rpc/request/+'
         self.publish_topic = 'v1/devices/me/telemetry'
 
     def device_configuration(self, data: dict) -> int:
@@ -65,6 +64,7 @@ class ThingsBoard(CloudProvider):
 
         try:
             response = urequests.post(url, headers=headers,data=data)
+            logging.debug("Authorized!")
         except IndexError as e:
             logging.error("No internet connection: {}".format(e))
             return ""
@@ -80,14 +80,44 @@ class ThingsBoard(CloudProvider):
         jwt_token = response_dict.get("token")
         return jwt_token
 
-    def get_sleep_time(self, jwt_token) -> int:
+    def get_device_id(self, jwt_token) -> str:
+        """
+        Get device ID.
+        """
+        logging.debug("Getting device id...")
+
+        url = 'http://{}:{}/api/tenant/devices?pageSize=10&page=0'.format(config.cfg.thingsboard_host, config.DEFAULT_HTTP_PORT)
+
+        headers = {
+            'x-authorization': 'Bearer {}'.format(jwt_token), 
+            'content-type': 'application/json'
+        }
+
+        response = urequests.get(url=url, headers=headers)
+        
+        if response.status_code == 200:
+            response_dict = response.json()
+            response_data = response_dict.get('data')
+
+            for data in response_data:
+                if data.get('name') == config.cfg.thingsboard_device_name:
+                    logging.debug("Got device ID!")
+                    return(data.get('id').get('id'))
+            
+            logging.debug("Could not find any device named: {}".format(config.cfg.thingsboard_device_name))
+            return ""
+        else:
+            logging.error("Error while getting device ID! Status code: {}".format(response.status_code))
+            return ""
+
+    def get_sleep_time(self, jwt_token, device_id) -> int:
         """
         Acquire attributes provided in dashboard.
         """
         logging.debug("Acquisition of new attributes...")
         
         url = 'http://{}:{}/api/plugins/telemetry/DEVICE/{}/values/attributes/SERVER_SCOPE'.format(
-            config.cfg.thingsboard_host, config.DEFAULT_HTTP_PORT, 'device id')
+            config.cfg.thingsboard_host, config.DEFAULT_HTTP_PORT, device_id)
         headers = {
             'x-authorization': 'Bearer {}'.format(jwt_token), 
             'content-type': 'application/json'
@@ -106,7 +136,7 @@ class ThingsBoard(CloudProvider):
             logging.debug("Did not find any new attributes")
             return 0
         else:
-            logging.error("Wrong device id!")
+            logging.error("Wrong device ID!")
             return 0
 
     def receive_message(self, topic, msg) -> None:
@@ -149,6 +179,9 @@ class ThingsBoard(CloudProvider):
 
         config.cfg.thingsboard_device_password = thingsboard_configuration.get(
             "thingsboard_device_password", config.DEFAULT_THINGSBOARD_DEVICE_PASSWORD)
+        
+        config.cfg.thingsboard_device_name = thingsboard_configuration.get(
+            "thingsboard_device_name", config.DEFAULT_THINGSBOARD_DEVICE_NAME)
 
         config.cfg.thingsboard_username = thingsboard_configuration.get(
             "thingsboard_username", config.DEFAULT_THINGSBOARD_USERNAME)
@@ -191,19 +224,21 @@ class ThingsBoard(CloudProvider):
         return formatted_data
 
     def publish_data(self, data: dict):
-        wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
-            sync_time=False)
+        wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(sync_time=False)
+        self.configure_data()
 
         jwt_token = self.authorization_request()
 
         if jwt_token:
-            sleep_time = self.get_sleep_time(jwt_token)
-            if sleep_time:
-                config.cfg.data_publishing_period_in_ms = sleep_time*1000
-                config.cfg.save()
-
+            device_id = self.get_device_id(jwt_token)
+            if device_id:
+                sleep_time = self.get_sleep_time(jwt_token, device_id)
+                if sleep_time:
+                    config.cfg.data_publishing_period_in_ms = sleep_time*1000
+                    config.cfg.save()
+        
         result_request_topic = mqtt_communicator.subscribe(
-            topic=self.rpc_request_topic, callback=self.receive_message, qos=config.cfg.QOS)
+            topic=self.request_topic, callback=self.receive_message, qos=config.cfg.QOS)
 
         if result_request_topic:
             logging.debug("Connected to ThingsBoard!")

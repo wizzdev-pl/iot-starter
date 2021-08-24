@@ -54,6 +54,7 @@ def set_credentials(cloud):
         old_client_id = config.get('thingsboard_device_client_id', None)
         old_device_username = config.get('thingsboard_device_username', None)
         old_device_password = config.get('thingsboard_device_password', None)
+        old_device_name = config.get('thingsboard_device_name', None)
         old_username = config.get('thingsboard_username', None)
         old_password = config.get('thingsboard_password', None)
 
@@ -61,6 +62,7 @@ def set_credentials(cloud):
         client_id = input("Client ID [{}]: ".format(old_client_id))
         device_username = input("Device username  [{}]: ".format(old_device_username))
         device_password = input("Device password [{}]: ".format(old_device_password))
+        device_name = input("Device name [{}]: ".format(old_device_name))
         username = input("ThingsBoard username [{}]: ".format(old_username))
         password = input("ThingsBoard password  [{}]: ".format(old_password))
 
@@ -73,6 +75,8 @@ def set_credentials(cloud):
             config['thingsboard_device_username'] = device_username
         if device_password:
             config['thingsboard_device_password'] = device_password
+        if device_name:
+            config['thingsboard_device_name'] = device_name
         if username:
             config['thingsboard_username'] = username
         if password:

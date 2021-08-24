@@ -29,24 +29,24 @@ def collect_data():
         'thingsboard_device_password': credentials.get('password', None)
     }
 
-    host = input("\nPlease write your ThingsBoard \033[93mhost\033[0m or leave it blank to use default [{}]: ".format(
+    host = input("\nPlease write your ThingsBoard host or leave it blank to use default [{}]: ".format(
         config['thingsboard_host']))
     if host:
         config["thingsboard_host"] = host
 
-    port = input("Please write your ThingsBoard \033[93mMQTT port\033[0m or leave it blank to use default [{}]: ".format(
+    port = input("Please write your ThingsBoard MQTT port or leave it blank to use default [{}]: ".format(
         config['port']))
     if port:
         config["port"] = int(port)
 
-    config["provision_device_key"] = input("Please write \033[93mprovision device key\033[0m: ")
-    config["provision_device_secret"] = input("Please write \033[93mprovision device secret\033[0m: ")
+    config["provision_device_key"] = input("Please write provision device key: ")
+    config["provision_device_secret"] = input("Please write provision device secret: ")
 
-    clientID = input("Please write ThingsBoard \033[93mclient ID\033[0m for your device [{}]: ".format(
+    clientID = input("Please write ThingsBoard client ID for your device [{}]: ".format(
         config['thingsboard_device_client_id']))
-    device_username = input("Please write ThingsBoard \033[93musername\033[0m for your device [{}]: ".format(
+    device_username = input("Please write ThingsBoard username for your device [{}]: ".format(
         config['thingsboard_device_username']))
-    device_password = input("Please write ThingsBoard \033[93mpassword\033[0m for your device [{}]: ".format(
+    device_password = input("Please write ThingsBoard password for your device [{}]: ".format(
         config['thingsboard_device_password']))
 
     if clientID:
@@ -56,7 +56,7 @@ def collect_data():
     if device_password:
         config['thingsboard_device_password'] = device_password
 
-    device_name = input("Please write \033[93mdevice name\033[0m or leave it blank to generate: ")
+    device_name = input("Please write device name or leave it blank to generate: ")
     if device_name:
         config["thingsboard_device_name"] = device_name
 
