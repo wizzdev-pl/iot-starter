@@ -1,17 +1,11 @@
 import argparse
 import logging
 import json
-from pathlib import Path
 
+from common.utilities import file_exists
 
 KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
 THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
-
-def file_exists(path):
-    if Path(path).is_file():
-        return True
-    else:
-        return False
 
 
 def set_credentials(cloud):
@@ -34,13 +28,16 @@ def set_credentials(cloud):
         app_version = input("App version [{}]: ".format(old_app_version))
         user = input("User [{}]: ".format(old_user))
         password = input("Password [{}]: ".format(old_password))
-        print()
 
         # If values were not updated; leave the old ones
-        config['kaa_endpoint'] = endpoint if endpoint else old_endpoint
-        config['kaa_app_version'] = app_version if app_version else old_app_version
-        config['kaa_user'] = user if user else old_user
-        config['kaa_password'] = password if password else old_password
+        if endpoint:
+            config['kaa_endpoint'] = endpoint
+        if app_version:
+            config['kaa_app_version'] = app_version
+        if user:
+            config['kaa_user'] = user
+        if password:
+            config['kaa_password'] = password
 
         with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
@@ -51,22 +48,33 @@ def set_credentials(cloud):
                 config = json.load(infile)
         else:
             config = {}
-        
+
         print("Please provide ThingsBoard credentials:")
         old_host = config.get('thingsboard_host', None)
         old_username = config.get('thingsboard_username', None)
         old_password = config.get('thingsboard_password', None)
+        old_client_id = config.get('thingsboard_client_id', None)
+        old_user = config.get('thingsboard_user', None)
+        old_password = config.get('thingsboard_password', None)
 
-        host = input("Hostname [{}]: ".format(old_host))
+        host = input("Hostname  [{}]: ".format(old_host))
+        client_id = input("Client ID [{}]: ".format(old_client_id))
+        user = input("Username  [{}]: ".format(old_user))
         username = input("Username [{}]: ".format(old_username))
         password = input("Password [{}]: ".format(old_password))
-        print()
+        password = input("Password  [{}]: ".format(old_password))
 
         # If values were not updated; leave the old ones
         if host:
             config['thingsboard_host'] = host
+        if user:
+            config['thingsboard_client_id'] = client_id
+        if user:
+            config['thingsboard_user'] = user
         if username:
             config['thingsboard_username'] = username
+        if password:
+            config['thingsboard_password'] = password
         if password:
             config['thingsboard_password'] = password
 
@@ -77,10 +85,8 @@ def set_credentials(cloud):
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        '--set-credentials', required=True, action='store_true',
-        dest='creds', help="Set credentials needed for cloud service"
-    )
+    parser.add_argument('-c', '--cloud', metavar='CLOUD', type=str, required=True,
+                        help="Cloud provider for IoT Starter")
 
     args = vars(parser.parse_args())
     return args
@@ -89,8 +95,7 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    if args['creds']:
-        set_credentials()
+    if args['cloud'] not in ('AWS', 'KAA', 'THINGSBOARD'):
+        print('Invalid choice! Only: AWS / KAA / THINGSBOARD clouds are supported!')
     else:
-        logging.info('Please run the script with "--set-credentials" flag!')
-
+        set_credentials(args['cloud'])

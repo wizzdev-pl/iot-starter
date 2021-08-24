@@ -5,7 +5,6 @@ import urequests
 from ujson import loads, dumps, load
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import MainControllerEvent, MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -13,6 +12,8 @@ class ThingsBoard(CloudProvider):
     def __init__(self) -> None:
         self.rpc_response_topic = 'v1/devices/me/rpc/response/'
         self.rpc_request_topic = 'v1/devices/me/rpc/request/+'
+        self.publish_topic = 'v1/devices/me/telemetry'
+
 
     def device_configuration(self, data: dict) -> int:
         """
@@ -20,23 +21,21 @@ class ThingsBoard(CloudProvider):
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-        ssid = data['ssid']
-        password = data['password']
+        logging.info("Wifi access point configuration:")
 
-        config.cfg.ssid = ssid
-        config.cfg.password = password
-        config.cfg.save()
-
-        logging.info(
-            "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
+        for access_point in data:
+            logging.info("Ssid: {} Password: {}".format(access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:
-            utils.connect_to_wifi(wireless_controller)
+            utils.connect_to_wifi(wireless_controller, data)
             logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_data()
+            config.cfg.access_points = data
         except Exception as e:
             logging.error("Exception catched: {}".format(e))
+            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
+            config.cfg.save()
             return -1
 
         config.cfg.ap_config_done = True
@@ -136,11 +135,20 @@ class ThingsBoard(CloudProvider):
         """
         logging.debug("ThingsBoard_config/configure_data()")
         thingsboard_configuration = self.load_thingsboard_config_from_file()
-        
+
         config.cfg.thingsboard_host = thingsboard_configuration.get(
             "thingsboard_host", config.DEFAULT_THINGSBOARD_HOST)
         config.cfg.thingsboard_username = thingsboard_configuration.get(
             "thingsboard_username", config.DEFAULT_THINGSBOARD_USERNAME)
+        config.cfg.thingsboard_password = thingsboard_configuration.get(
+            "thingsboard_password", config.DEFAULT_THINGSBOARD_PASSWORD)
+
+        config.cfg.thingsboard_client_id = thingsboard_configuration.get(
+            "thingsboard_client_id", config.DEFAULT_THINGSBOARD_CLIENT_ID)
+            
+        config.cfg.thingsboard_user = thingsboard_configuration.get(
+            "thingsboard_user", config.DEFAULT_THINGSBOARD_USER)
+
         config.cfg.thingsboard_password = thingsboard_configuration.get(
             "thingsboard_password", config.DEFAULT_THINGSBOARD_PASSWORD)
 
@@ -165,21 +173,23 @@ class ThingsBoard(CloudProvider):
         :param data: Data in dict to be formatted
         :return dict: Formatted data
         """
-        formatted_data = {}
-        for ind, (key, values) in enumerate(data.items()):
+        formatted_data = {
+            "ts": None,
+            "values": {}
+        }
+
+        for key, values in data.items():
             # Unpack outer list and extract values to variables
-            (_, value), = values
-            formatted_data[key] = value
-        
+            (ts, value), = values
+            formatted_data['values'][key] = value
+        formatted_data['ts'] = ts
+
         return formatted_data
 
-    def publish_data(self, data):
+    def publish_data(self, data: dict):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
-            sync_time=False
-        )
-
+            sync_time=False)
         jwt_token = self.authorization_request()
-        
         if jwt_token:
             config.cfg.data_publishing_period_in_ms = self.get_sleep_time(jwt_token)*1000
             config.cfg.save()

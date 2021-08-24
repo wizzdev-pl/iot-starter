@@ -11,8 +11,8 @@ def main():
     logging.debug("=== MAIN START ===")
 
     # Increase stack size per thread this increases micropython recursion depth
-    _thread.stack_size(8192*2)
-    
+    _thread.stack_size(8192 * 2)
+
     # Read and parse configuration from config.json
     utils.init()
 
@@ -21,10 +21,11 @@ def main():
     # Check if configuration via access point has to be started
     if not config.cfg.ap_config_done or wake_reason() == PIN_WAKE:
         logging.debug("AP_DONE: {}, wake_reason: {}".format(config.cfg.ap_config_done, wake_reason()))
-        logging.debug("SSID: {}, Password: {}".format(config.cfg.ssid, config.cfg.password))
-        if config.cfg.ssid != 'ssid' and config.cfg.password != 'password':
-            logging.debug("SSID and password aren't default. Try to connect")
-            pass
+        logging.debug("Access points saved:")
+        for ap in config.cfg.access_points:
+            logging.debug("SSID: {} Password: {}".format(ap["ssid"], ap["password"]))
+        if config.cfg.access_points != config.DEFAULT_ACCESS_POINTS:
+            logging.debug("Access points aren't default. Try to connect")
         else:
             logging.debug("=== Entering configuration mode ===")
 
@@ -56,6 +57,7 @@ def main():
     controller.add_event(event)
 
     controller.perform()
+
 
 if __name__ == '__main__':
     main()

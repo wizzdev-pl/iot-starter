@@ -4,10 +4,11 @@
 <head>
     <title> WizzDev Mobile IoT </title>
     <meta name="robots" content="noindex"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32-1.png">
     <link rel="stylesheet" href="style.css">
-    <script src="form.js"></script>
+    <script defer src="form.js"></script>
 </head>
 
 <body>
@@ -22,7 +23,7 @@
         </span>
         <nav class="header__nav">
             <a class="header__nav__link" href="setup.html">Device Setup</a>
-            <a class="header__nav__link" href="server_info.html">System Information</a>
+            <a class="header__nav__link__right" href="server_info.html">System Information</a>
         </nav>
     </div>
 
@@ -46,21 +47,26 @@
                 </div>
             </div>
 
-            <div class="setup_form">
+            <form id="setup_form">
                 <strong class="setup_form_title">Register new device:</strong>
-                <div class="setup_form__entry">
-                    <label for="formSsid">SSID:</label>
-                    <input type="text" id="formSsid" name="formSsid">
+                <div id="add-new-ap-button">
+                    <img src="add_icon.png" alt="add-icon" height="28"/>
+                    <p>Add new AP</p>
                 </div>
-                <div class="setup_form__entry">
-                    <label for="formPassword">Password:</label>
-                    <input type="password" id="formPassword" name="formPassword">
+                <div class="setup_form__entries">
+                    <div class="setup_form__entry">
+                        <label for="ssid0">SSID:</label>
+                        <input type="text" id="ssid0">
+                    </div>
+                    <div class="setup_form__entry">
+                        <label for="password0">Password:</label>
+                        <input type="password" id="password0">
+                    </div>
                 </div>
-                <input type="submit" value="Submit" class="setup_form__submit" onclick="sendWiFiConfiguration()">
-            </div>
+                <button type="submit" class="setup_form__submit">Submit</button>
+            </form>
         </div>
     </div>
-
 </div>
 
 <footer>
@@ -69,6 +75,15 @@
     </small>
 </footer>
 
+<div class="full-page-div">
+    <div class="loader"></div>
+    <p>IoT Starter will now connect to the strongest AP available.</p>
+</div>
+<noscript>
+    <div class="no-js-div">
+        <h1>Please enable javascript</h1>
+    </div>
+</noscript>
 </body>
 
 </html>

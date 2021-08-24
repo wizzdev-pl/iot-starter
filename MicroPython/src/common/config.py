@@ -9,8 +9,7 @@ cfg = None
 
 DEFAULT_CLOUD_PROVIDER = 'KAA'
 
-DEFAULT_SSID = 'ssid'
-DEFAULT_PASSWORD = 'password'
+DEFAULT_ACCESS_POINTS = []
 
 # Connection
 DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
@@ -75,10 +74,13 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
 #ThingsBoard stuff
 THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
 DEFAULT_THINGSBOARD_HOST = 'localhost'
-DEFAULT_THINGSBOARD_ACCES_TOKEN = ''
+DEFAULT_THINGSBOARD_CLIENT_ID = ''
 DEFAULT_THINGSBOARD_PUBLISH_TOPIC = 'v1/devices/me/telemetry'
 DEFAULT_THINGSBOARD_USERNAME = "tenant@thingsboard.org"
 DEFAULT_THINGSBOARD_PASSWORD = "tenant"
+DEFAULT_THINGSBOARD_USER = ''
+DEFAULT_THINGSBOARD_PASSWORD = ''
+
 
 class ESPConfig:
     """
@@ -94,8 +96,7 @@ class ESPConfig:
 
         self.cloud_provider = DEFAULT_CLOUD_PROVIDER
 
-        self.ssid = DEFAULT_SSID
-        self.password = DEFAULT_PASSWORD
+        self.access_points = DEFAULT_ACCESS_POINTS
 
         # Connection
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
@@ -141,8 +142,9 @@ class ESPConfig:
 
         #ThingsBoard
         self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
-        self.thingsboard_acces_token = DEFAULT_THINGSBOARD_ACCES_TOKEN
+        self.thingsboard_client_id = DEFAULT_THINGSBOARD_CLIENT_ID
         self.thingsboard_username = DEFAULT_THINGSBOARD_USERNAME
+        self.thingsboard_user = DEFAULT_THINGSBOARD_USER
         self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
 
     def load_from_file(self) -> None:
@@ -165,8 +167,7 @@ class ESPConfig:
             self.cloud_provider = config_dict.get(
                 'cloud_provider', DEFAULT_CLOUD_PROVIDER)
 
-            self.ssid = config_dict.get('ssid', DEFAULT_SSID)
-            self.password = config_dict.get('password', DEFAULT_PASSWORD)
+            self.access_points = config_dict.get('access_points', DEFAULT_ACCESS_POINTS)
 
             # Connection
             self.data_publishing_period_in_ms = config_dict.get(
@@ -219,19 +220,21 @@ class ESPConfig:
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
             #ThingsBoard
-            self.thingsboard_acces_token = config_dict.get(
-                'thingsboard_acces_token', DEFAULT_THINGSBOARD_ACCES_TOKEN)
             self.thingsboard_host = config_dict.get(
                 'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
             self.thingsboard_username = config_dict.get(
                 'thingsboard_username', DEFAULT_THINGSBOARD_USERNAME)
             self.thingsboard_password = config_dict.get(
                 'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
+            self.thingsboard_client_id = config_dict.get(
+                'thingsboard_client_id', DEFAULT_THINGSBOARD_CLIENT_ID)
+            self.thingsboard_user = config_dict.get(
+                'thingsboard_user', DEFAULT_THINGSBOARD_USER)
+            self.thingsboard_password = config_dict.get(
+                'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
             
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
-                # self.device_uid = config_dict.get(
-                #     'device_uid', DEFAULT_DEVICE_UID)
 
         if not config_file_exists:
             self.save()
@@ -247,8 +250,7 @@ class ESPConfig:
 
         config_dict['cloud_provider'] = self.cloud_provider
 
-        config_dict['ssid'] = self.ssid
-        config_dict['password'] = self.password
+        config_dict['access_points'] = self.access_points
 
         # Connection
         config_dict['data_publishing_period_ms'] = self.data_publishing_period_in_ms
@@ -289,9 +291,11 @@ class ESPConfig:
         config_dict['kaa_topic'] = self.kaa_topic
 
         #ThingsBoard
-        config_dict['thingsboard_acces_token'] = self.thingsboard_acces_token
         config_dict['thingsboard_host'] = self.thingsboard_host
+        config_dict['thingsboard_client_id'] = self.thingsboard_client_id
+        config_dict['thingsboard_user'] = self.thingsboard_user
         config_dict['thingsboard_username'] = self.thingsboard_username
+        config_dict['thingsboard_password'] = self.thingsboard_password
         config_dict['thingsboard_password'] = self.thingsboard_password
 
         return config_dict

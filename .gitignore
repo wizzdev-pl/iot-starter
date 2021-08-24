@@ -20,11 +20,8 @@ venv/
 *.vscode/
 .env
 
-# Test
-kaa_test.py
-kaa_test_wifi.py
-
-# Ca
+# Certs and creds
+*credentials.txt
 ca.pem
 
 # Misc files
