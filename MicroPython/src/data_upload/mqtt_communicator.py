@@ -1,17 +1,12 @@
-from cloud.AWS_cloud import AWS_cloud
-from cloud.KAA_cloud import KAA_cloud
-from cloud.Things_cloud import ThingsBoard
-from cloud.cloud_interface import Providers
-import utime
-import logging
-import ujson
-
-from umqtt.simple import MQTTClient  # micropython-umqtt library
-
-from common import config
-from common import utils
-
 import gc
+import logging
+
+import ujson
+import utime
+from cloud.AWS_cloud import AWS_cloud
+from cloud.cloud_interface import Providers
+from common import config, utils
+from umqtt.simple import MQTTClient  # micropython-umqtt library
 
 
 class MQTTCommunicator:

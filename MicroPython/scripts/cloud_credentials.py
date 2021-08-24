@@ -1,7 +1,7 @@
 import argparse
-import logging
 import json
 
+from common.cloud_providers import Providers
 from common.utilities import file_exists
 
 KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
@@ -12,7 +12,7 @@ def set_credentials(cloud):
     """
     Asks user for credentials for cloud similar to "awscli"
     """
-    if cloud == "KAA":
+    if cloud == Providers.KAA:
         if file_exists(KAA_CONFIG_SRC_PATH):
             with open(KAA_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
                 config = json.load(infile)
@@ -42,7 +42,7 @@ def set_credentials(cloud):
         with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
 
-    elif cloud == "THINGSBOARD":
+    elif cloud == Providers.THINGSBOARD:
         if file_exists(THINGSBOARD_CONFIG_SRC_PATH):
             with open(THINGSBOARD_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
                 config = json.load(infile)
@@ -78,7 +78,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-c', '--cloud', metavar='CLOUD', type=str, required=True,
-                        help="Cloud provider for IoT Starter")
+                        help="Cloud provider for IoT Starter: {}".format(
+                            Providers.print_providers()))
 
     args = vars(parser.parse_args())
     return args
@@ -87,7 +88,7 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    if args['cloud'] not in ('AWS', 'KAA', 'THINGSBOARD'):
-        print('Invalid choice! Only: AWS / KAA / THINGSBOARD clouds are supported!')
+    if args['cloud'] not in Providers.get_providers():
+        print('Invalid choice! Only:', Providers.print_providers(), 'clouds are supported!')
     else:
         set_credentials(args['cloud'])

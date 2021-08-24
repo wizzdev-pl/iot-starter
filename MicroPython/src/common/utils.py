@@ -1,13 +1,15 @@
-import ntptime
-import utime
-import uos
-import machine
 import logging
-import esp32
 
-from communication.wirerless_connection_controller import WirelessConnectionController
-from data_upload.mqtt_communicator import MQTTCommunicator
+import esp32
+import machine
+import ntptime
+import uos
+import utime
 from communication import wirerless_connection_controller
+from communication.wirerless_connection_controller import \
+    WirelessConnectionController
+from data_upload.mqtt_communicator import MQTTCommunicator
+
 from common import config
 
 TIME_EPOCH_SHIFT = 946684800000
