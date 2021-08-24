@@ -1,5 +1,4 @@
 import _thread
-import gc
 import logging
 
 import machine
@@ -7,6 +6,7 @@ import utime
 from cloud.AWS_cloud import AWS_cloud
 from cloud.cloud_interface import CloudProvider, Providers
 from cloud.KAA_cloud import KAA_cloud
+from cloud.Things_cloud import ThingsBoard
 from common import config, utils
 from communication import wirerless_connection_controller
 from data_acquisition import data_acquisitor
@@ -61,7 +61,7 @@ class MainController:
                         start_data_acquisition=self.start_data_acquisition_hook,
                         get_status_hook=self.get_status)
 
-        elif config.cfg.cloud_provider == Providers.KAA:
+        elif config.cfg.cloud_provider == Providers.KAA or config.cfg.cloud_provider == Providers.THINGSBOARD :
             web_app.setup(
                 get_measurement_hook=self.get_measurement,
                 configure_device_hook=self.cloud_provider.device_configuration,
@@ -109,9 +109,10 @@ class MainController:
         """
         if config.cfg.cloud_provider == Providers.AWS:
             return AWS_cloud()
-
         elif config.cfg.cloud_provider == Providers.KAA:
             return KAA_cloud()
+        elif config.cfg.cloud_provider == Providers.THINGSBOARD:
+            return ThingsBoard()
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
@@ -158,7 +159,10 @@ class MainController:
 
             self.data_acquisitor.acquire_temp_humi()
             if not any([FAILED_TO_MEASURE_VALUE in val for (val,) in self.data_acquisitor.data.values()]):
-                self.got_sensor_data = True   
+                self.got_sensor_data = True
+            else:
+                logging.debug("Sensors measured values: {} and {}".format(
+                    *self.data_acquisitor.data.values()))
 
         elif event.event_type == MainControllerEventType.PUBLISH_DATA:
             logging.debug("WAITING FOR GOT SENSOR DATA")

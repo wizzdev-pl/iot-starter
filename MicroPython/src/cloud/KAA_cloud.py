@@ -1,12 +1,10 @@
 import logging
-import random
-from random import randint
 
 import machine
 import ujson
 from common import config, utils
 from communication import wirerless_connection_controller
-from utime import time
+from controller.main_controller_event import MainControllerEventType
 
 from cloud.cloud_interface import CloudProvider
 
@@ -52,7 +50,6 @@ class KAA_cloud(CloudProvider):
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-
         logging.info("Wifi access point configuration:")
 
         for access_point in data:
@@ -68,7 +65,7 @@ class KAA_cloud(CloudProvider):
             logging.error("Exception caught: {}".format(e))
             config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
             config.cfg.save()
-            machine.reset()
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()

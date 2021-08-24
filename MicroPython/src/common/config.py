@@ -71,6 +71,13 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
     DEFAULT_KAA_APP_VERSION, DEFAULT_KAA_ENDPOINT, DEFAULT_MQTT_REQUEST_ID
 )
 
+#ThingsBoard stuff
+THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
+DEFAULT_THINGSBOARD_HOST = 'localhost'
+DEFAULT_THINGSBOARD_CLIENT_ID = ''
+DEFAULT_THINGSBOARD_USER = ''
+DEFAULT_THINGSBOARD_PASSWORD = ''
+
 
 class ESPConfig:
     """
@@ -129,6 +136,12 @@ class ESPConfig:
         self.kaa_endpoint = DEFAULT_KAA_ENDPOINT
         self.kaa_app_version = DEFAULT_KAA_APP_VERSION
         self.kaa_topic = DEFAULT_KAA_TOPIC
+
+        #ThingsBoard
+        self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
+        self.thingsboard_client_id = DEFAULT_THINGSBOARD_CLIENT_ID
+        self.thingsboard_user = DEFAULT_THINGSBOARD_USER
+        self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
 
     def load_from_file(self) -> None:
         """
@@ -202,10 +215,18 @@ class ESPConfig:
                 'kaa_app_version', DEFAULT_KAA_APP_VERSION)
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
+            #ThingsBoard
+            self.thingsboard_host = config_dict.get(
+                'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
+            self.thingsboard_client_id = config_dict.get(
+                'thingsboard_client_id', DEFAULT_THINGSBOARD_CLIENT_ID)
+            self.thingsboard_user = config_dict.get(
+                'thingsboard_user', DEFAULT_THINGSBOARD_USER)
+            self.thingsboard_password = config_dict.get(
+                'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
+
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
-                # self.device_uid = config_dict.get(
-                #     'device_uid', DEFAULT_DEVICE_UID)
 
         if not config_file_exists:
             self.save()
@@ -260,6 +281,12 @@ class ESPConfig:
         config_dict['kaa_endpoint'] = self.kaa_endpoint
         config_dict['kaa_app_version'] = self.kaa_app_version
         config_dict['kaa_topic'] = self.kaa_topic
+
+        #ThingsBoard
+        config_dict['thingsboard_host'] = self.thingsboard_host
+        config_dict['thingsboard_client_id'] = self.thingsboard_client_id
+        config_dict['thingsboard_user'] = self.thingsboard_user
+        config_dict['thingsboard_password'] = self.thingsboard_password
 
         return config_dict
 

@@ -11,6 +11,7 @@ terraform/terraform.exe
 MicroPython/src/aws_config.json
 MicroPython/src/kaa_config.json
 MicroPython/src/config.json
+MicroPython/src/thingsboard_config.json
 
 # Python cache files
 *.pyc
@@ -19,11 +20,8 @@ venv/
 *.vscode/
 .env
 
-# Test
-kaa_test.py
-kaa_test_wifi.py
-
-# Ca
+# Certs and creds
+*credentials.txt
 ca.pem
 
 # Misc files

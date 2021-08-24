@@ -1,27 +1,24 @@
 import gc
 import logging
-import urequests
-import machine
-from ujson import dumps, load
 from os import mkdir
 
+import machine
+import urequests
 from common import config, utils
 from communication import wirerless_connection_controller
+from controller.main_controller_event import MainControllerEventType
+from ujson import dumps, load
+
 from cloud.cloud_interface import CloudProvider
 
 
 class AWS_cloud(CloudProvider):
-    def __init__(self) -> None:
-        # TODO: Any initialization at constructor for a given cloud?
-        pass
-
     def device_configuration(self, data: list[dict]) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-
         logging.info("Wifi access point configuration:")
 
         for access_point in data:
@@ -37,7 +34,7 @@ class AWS_cloud(CloudProvider):
             logging.error("Exception caught: {}".format(e))
             config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
             config.cfg.save()
-            machine.reset()
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()
@@ -66,8 +63,6 @@ class AWS_cloud(CloudProvider):
             return True
         else:
             logging.error("Problem with authorization")
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
             return False
 
     def configure_data_from_terraform(self) -> None:
@@ -129,7 +124,8 @@ class AWS_cloud(CloudProvider):
             with open(config.CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(ca_certificate_string)
 
-    def read_certificates(self, parse: bool = False) -> tuple(bool, str, str):
+    @staticmethod
+    def read_certificates(parse: bool = False) -> tuple(bool, str, str):
         """
         Read certificates from files.
         :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.
