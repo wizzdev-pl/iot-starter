@@ -133,7 +133,7 @@ class WirelessConnectionController:
                 else:
                     logging.info("Failed to connect to AP: {}".format(wifi_credentials["ssid"]))
         self.disconnect_station()
-        raise Exception("Failed to connect to any AP")
+        raise Exception("Failed to connect to any AP, please restart your board")
 
     def disconnect_station(self) -> bool:
         """
