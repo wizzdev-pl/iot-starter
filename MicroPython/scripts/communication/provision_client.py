@@ -1,6 +1,6 @@
 from json import dumps, loads
-from common.utilities import file_exists
 
+from common.utilities import file_exists
 from paho.mqtt.client import Client
 
 RESULT_CODES = {
@@ -66,7 +66,7 @@ class ProvisionClient(Client):
     def get_credentials():
         new_credentials = None
         if not file_exists('src/credentials.txt'):
-            print("No saved credentials, using default!")
+            print("Credentials not found, using default!")
         else:
             with open("src/credentials.txt", "r") as credentials_file:
                 new_credentials = credentials_file.read()

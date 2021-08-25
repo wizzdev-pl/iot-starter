@@ -1,9 +1,9 @@
 import argparse
 import os
 import sys
+from pathlib import Path
 
 import git
-from pathlib import Path
 from git.refs.tag import TagReference
 
 import pyboard

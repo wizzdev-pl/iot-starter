@@ -1,12 +1,14 @@
 import gc
 import logging
-import urequests
-import machine
-from ujson import dumps, load
 from os import mkdir
 
+import machine
+import urequests
 from common import config, utils
 from communication import wirerless_connection_controller
+from controller.main_controller_event import MainControllerEventType
+from ujson import dumps, load
+
 from cloud.cloud_interface import CloudProvider
 
 
@@ -32,7 +34,7 @@ class AWS_cloud(CloudProvider):
             logging.error("Exception caught: {}".format(e))
             config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
             config.cfg.save()
-            return -1
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()
@@ -61,8 +63,6 @@ class AWS_cloud(CloudProvider):
             return True
         else:
             logging.error("Problem with authorization")
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
             return False
 
     def configure_data_from_terraform(self) -> None:

@@ -4,6 +4,7 @@ import machine
 import ujson
 from common import config, utils
 from communication import wirerless_connection_controller
+from controller.main_controller_event import MainControllerEventType
 
 from cloud.cloud_interface import CloudProvider
 
@@ -64,7 +65,7 @@ class KAA_cloud(CloudProvider):
             logging.error("Exception caught: {}".format(e))
             config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
             config.cfg.save()
-            return -1
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()

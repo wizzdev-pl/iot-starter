@@ -1,11 +1,12 @@
 import argparse
 import json
-from common.utilities import file_exists
-from cloud_credentials import THINGSBOARD_CONFIG_SRC_PATH
 import sys
 from json import loads
 
-from communication.provision_client import ProvisionClient, RESULT_CODES
+from cloud_credentials import THINGSBOARD_CONFIG_SRC_PATH
+from common.cloud_providers import Providers
+from common.utilities import file_exists
+from communication.provision_client import RESULT_CODES, ProvisionClient
 
 
 def collect_data():
@@ -81,7 +82,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-c', '--cloud', metavar='CLOUD', type=str, required=True,
-                        help="Cloud provider for IoT Starter")
+                        help="Cloud provider for IoT Starter: {}".format(
+                            Providers.print_providers()))
 
     args = vars(parser.parse_args())
     return args
@@ -90,7 +92,7 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    if args['cloud'] != 'THINGSBOARD':
+    if args['cloud'] != Providers.THINGSBOARD:
         print('Script for registering new devices works only for THINGSBOARD currently!')
         sys.exit(-1)
 

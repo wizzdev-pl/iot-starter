@@ -1,8 +1,9 @@
-import dht
-import utime
-import machine
 import logging
+
+import dht
 import lib.bme280 as bme280
+import machine
+import utime
 
 TIME_TO_DHT11_TO_WAKE_UP_S = 1
 TIME_TO_DHT22_TO_WAKE_UP_S = 0.5

@@ -1,5 +1,6 @@
-import os
 import argparse
+import os
+
 import esptool
 
 # esptool.py --chip esp32 --port "$PORT" erase_flash

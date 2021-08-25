@@ -5,6 +5,7 @@ import urequests
 from ujson import loads, dumps, load
 from common import config, utils
 from communication import wirerless_connection_controller
+from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -34,7 +35,7 @@ class ThingsBoard(CloudProvider):
             logging.error("Exception catched: {}".format(e))
             config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
             config.cfg.save()
-            return -1
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()

@@ -1,7 +1,6 @@
 import logging
 
-from common import utils
-from common import config
+from common import config, utils
 from peripherals.sensor import Sensor
 
 ADC_TO_VOLTS_ATTN_11DB = 0.000878906
