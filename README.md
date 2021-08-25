@@ -5,6 +5,7 @@ This repository contains the WizzDev mobile IoT application in the "Starter" ver
 
 - AWS: directly on the AWS, or on the dedicated visualization page.
 - KAA: directly on the Kaa on the created dashboard for a device.
+- ThingsBoard: directly on the dashboard in ThingsBoard local page
 
 The board was programmed using MicroPython, which is a Python implementation for embedded devices. If you are a novice and / or just want to try a solution that works without putting much work into it, we recommend using Kaa cloud which is much faster to set up.
 
@@ -72,6 +73,9 @@ KAA configuration is easy to set up and work with cloud. Detailed description of
 ### **AWS configuration:** 
 AWS's configuration is handled using terraform. Detailed description of this procedure is available in the "terraform" directory [here](terraform/README.md).
 
+### **ThingsBoard configuration:** 
+As ThingsBoard is hosted locally on your device you need to install it first. Detailed description of whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
+
 ---
 ## **After cloud setup:**
 
@@ -92,6 +96,16 @@ Log in to your KAA account. From the side pane select "Device management" -> "De
 ### Dashboard
 
 Another way of visualization of the data is to create a dashboard. You can use already created widgets or create custom ones. For more information visit [documentation](https://docs.kaaiot.io/KAA/docs/v1.3.0/Features/Visualization/WD/Dashboards/).
+
+## **For ThingsBoard:**
+
+### Device management
+
+Log in to your ThingsBoard page and from the side pane select "Devices" tab. Click on your device and select "Latest telemetry", there should be shown the latest telemetry sent to cloud. In the "Details" you can manage your device credentials set during the device registering or assing device to customer. In "Attributes" and server scope selected you can manage created attributes. After first connection a variable SleepTime should be created. If not, make sure all passed ThingsBoard credentials are correct. SleepTime represents frequency of sending data to cloud in seconds, you can change the variable directly from attributes tab or create a special widget in your dashboard.
+
+### Dashboard
+
+To visualize data you need to create a dashboard. Whole process of setting up dashboard is described [here](https://thingsboard.io/docs/user-guide/dashboards/). In addition to change your SleepTime attribute from dashboard, you need to click on "Add new widget" in the right bottom corner, then: "Create new widget" -> "Input widgets" -> "Update server integer attribute". Add datasource and as attribute select SleepTime. In widget settings change the title, in "Advenced" tab add error messege and set "Min value" to 30(seconds). Smaller value may cause software problems.
 
 ---
 
