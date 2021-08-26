@@ -46,6 +46,8 @@ class ThingsBoard(CloudProvider):
     
     def api_configuration(self) -> None:
         """
+        Configure device in API (get JWT, get device ID, create attributes)
+        :return: None
         """
         logging.debug("Api configuration")
         logging.info("Allocated bytes on heap before gc {}".format(gc.mem_alloc()))
@@ -124,8 +126,10 @@ class ThingsBoard(CloudProvider):
 
             for data in response_data:
                 if data.get('name') == config.cfg.thingsboard_device_name:
+                    device_dict = data.get('id')
+                    device_id = device_dict.get('id')
                     logging.debug("Got device ID!")
-                    return data.get('id').get('id')
+                    return device_id
             
             logging.debug("Could not find any device named: {}".format(config.cfg.thingsboard_device_name))
             return ""

@@ -102,7 +102,7 @@ if __name__ == '__main__':
         "provisionDeviceKey": config["provision_device_key"],
         "provisionDeviceSecret": config["provision_device_secret"],
         "credentialsType": "MQTT_BASIC",
-        "clientID": config["thingsboard_device_client_id"],
+        "clientId": config["thingsboard_device_client_id"],
         "username": config["thingsboard_device_username"],
         "password": config["thingsboard_device_password"]
     }
