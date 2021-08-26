@@ -41,7 +41,7 @@ class Sensor:
         elif self.sensor_type == "BME280":
             self.sensor_sda_pin = machine.Pin(sensor_sda_pin_number)
             self.sensor_scl_pin = machine.Pin(sensor_scl_pin_number)
-            self.i2c = machine.I2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000)
+            self.i2c = machine.SoftI2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000) 
             self.sensor = bme280.BME280(i2c=self.i2c)
         else:
             raise Exception("Wrong sensor type provided! " + self.sensor_type + " is not supported")

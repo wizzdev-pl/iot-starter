@@ -5,7 +5,7 @@ import esptool
 
 # esptool.py --chip esp32 --port "$PORT" erase_flash
 
-MICROPYTHON_BIN_FILE_NAME = "esp32-idf3-20191220-v1.12.bin"
+MICROPYTHON_BIN_FILE_NAME = "esp32-20210623-v1.16.bin"
 MICROPYTHON_BIN_FILE_DIR = "MicroPython_firmware/"
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
