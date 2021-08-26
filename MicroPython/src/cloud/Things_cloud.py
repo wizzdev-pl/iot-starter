@@ -1,12 +1,13 @@
-import logging
 import gc
+import logging
 import machine
+import ujson
 import urequests
 
-from ujson import loads, dumps, load
 from common import config, utils
 from communication import wirerless_connection_controller
 from controller.main_controller_event import MainControllerEventType
+
 from cloud.cloud_interface import CloudProvider
 
 
@@ -84,7 +85,7 @@ class ThingsBoard(CloudProvider):
         }
 
         logging.debug('username: {}, password: {}'.format(config.cfg.thingsboard_username, config.cfg.thingsboard_password))
-        data = dumps(data)
+        data = ujson.dumps(data)
 
         try:
             response = urequests.post(url, headers=headers, data=data)
@@ -156,7 +157,7 @@ class ThingsBoard(CloudProvider):
             "SleepTime": config.DEFAULT_DATA_PUBLISHING_PERIOD_MS / 1000
         }
 
-        data = dumps(data_raw)
+        data = ujson.dumps(data_raw)
         response = urequests.post(url=url, headers=headers, data=data)
         
         if response.status_code == 200:
@@ -209,7 +210,7 @@ class ThingsBoard(CloudProvider):
 
         # Check if msg is in json format, if not decode as str
         if b'{' in msg and b'}' in msg:
-            msg = loads(msg)
+            msg = ujson.loads(msg)
         else:
             msg = msg.decode()
 
@@ -258,7 +259,7 @@ class ThingsBoard(CloudProvider):
             raise Exception("Create thingsboard_config.json file first!")
 
         with open(config.THINGSBOARD_CONFIG_PATH, "r", encoding="utf8") as infile:
-            config_dict = load(infile)
+            config_dict = ujson.load(infile)
 
         return config_dict
 

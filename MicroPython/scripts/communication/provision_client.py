@@ -42,7 +42,7 @@ class ProvisionClient(Client):
             self.__save_credentials(decoded_message["credentialsValue"])
             print("Provisioning successful! New device registered.")
         else:
-            print("Provisioning was unsuccessful with status {} and message: {}}".format(
+            print("Provisioning was unsuccessful with status {} and message: {}".format(
                 provision_device_status, decoded_message["errorMsg"]))
         self.disconnect()
 
@@ -52,7 +52,11 @@ class ProvisionClient(Client):
         self.loop_forever()
 
     def get_new_client(self):
-        client_credentials = loads(self.get_credentials())
+        client_credentials = self.get_credentials() 
+        if client_credentials is not None and client_credentials != '':
+            client_credentials = loads(client_credentials)
+        else:
+            client_credentials = {}
         new_client = None
         if client_credentials:
             new_client = Client(client_id=client_credentials["clientId"])

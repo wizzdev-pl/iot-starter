@@ -17,49 +17,64 @@ def collect_data():
         config = {}
 
     credentials = ProvisionClient.get_credentials()
-    if credentials is not None:
+    if credentials is not None and credentials != "":
         credentials = loads(credentials)
     else:
         credentials = {}
 
-    config = {
-        'thingsboard_host': config.get('thingsboard_host', 'localhost'),
-        'port': config.get('port', 1883),
-        'thingsboard_device_client_id': credentials.get('clientId', None),
-        'thingsboard_device_username': credentials.get('userName', None),
-        'thingsboard_device_password': credentials.get('password', None)
-    }
-
     host = input("\nPlease write your ThingsBoard host or leave it blank to use default [{}]: ".format(
-        config['thingsboard_host']))
+        config.get('thingsboard_host', 'localhost')))
     if host:
         config["thingsboard_host"] = host
+    else:
+        config["thingsboard_host"] = 'localhost'
 
     port = input("Please write your ThingsBoard MQTT port or leave it blank to use default [{}]: ".format(
-        config['port']))
+        config.get('port', 1883)))
     if port:
         config["port"] = int(port)
+    else:
+        config["port"] = 1883
 
-    config["provision_device_key"] = input("Please write provision device key: ")
-    config["provision_device_secret"] = input("Please write provision device secret: ")
+    provision_device_key = input("Please write provision device key |{}|: ".format(
+        config.get('provision_device_key', None)))
+    provision_device_secret = input("Please write provision device secret |{}|: ".format(
+        config.get('provision_device_secret', None)))
+
+    if provision_device_key:
+        config['provision_device_key'] = provision_device_key
+    else:
+        config['provision_device_key'] = config.get('provision_device_key')
+    if provision_device_secret:
+        config['provision_device_secret'] = provision_device_secret
+    else:
+        config['provision_device_secret'] = config.get('provision_device_secret')
 
     clientID = input("Please write ThingsBoard client ID for your device [{}]: ".format(
-        config['thingsboard_device_client_id']))
+        credentials.get('clientId', None)))
     device_username = input("Please write ThingsBoard username for your device [{}]: ".format(
-        config['thingsboard_device_username']))
+        credentials.get('userName', None)))
     device_password = input("Please write ThingsBoard password for your device [{}]: ".format(
-        config['thingsboard_device_password']))
+        credentials.get('password', None)))
 
     if clientID:
         config['thingsboard_device_client_id'] = clientID
+    else:
+        config['thingsboard_device_client_id'] = credentials.get('clientId')
     if device_username:
         config['thingsboard_device_username'] = device_username
+    else:
+        config['thingsboard_device_username'] = credentials.get('userName')
     if device_password:
         config['thingsboard_device_password'] = device_password
+    else:
+        config['thingsboard_device_password'] = credentials.get('password')
 
     device_name = input("Please write device name or leave it blank to generate: ")
     if device_name:
         config["thingsboard_device_name"] = device_name
+    else:
+        config["thingsboard_device_name"] = None
 
     return config
 
@@ -110,10 +125,14 @@ if __name__ == '__main__':
     if config.get('thingsboard_device_name', None) is not None:
         provision_request['deviceName'] = config['thingsboard_device_name']
 
-    provision_client = ProvisionClient(
-        config['thingsboard_host'], config['port'], provision_request)
-    provision_client.provision()
-
+    if not None in provision_request.values():
+        provision_client = ProvisionClient(
+            config['thingsboard_host'], config['port'], provision_request)
+        provision_client.provision()
+    else:
+        print("At least one provided credential is empty! Aborting...")
+        sys.exit(-1)
+    
     client = provision_client.get_new_client()
     if client:
         client.on_connect = on_connected

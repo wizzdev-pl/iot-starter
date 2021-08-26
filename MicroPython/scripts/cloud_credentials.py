@@ -58,13 +58,13 @@ def set_credentials(cloud):
         old_username = config.get('thingsboard_username', None)
         old_password = config.get('thingsboard_password', None)
 
-        host = input("Hostname  [{}]: ".format(old_host))
+        host = input("Hostname [{}]: ".format(old_host))
         client_id = input("Client ID [{}]: ".format(old_client_id))
-        device_username = input("Device username  [{}]: ".format(old_device_username))
+        device_username = input("Device username [{}]: ".format(old_device_username))
         device_password = input("Device password [{}]: ".format(old_device_password))
         device_name = input("Device name [{}]: ".format(old_device_name))
         username = input("ThingsBoard username [{}]: ".format(old_username))
-        password = input("ThingsBoard password  [{}]: ".format(old_password))
+        password = input("ThingsBoard password [{}]: ".format(old_password))
 
         # If values were not updated; leave the old ones
         if host:
