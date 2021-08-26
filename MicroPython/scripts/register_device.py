@@ -37,9 +37,9 @@ def collect_data():
     else:
         config["port"] = 1883
 
-    provision_device_key = input("Please write provision device key |{}|: ".format(
+    provision_device_key = input("Please write provision device key [{}]: ".format(
         config.get('provision_device_key', None)))
-    provision_device_secret = input("Please write provision device secret |{}|: ".format(
+    provision_device_secret = input("Please write provision device secret [{}]: ".format(
         config.get('provision_device_secret', None)))
 
     if provision_device_key:

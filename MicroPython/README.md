@@ -65,6 +65,25 @@ Now we will make use of credentials we have saved in previous steps:
 
 If you host ThingsBoard locally, be aware of providing your host machine ip address while flashing the board!
 
+First, you need to register a device, to do that run the following command:
+```
+python scripts/register_device.py -c <cloud>
+```
+You'll need to supply couple of things that you have saved earlier:
+ - ThingsBoard host (IP of the computer in the local network)
+ - Port for MQTT (defaults to standard 1883)
+ - Provision device key
+ - Provision device secret
+
+You'll need to also provide new credentials for your device:
+ - Client ID
+ - Username
+ - Password
+ - Name
+
+After you execute the script, you should see "Provisioning successful!" message. If something went wrong, please try again, validate your provision keys and make sure that the device you're trying to register is not already taken (both client ID and its name).
+
+
 ### Basic Setup of the ESP32
 To set up a new board or flash the old one. <br>
 Make sure that your cloud is configured and in case of using **AWS** make sure that your computer has AWS credentials.
@@ -74,7 +93,7 @@ Make sure that your board is connected to the computer and you have activated yo
 Check the port number - on Linux system, port can be checked through the simple script which will list all usb devices and their ports:
 
 ```bash
-#!/bin/sh
+#!/bin/bash
 
 for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
     (
