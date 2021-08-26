@@ -43,12 +43,8 @@ def collect_data():
 
     if provision_device_key:
         config['provision_device_key'] = provision_device_key
-    else:
-        config['provision_device_key'] = config.get('provision_device_key')
     if provision_device_secret:
         config['provision_device_secret'] = provision_device_secret
-    else:
-        config['provision_device_secret'] = config.get('provision_device_secret')
 
     clientID = input("Please write ThingsBoard client ID for your device [{}]: ".format(
         credentials.get('clientId', None)))
@@ -59,16 +55,10 @@ def collect_data():
 
     if clientID:
         config['thingsboard_device_client_id'] = clientID
-    else:
-        config['thingsboard_device_client_id'] = credentials.get('clientId')
     if device_username:
         config['thingsboard_device_username'] = device_username
-    else:
-        config['thingsboard_device_username'] = credentials.get('userName')
     if device_password:
         config['thingsboard_device_password'] = device_password
-    else:
-        config['thingsboard_device_password'] = credentials.get('password')
 
     device_name = input("Please write device name or leave it blank to generate: ")
     if device_name:
