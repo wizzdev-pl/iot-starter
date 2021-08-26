@@ -17,50 +17,52 @@ def collect_data():
         config = {}
 
     credentials = ProvisionClient.get_credentials()
-    if credentials is not None and credentials is not "":
+    if credentials is not None and credentials != "":
         credentials = loads(credentials)
     else:
         print("Credentials not found, using default!")
         credentials = {}
 
-    config = {
-        'thingsboard_host': config.get('thingsboard_host', 'localhost'),
-        'port': config.get('port', 1883),
-        'thingsboard_client_id': credentials.get('clientId', None),
-        'thingsboard_user': credentials.get('userName', None),
-        'thingsboard_password': credentials.get('password', None),
-        'thingsboard_device_name': config.get('thingsboard_device_name', None)
-    }
-
     host = input("\nPlease write your ThingsBoard host or leave it blank to use default [{}]: ".format(
-        config['thingsboard_host']))
+        config.get('thingsboard_host', 'localhost')))
     if host:
         config["thingsboard_host"] = host
+    else:
+        config["thingsboard_host"] = 'localhost'
 
     port = input("Please write your ThingsBoard MQTT port or leave it blank to use default [{}]: ".format(
-        config['port']))
+        config.get('port', 1883)))
     if port:
         config["port"] = int(port)
+    else:
+        config["port"] = 1883
 
-    config["provision_device_key"] = input("Please write provision device key: ")
-    config["provision_device_secret"] = input("Please write provision device secret: ")
+    provision_device_key = input("Please write provision device key |{}|: ".format(
+        config.get('provision_device_key', None)))
+    provision_device_secret = input("Please write provision device secret |{}|: ".format(
+        config.get('provision_device_secret', None)))
 
-    clientID = input("Please write your ThingsBoard client ID [{}]: ".format(
-        config['thingsboard_client_id']))
-    user = input("Please write your ThingsBoard username [{}]: ".format(
-        config['thingsboard_user']))
-    password = input("Please write your ThingsBoard password [{}]: ".format(
-        config['thingsboard_password']))
+    if provision_device_key:
+        config['provision_device_key'] = provision_device_key
+    if provision_device_secret:
+        config['provision_device_secret'] = provision_device_secret
+
+    clientID = input("Please write ThingsBoard client ID for your device [{}]: ".format(
+        credentials.get('clientId', None)))
+    device_username = input("Please write ThingsBoard username for your device [{}]: ".format(
+        credentials.get('userName', None)))
+    device_password = input("Please write ThingsBoard password for your device [{}]: ".format(
+        credentials.get('password', None)))
 
     if clientID:
-        config['thingsboard_client_id'] = clientID
-    if user:
-        config['thingsboard_user'] = user
-    if password:
-        config['thingsboard_password'] = password
+        config['thingsboard_device_client_id'] = clientID
+    if device_username:
+        config['thingsboard_device_username'] = device_username
+    if device_password:
+        config['thingsboard_device_password'] = device_password
 
     device_name = input("Please write your device name or leave blank to use previous one [{}]: ".format(
-        config['thingsboard_device_name']))
+        config.get('thingsboard_device_name', None)))
 
     if device_name:
         config["thingsboard_device_name"] = device_name
@@ -109,18 +111,22 @@ if __name__ == '__main__':
         "provisionDeviceKey": config["provision_device_key"],
         "provisionDeviceSecret": config["provision_device_secret"],
         "credentialsType": "MQTT_BASIC",
-        "clientId": config["thingsboard_client_id"],
-        "username": config["thingsboard_user"],
-        "password": config["thingsboard_password"]
+        "clientId": config["thingsboard_device_client_id"],
+        "username": config["thingsboard_device_username"],
+        "password": config["thingsboard_device_password"]
     }
 
     if config.get('thingsboard_device_name', None) is not None:
         provision_request['deviceName'] = config['thingsboard_device_name']
 
-    provision_client = ProvisionClient(
-        config['thingsboard_host'], config['port'], provision_request)
-    provision_client.provision()
-
+    if not None in provision_request.values():
+        provision_client = ProvisionClient(
+            config['thingsboard_host'], config['port'], provision_request)
+        provision_client.provision()
+    else:
+        print("At least one provided credential is empty! Aborting...")
+        sys.exit(-1)
+    
     client = provision_client.get_new_client()
     if client:
         client.on_connect = on_connected

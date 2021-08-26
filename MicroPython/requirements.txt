@@ -1,4 +1,5 @@
 wheel
+paho-mqtt==1.5.1
 esptool==2.8
 gitpython==3.1.17
 adafruit-ampy==1.0.5
