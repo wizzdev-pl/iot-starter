@@ -25,8 +25,8 @@ def collect_data():
     config = {
         'thingsboard_host': config.get('thingsboard_host', 'localhost'),
         'port': config.get('port', 1883),
-        'thingsboard_device_client_id': credentials.get('clientID', None),
-        'thingsboard_device_username': credentials.get('username', None),
+        'thingsboard_device_client_id': credentials.get('clientId', None),
+        'thingsboard_device_username': credentials.get('userName', None),
         'thingsboard_device_password': credentials.get('password', None)
     }
 

@@ -18,7 +18,7 @@ DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_REQUEST_ID = 42
 DEFAULT_MQTT_PORT_SSL = 8883
 DEFAULT_MQTT_TIMEOUT = 400
-DEFAULT_HTTP_PORT = 8080
+DEFAULT_THINGSBOARD_PORT = 8080
 DEFAULT_QOS = 1
 DEFAULT_TESTED_CONNECTION_CLOUD = False
 
@@ -81,6 +81,9 @@ DEFAULT_THINGSBOARD_DEVICE_PASSWORD = ''
 DEFAULT_THINGSBOARD_DEVICE_NAME = ''
 DEFAULT_THINGSBOARD_USERNAME = "tenant@thingsboard.org"
 DEFAULT_THINGSBOARD_PASSWORD = "tenant"
+DEFAULT_THINGSBOARD_JWT_TOKEN = ''
+DEFAULT_THINGSBOARD_DEVICE_ID = ''
+DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS = False
 
 
 class ESPConfig:
@@ -149,6 +152,9 @@ class ESPConfig:
         self.thingsboard_device_name = DEFAULT_THINGSBOARD_DEVICE_NAME
         self.thingsboard_username = DEFAULT_THINGSBOARD_USERNAME
         self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
+        self.thingsboard_jwt_token = DEFAULT_THINGSBOARD_JWT_TOKEN
+        self.thingsboard_device_id = DEFAULT_THINGSBOARD_DEVICE_ID
+        self.thingsboard_attributes_exists = DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS
 
     def load_from_file(self) -> None:
         """
@@ -237,6 +243,12 @@ class ESPConfig:
                 'thingsboard_username', DEFAULT_THINGSBOARD_USERNAME)
             self.thingsboard_password = config_dict.get(
                 'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
+            self.thingsboard_jwt_token = config_dict.get(
+                'thingsboard_jwt_token', DEFAULT_THINGSBOARD_JWT_TOKEN)
+            self.thingsboard_device_id = config_dict.get(
+                'thingsboard_device_id', DEFAULT_THINGSBOARD_DEVICE_ID)
+            self.thingsboard_attributes_exists = config_dict.get(
+                'thingsboard_attributes_exists', DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS)
             
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
@@ -303,6 +315,9 @@ class ESPConfig:
         config_dict['thingsboard_device_name'] = self.thingsboard_device_name
         config_dict['thingsboard_username'] = self.thingsboard_username
         config_dict['thingsboard_password'] = self.thingsboard_password
+        config_dict['thingsboard_jwt_token'] = self.thingsboard_jwt_token
+        config_dict['thingsboard_device_id'] = self.thingsboard_device_id
+        config_dict['thingsboard_attributes_exists'] = self.thingsboard_attributes_exists
 
         return config_dict
 
