@@ -17,9 +17,10 @@ def collect_data():
         config = {}
 
     credentials = ProvisionClient.get_credentials()
-    if credentials is not None:
+    if credentials is not None and credentials is not "":
         credentials = loads(credentials)
     else:
+        print("Credentials not found, using default!")
         credentials = {}
 
     config = {
@@ -27,27 +28,28 @@ def collect_data():
         'port': config.get('port', 1883),
         'thingsboard_client_id': credentials.get('clientId', None),
         'thingsboard_user': credentials.get('userName', None),
-        'thingsboard_password': credentials.get('password', None)
+        'thingsboard_password': credentials.get('password', None),
+        'thingsboard_device_name': config.get('thingsboard_device_name', None)
     }
 
-    host = input("\nPlease write your ThingsBoard \033[93mhost\033[0m or leave it blank to use default [{}]: ".format(
+    host = input("\nPlease write your ThingsBoard host or leave it blank to use default [{}]: ".format(
         config['thingsboard_host']))
     if host:
         config["thingsboard_host"] = host
 
-    port = input("Please write your ThingsBoard \033[93mMQTT port\033[0m or leave it blank to use default [{}]: ".format(
+    port = input("Please write your ThingsBoard MQTT port or leave it blank to use default [{}]: ".format(
         config['port']))
     if port:
         config["port"] = int(port)
 
-    config["provision_device_key"] = input("Please write \033[93mprovision device key\033[0m: ")
-    config["provision_device_secret"] = input("Please write \033[93mprovision device secret\033[0m: ")
+    config["provision_device_key"] = input("Please write provision device key: ")
+    config["provision_device_secret"] = input("Please write provision device secret: ")
 
-    clientID = input("Please write your ThingsBoard \033[93mclient ID\033[0m [{}]: ".format(
+    clientID = input("Please write your ThingsBoard client ID [{}]: ".format(
         config['thingsboard_client_id']))
-    user = input("Please write your ThingsBoard \033[93musername\033[0m [{}]: ".format(
+    user = input("Please write your ThingsBoard username [{}]: ".format(
         config['thingsboard_user']))
-    password = input("Please write your ThingsBoard \033[93mpassword\033[0m [{}]: ".format(
+    password = input("Please write your ThingsBoard password [{}]: ".format(
         config['thingsboard_password']))
 
     if clientID:
@@ -57,9 +59,14 @@ def collect_data():
     if password:
         config['thingsboard_password'] = password
 
-    device_name = input("Please write \033[93mdevice name\033[0m or leave it blank to generate: ")
+    device_name = input("Please write your device name or leave blank to use previous one [{}]: ".format(
+        config['thingsboard_device_name']))
+
     if device_name:
         config["thingsboard_device_name"] = device_name
+    elif config['thingsboard_device_name'] is None:
+        print("Device name must be supplied! Please restart the script.")
+        sys.exit(-1)
 
     return config
 
