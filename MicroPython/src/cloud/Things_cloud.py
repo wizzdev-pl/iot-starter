@@ -186,10 +186,10 @@ class ThingsBoard(CloudProvider):
             response_dict = response.json()
 
             for item in response_dict:
-                if item['key'] == 'SleepTime':
+                if item.get('key') == 'SleepTime':
                     logging.debug("Got new attributes")
                     logging.debug("New data will be applied at the next wake-up call")
-                    return item['value']
+                    return item.get('value')
             
             logging.debug("Did not find any new attributes")
             return 0
