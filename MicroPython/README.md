@@ -63,6 +63,8 @@ Now we will make use of credentials we have saved in previous steps:
 - Provision device key
 - Provision device secret
 
+If you host ThingsBoard locally, be aware of providing your host machine ip address while flashing the board!
+
 ### Basic Setup of the ESP32
 To set up a new board or flash the old one. <br>
 Make sure that your cloud is configured and in case of using **AWS** make sure that your computer has AWS credentials.
