@@ -74,7 +74,7 @@ KAA configuration is easy to set up and work with cloud. Detailed description of
 AWS's configuration is handled using terraform. Detailed description of this procedure is available in the "terraform" directory [here](terraform/README.md).
 
 ### **ThingsBoard configuration:** 
-As ThingsBoard is hosted locally on your device you need to install it first. Detailed description of the whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
+As ThingsBoard is hosted locally on your device you need to configure it first. Detailed description of the whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
 
 ---
 ## **After cloud setup:**
