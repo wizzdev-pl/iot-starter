@@ -57,7 +57,7 @@ If you already have configured AWS infrastructure, make sure that:
 - you have configured ssh connections with AWS (aws configure)
 
 ### - ThingsBoard
-Make sour your ThingsBoard server is configured. For more information please go to README in "ThingsBoard" direcotry [here](../ThingsBoard/README.md)
+Make sure your ThingsBoard server is configured. For more information please go to README in "ThingsBoard" directory [here](../ThingsBoard/README.md)
 
 Now we will make use of credentials we have saved in previous steps:
 - Provision device key

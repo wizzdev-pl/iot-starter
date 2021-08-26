@@ -2,7 +2,7 @@
 The instruction walks you through the process of creating your own IoT device in just a few steps.
 
 ## What is ThingsBoard
-ThingsBoard is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version 
+ThingsBoard is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version.
 
 ## Requirements
 
@@ -104,9 +104,9 @@ Now go ahead and log in to your server. If you have specified *-loadDemo* during
 * Tenant Administrator: tenant@thingsboard.org / tenant
 * Customer User: customer@thingsboard.org / customer
 
-You can always change passwords for each account in account profile page.
+You can always change password for each account in the account profile page.
 
-Now the only thing you need to do is obtain two keys needed for device registering. To do this, click on the **Device profiles** tab on the left and hit the profile name you want to use (you can use default one or create a new profile). Toggle on edit mode, then go to **Device provisioning** tab and change the **Provision strategy** to 'Allow to create new devices'. Apply changes and now two new fields have appeared - **Provision device key** and **Provision device secret**. Please copy them and save for later.
+Now the only thing you need to do is to obtain two keys needed for device registering. To do this, click on the **Device profiles** tab on the left and hit the profile name you want to use (you can use the default or create a new one). Toggle on edit mode, then go to the **Device provisioning** tab and change the **Provision strategy** to 'Allow to create new devices'. After applying changes, two new fields should appear - **Provision device key** and **Provision device secret**. Please copy them and save for later.
 
 ### 3. Open ports
 

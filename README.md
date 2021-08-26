@@ -74,7 +74,7 @@ KAA configuration is easy to set up and work with cloud. Detailed description of
 AWS's configuration is handled using terraform. Detailed description of this procedure is available in the "terraform" directory [here](terraform/README.md).
 
 ### **ThingsBoard configuration:** 
-As ThingsBoard is hosted locally on your device you need to install it first. Detailed description of whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
+As ThingsBoard is hosted locally on your device you need to install it first. Detailed description of the whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
 
 ---
 ## **After cloud setup:**
@@ -101,11 +101,11 @@ Another way of visualization of the data is to create a dashboard. You can use a
 
 ### Device management
 
-Log in to your ThingsBoard page and from the side pane select "Devices" tab. Click on your device and select "Latest telemetry", there should be shown the latest telemetry sent to cloud. In the "Details" you can manage your device credentials set during the device registering or assing device to customer. In "Attributes" and server scope selected you can manage created attributes. After first connection a variable SleepTime should be created. If not, make sure all passed ThingsBoard credentials are correct. SleepTime represents frequency of sending data to cloud in seconds, you can change the variable directly from attributes tab or create a special widget in your dashboard.
+Log in to your ThingsBoard page and from the side pane select the "Devices" tab. Click on your device and select "Latest telemetry", there should be shown the latest telemetry sent to cloud. In the "Details" you can manage your device credentials set during the device registering or assign device to customer. In the "Attributes" select "Server attributes" in "Entity attributes scope", here you can manage created attributes. After first connection a variable SleepTime should be created. If not, make sure all passed ThingsBoard credentials are correct. SleepTime represents frequency of sending data to cloud in seconds, you can change the variable directly from attributes tab or create a special widget in your dashboard.
 
 ### Dashboard
 
-To visualize data you need to create a dashboard. Whole process of setting up dashboard is described [here](https://thingsboard.io/docs/user-guide/dashboards/). In addition to change your SleepTime attribute from dashboard, you need to click on "Add new widget" in the right bottom corner, then: "Create new widget" -> "Input widgets" -> "Update server integer attribute". Add datasource and as attribute select SleepTime. In widget settings change the title, in "Advenced" tab add error messege and set "Min value" to 30(seconds). Smaller value may cause software problems.
+To visualize data you need to create a dashboard. Whole process of setting up dashboard is described [here](https://thingsboard.io/docs/user-guide/dashboards/). In order to change your SleepTime attribute from dashboard, you need to click on the "Add new widget" button in the right bottom corner, then: "Create new widget" -> "Input widgets" -> "Update server integer attribute". Add datasource and as an attribute select SleepTime. In the widget settings change its title, in the "Advanced" tab add error message and set "Min value" to 30(seconds). Smaller value may cause software problems.
 
 ---
 
