@@ -20,6 +20,7 @@ def collect_data():
     if credentials is not None and credentials != "":
         credentials = loads(credentials)
     else:
+        print("Credentials not found, using default!")
         credentials = {}
 
     host = input("\nPlease write your ThingsBoard host or leave it blank to use default [{}]: ".format(
@@ -36,9 +37,9 @@ def collect_data():
     else:
         config["port"] = 1883
 
-    provision_device_key = input("Please write provision device key |{}|: ".format(
+    provision_device_key = input("Please write provision device key [{}]: ".format(
         config.get('provision_device_key', None)))
-    provision_device_secret = input("Please write provision device secret |{}|: ".format(
+    provision_device_secret = input("Please write provision device secret [{}]: ".format(
         config.get('provision_device_secret', None)))
 
     if provision_device_key:
@@ -60,11 +61,14 @@ def collect_data():
     if device_password:
         config['thingsboard_device_password'] = device_password
 
-    device_name = input("Please write device name or leave it blank to generate: ")
+    device_name = input("Please write your device name or leave blank to use previous one [{}]: ".format(
+        config.get('thingsboard_device_name', None)))
+
     if device_name:
         config["thingsboard_device_name"] = device_name
-    else:
-        config["thingsboard_device_name"] = None
+    elif config['thingsboard_device_name'] is None:
+        print("Device name must be supplied! Please restart the script.")
+        sys.exit(-1)
 
     return config
 

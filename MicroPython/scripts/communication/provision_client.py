@@ -1,6 +1,6 @@
 from json import dumps, loads
 
-from common.utilities import file_exists
+from common.utilities import file_exists, remove_file
 from paho.mqtt.client import Client
 
 RESULT_CODES = {
@@ -10,6 +10,8 @@ RESULT_CODES = {
     4: "bad username or password",
     5: "not authorised",
 }
+
+CREDENTIALS_PATH = 'src/credentials.txt'
 
 
 class ProvisionClient(Client):
@@ -44,6 +46,9 @@ class ProvisionClient(Client):
         else:
             print("Provisioning was unsuccessful with status {} and message: {}".format(
                 provision_device_status, decoded_message["errorMsg"]))
+            # Needed as it can cause errors while checking if device was created
+            remove_file(CREDENTIALS_PATH, suppress=True)
+            
         self.disconnect()
 
     def provision(self):
@@ -52,11 +57,12 @@ class ProvisionClient(Client):
         self.loop_forever()
 
     def get_new_client(self):
-        client_credentials = self.get_credentials() 
-        if client_credentials is not None and client_credentials != '':
-            client_credentials = loads(client_credentials)
-        else:
+        client_credentials = self.get_credentials()
+        if client_credentials is None:
             client_credentials = {}
+        else:
+            client_credentials = loads(client_credentials)
+
         new_client = None
         if client_credentials:
             new_client = Client(client_id=client_credentials["clientId"])
@@ -69,18 +75,17 @@ class ProvisionClient(Client):
     @staticmethod
     def get_credentials():
         new_credentials = None
-        if not file_exists('src/credentials.txt'):
-            print("Credentials not found, using default!")
-        else:
-            with open("src/credentials.txt", "r") as credentials_file:
+        if file_exists(CREDENTIALS_PATH):
+            with open(CREDENTIALS_PATH, "r") as credentials_file:
                 new_credentials = credentials_file.read()
         return new_credentials
 
     @staticmethod
     def __save_credentials(credentials):
-        with open("src/credentials.txt", "w") as credentials_file:
+        with open(CREDENTIALS_PATH, "w") as credentials_file:
             credentials_file.write(dumps(credentials))
 
     @staticmethod
     def __clean_credentials():
-        open("src/credentials.txt", "w").close()
+        if file_exists(CREDENTIALS_PATH):
+            open(CREDENTIALS_PATH, "w").close()
