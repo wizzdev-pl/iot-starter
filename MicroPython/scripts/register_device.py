@@ -27,15 +27,8 @@ def collect_data():
         config.get('thingsboard_host', 'localhost')))
     if host:
         config["thingsboard_host"] = host
-    else:
+    elif config.get('thingsboard_host', None) is None:
         config["thingsboard_host"] = 'localhost'
-
-    port = input("Please write your ThingsBoard MQTT port or leave it blank to use default [{}]: ".format(
-        config.get('port', 1883)))
-    if port:
-        config["port"] = int(port)
-    else:
-        config["port"] = 1883
 
     provision_device_key = input("Please write provision device key [{}]: ".format(
         config.get('provision_device_key', None)))
@@ -121,7 +114,7 @@ if __name__ == '__main__':
 
     if not None in provision_request.values():
         provision_client = ProvisionClient(
-            config['thingsboard_host'], config['port'], provision_request)
+            config['thingsboard_host'], port=1883, provision_request=provision_request)
         provision_client.provision()
     else:
         print("At least one provided credential is empty! Aborting...")
@@ -130,7 +123,7 @@ if __name__ == '__main__':
     client = provision_client.get_new_client()
     if client:
         client.on_connect = on_connected
-        client.connect(config['thingsboard_host'], config['port'])
+        client.connect(config['thingsboard_host'], port=1883)
         save_config(config)
     else:
         print("Device was not created!")

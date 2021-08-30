@@ -196,7 +196,8 @@ class ThingsBoard(CloudProvider):
             response_dict = response.json()
 
             for item in response_dict:
-                if item.get('key') == 'SleepTime':
+                if item.get('key') == 'SleepTime' and \
+                        item.get('value') != config.cfg.data_publishing_period_in_ms / 1000:
                     logging.debug("Got new attributes")
                     logging.debug(
                         "New data will be applied at the next wake-up call")
