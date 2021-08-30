@@ -48,7 +48,6 @@ By now, you should have four things:
  - username
  - password
 
-
 ### - AWS
 Make sure that your AWS cloud is configured. For more information please go to 
 README in "terraform" directory [here](../terraform/README.md).
@@ -57,18 +56,44 @@ If you already have configured AWS infrastructure, make sure that:
 - terraform exists either in ".terraform" directory or installed through the package manager
 - you have configured ssh connections with AWS (aws configure)
 
+### - ThingsBoard
+Make sure your ThingsBoard server is configured. For more information please go to README in "ThingsBoard" directory [here](../ThingsBoard/README.md)
+
+Now we will make use of credentials we have saved in previous steps:
+- Provision device key
+- Provision device secret
+
+If you host ThingsBoard locally, be aware of providing your host machine ip address while flashing the board!
+
+First, you need to register a device, to do that run the following command:
+```
+python scripts/register_device.py -c <cloud>
+```
+You'll need to supply couple of things that you have saved earlier:
+ - ThingsBoard host (IP of the computer in the local network)
+ - Port for MQTT (defaults to standard 1883)
+ - Provision device key
+ - Provision device secret
+
+You'll need to also provide new credentials for your device:
+ - Client ID
+ - Username
+ - Password
+ - Name
+
+After you execute the script, you should see "Provisioning successful!" message. If something went wrong, please try again, validate your provision keys and make sure that the device you're trying to register is not already taken (both client ID and its name).
+
 
 ### Basic Setup of the ESP32
 To set up a new board or flash the old one. <br>
 Make sure that your cloud is configured and in case of using **AWS** make sure that your computer has AWS credentials.
-
 
 ### Flashing the board
 Make sure that your board is connected to the computer and you have activated your virtual environment. 
 Check the port number - on Linux system, port can be checked through the simple script which will list all usb devices and their ports:
 
 ```bash
-#!/bin/sh
+#!/bin/bash
 
 for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
     (
@@ -87,7 +112,7 @@ After finding the correct port, execute:
 ```bash
 python scripts/upload_all.py -p <port> -c <cloud> -s <sensor>
 ```
-where \<cloud\> is your chosen cloud service provider (KAA or AWS).<br>
+where \<cloud\> is your chosen cloud service provider (KAA, AWS or THINGSBOARD).<br>
 where \<sensor\> is your currently used sensor (DHT11, DHT22 or BME280). Defaults to DHT22.<br>
 After flashing the board please reset it using button EN button.
 

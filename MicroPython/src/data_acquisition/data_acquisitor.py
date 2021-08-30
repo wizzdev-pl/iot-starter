@@ -1,7 +1,6 @@
 import logging
 
-from common import utils
-from common import config
+from common import config, utils
 from peripherals.sensor import Sensor
 
 ADC_TO_VOLTS_ATTN_11DB = 0.000878906
@@ -12,15 +11,15 @@ class DataAcquisitor:
     """
     Class to collect data from sensor
     """
+
     def __init__(self):
         self.sensor = None
         self.data = {}
 
         self.sensor = Sensor(sensor_type=config.cfg.sensor_type,
-                                sensor_measurement_pin_number=config.cfg.sensor_measurement_pin,
-                                sensor_sda_pin_number=config.cfg.sensor_sda_pin, sensor_scl_pin_number=config.cfg.sensor_scl_pin,
-                                sensor_power_pin_number=config.cfg.sensor_power_pin)
-
+                             sensor_measurement_pin_number=config.cfg.sensor_measurement_pin,
+                             sensor_sda_pin_number=config.cfg.sensor_sda_pin, sensor_scl_pin_number=config.cfg.sensor_scl_pin,
+                             sensor_power_pin_number=config.cfg.sensor_power_pin)
 
     def acquire_temp_humi(self) -> dict:
         """
@@ -33,8 +32,10 @@ class DataAcquisitor:
         if self.sensor is not None:
             try:
                 self.sensor.measure()
-                self.data['temperature'] = [[acquisition_timestamp, self.sensor.temperature()]]
-                self.data['humidity'] = [[acquisition_timestamp + 1, self.sensor.humidity()]]
+                self.data['temperature'] = [
+                    [acquisition_timestamp, self.sensor.temperature()]]
+                self.data['humidity'] = [
+                    [acquisition_timestamp + 1, self.sensor.humidity()]]
             except OSError:
                 logging.info("Error reading sensor!")
 

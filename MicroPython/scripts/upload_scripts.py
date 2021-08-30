@@ -1,9 +1,9 @@
 import argparse
 import os
 import sys
+from pathlib import Path
 
 import git
-from pathlib import Path
 from git.refs.tag import TagReference
 
 import pyboard
@@ -153,14 +153,11 @@ def _read_commit_info():
         return "Unknown", "Unknown"
 
 
-
-
-
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--port', metavar='PORT', type=str, required=True,
                         help="Com port of the device")
-    parser.add_argument('--config-path', metavar='CONFIG', type=str, required=True, 
+    parser.add_argument('--config-path', metavar='CONFIG', type=str, required=True,
                         help="Set credentials needed for cloud service")
     parser.add_argument('-f', '--force', action='store_true',
                         help='Upload all files again, even if not modified since caching')
@@ -185,14 +182,15 @@ def flash_scripts(port, cloud_config_file_path):
     upload_dir(repo_path='src', device_path='')
     dev_create_dir(DEVICE_RESOURCES_FILE_DIR)
 
-    cloud_config_device_path = DEVICE_RESOURCES_FILE_DIR + "/" + Path(cloud_config_file_path).name
+    cloud_config_device_path = DEVICE_RESOURCES_FILE_DIR + \
+        "/" + Path(cloud_config_file_path).name
     cloud_config_file_path = os.path.abspath(cloud_config_file_path)
     upload_file(cloud_config_file_path, cloud_config_device_path)
+
+    print('Finished!')
 
 
 if __name__ == '__main__':
     args = parse_arguments()
 
     flash_scripts(args['port'], args['config_path'])
-
-    print('Finished!')

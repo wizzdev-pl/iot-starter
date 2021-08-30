@@ -1,16 +1,13 @@
-from cloud.AWS_cloud import AWS_cloud
-from cloud.KAA_cloud import KAA_cloud
-from cloud.cloud_interface import Providers
-import utime
+import gc
 import logging
 import ujson
+import utime
 
 from umqtt.simple import MQTTClient  # micropython-umqtt library
 
-from common import config
-from common import utils
-
-import gc
+from cloud.AWS_cloud import AWS_cloud
+from cloud.cloud_interface import Providers
+from common import config, utils
 
 
 class MQTTCommunicator:
@@ -18,22 +15,25 @@ class MQTTCommunicator:
                  cloud_provider,
                  timeout,
                  ):
+        logging.debug("data_upload/MQTTCommunicator.__init__()")
         self.is_connected = False
         self.cloud_provider = cloud_provider
         self.timeout = timeout
 
         if cloud_provider == Providers.AWS:
             # Secure socket layer MQTT communication
-            
-            result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
+
+            result, aws_certificate, aws_key = AWS_cloud.read_certificates(
+                True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
-            
+
             ssl_parameters = {
                 "server_side": False,
                 "key": aws_key,
                 "cert": aws_certificate
             }
+
             self.server = config.cfg.aws_endpoint
             self.client_id = config.cfg.aws_client_id
             self.port = config.cfg.mqtt_port_ssl
@@ -62,11 +62,28 @@ class MQTTCommunicator:
                 password=config.cfg.kaa_password
             )
 
+        elif cloud_provider == Providers.THINGSBOARD:
+            self.port = config.cfg.mqtt_port
+            self.server = config.cfg.thingsboard_host
+            self.client_id = config.cfg.thingsboard_device_client_id
+            self.username = config.cfg.thingsboard_device_username
+            self.password = config.cfg.thingsboard_device_password
+
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port,
+                keepalive=self.timeout,
+                user=self.username,
+                password=self.password
+            )
+
         else:
             # Not implemented for other clouds yet
-            self.MQTT_client = MQTTClient(client_id=self.client_id,
-                                          server=self.server,
-                                          port=self.port)
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port)
 
     def __del__(self):
         if self.is_connected:
@@ -80,7 +97,7 @@ class MQTTCommunicator:
         logging.debug("mqtt_communicator.py/connect()")
         try:
             gc.collect()
-            self.MQTT_client.connect(clean_session=False)
+            self.MQTT_client.connect(False)
             self.is_connected = True
         except ValueError as e:
             self.is_connected = False
@@ -175,7 +192,7 @@ class MQTTCommunicator:
         return False
 
     def publish_message(self, payload, topic, qos):
-        
+
         if config.cfg.cloud_provider == Providers.AWS:
             mqtt_message = {
                 'client_id': self.client_id,
@@ -189,12 +206,12 @@ class MQTTCommunicator:
         try:
             # if qos == 1 it's a blocking method
             if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
-                if config.cfg.cloud_provider == Providers.AWS:
-                    # Kaa doesn't inform if it is successfull or not in the publish topic
-                    logging.debug("Publishing mesage succesfull")
+                if config.cfg.cloud_provider in (Providers.AWS, Providers.THINGSBOARD):
+                    logging.info("Publishing message successful!")
+                # Kaa subscribes to specific topics to know if publish is successful or not
                 return True
             else:
-                logging.debug("Problem with publishing mesage")
+                logging.error("Problem with publishing message!")
                 return False
         except MemoryError as e:
             try:

@@ -1,16 +1,16 @@
-from communication.wirerless_connection_controller import \
-    get_mac_address_as_string
-from lib import logging
 from ujson import dump, load
+from lib import logging
 
 from common import utils
+from communication.wirerless_connection_controller import \
+    get_mac_address_as_string
+
 
 cfg = None
 
 DEFAULT_CLOUD_PROVIDER = 'KAA'
 
-DEFAULT_SSID = 'ssid'
-DEFAULT_PASSWORD = 'password'
+DEFAULT_ACCESS_POINTS = []
 
 # Connection
 DEFAULT_DATA_PUBLISHING_PERIOD_MS = 120000
@@ -19,6 +19,7 @@ DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_REQUEST_ID = 42
 DEFAULT_MQTT_PORT_SSL = 8883
 DEFAULT_MQTT_TIMEOUT = 400
+DEFAULT_THINGSBOARD_PORT = 8080
 DEFAULT_QOS = 1
 DEFAULT_TESTED_CONNECTION_CLOUD = False
 
@@ -27,7 +28,7 @@ DEFAULT_CERT_PEM = ""
 DEFAULT_CERT_CA = ""
 
 # Sensors
-DEFAULT_SENSOR_MEASUREMENT_PIN = 4
+DEFAULT_SENSOR_MEASUREMENT_PIN = 27
 DEFAULT_SENSOR_POWER_PIN = 26
 DEFAULT_SENSOR_TYPE = "DHT22"
 DEFAULT_SENSOR_SDA_PIN = 21
@@ -72,6 +73,19 @@ DEFAULT_KAA_TOPIC = 'kp1/{}/dcx/{}/json/{}'.format(
     DEFAULT_KAA_APP_VERSION, DEFAULT_KAA_ENDPOINT, DEFAULT_MQTT_REQUEST_ID
 )
 
+# ThingsBoard stuff
+THINGSBOARD_CONFIG_PATH = '/resources/thingsboard_config.json'
+DEFAULT_THINGSBOARD_HOST = 'localhost'
+DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID = ''
+DEFAULT_THINGSBOARD_DEVICE_USERNAME = ''
+DEFAULT_THINGSBOARD_DEVICE_PASSWORD = ''
+DEFAULT_THINGSBOARD_DEVICE_NAME = ''
+DEFAULT_THINGSBOARD_USERNAME = "tenant@thingsboard.org"
+DEFAULT_THINGSBOARD_PASSWORD = "tenant"
+DEFAULT_THINGSBOARD_JWT_TOKEN = ''
+DEFAULT_THINGSBOARD_DEVICE_ID = ''
+DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS = False
+
 
 class ESPConfig:
     """
@@ -87,8 +101,7 @@ class ESPConfig:
 
         self.cloud_provider = DEFAULT_CLOUD_PROVIDER
 
-        self.ssid = DEFAULT_SSID
-        self.password = DEFAULT_PASSWORD
+        self.access_points = DEFAULT_ACCESS_POINTS
 
         # Connection
         self.data_publishing_period_in_ms = DEFAULT_DATA_PUBLISHING_PERIOD_MS
@@ -132,6 +145,18 @@ class ESPConfig:
         self.kaa_app_version = DEFAULT_KAA_APP_VERSION
         self.kaa_topic = DEFAULT_KAA_TOPIC
 
+        # ThingsBoard
+        self.thingsboard_host = DEFAULT_THINGSBOARD_HOST
+        self.thingsboard_device_client_id = DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID
+        self.thingsboard_device_username = DEFAULT_THINGSBOARD_DEVICE_USERNAME
+        self.thingsboard_device_password = DEFAULT_THINGSBOARD_DEVICE_PASSWORD
+        self.thingsboard_device_name = DEFAULT_THINGSBOARD_DEVICE_NAME
+        self.thingsboard_username = DEFAULT_THINGSBOARD_USERNAME
+        self.thingsboard_password = DEFAULT_THINGSBOARD_PASSWORD
+        self.thingsboard_jwt_token = DEFAULT_THINGSBOARD_JWT_TOKEN
+        self.thingsboard_device_id = DEFAULT_THINGSBOARD_DEVICE_ID
+        self.thingsboard_attributes_exists = DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS
+
     def load_from_file(self) -> None:
         """
         Load configuration of ESP from file.
@@ -152,8 +177,8 @@ class ESPConfig:
             self.cloud_provider = config_dict.get(
                 'cloud_provider', DEFAULT_CLOUD_PROVIDER)
 
-            self.ssid = config_dict.get('ssid', DEFAULT_SSID)
-            self.password = config_dict.get('password', DEFAULT_PASSWORD)
+            self.access_points = config_dict.get(
+                'access_points', DEFAULT_ACCESS_POINTS)
 
             # Connection
             self.data_publishing_period_in_ms = config_dict.get(
@@ -176,11 +201,16 @@ class ESPConfig:
             self.cert_ca = config_dict.get('cert_ca', DEFAULT_CERT_CA)
 
             # Sensors
-            self.sensor_measurement_pin = config_dict.get('sensor_measurement_pin', DEFAULT_SENSOR_MEASUREMENT_PIN)
-            self.sensor_power_pin = config_dict.get('sensor_power_pin', DEFAULT_SENSOR_POWER_PIN)
-            self.sensor_type = config_dict.get('sensor_type', DEFAULT_SENSOR_TYPE)
-            self.sensor_sda_pin = config_dict.get('sensor_sda_pin', DEFAULT_SENSOR_SDA_PIN)
-            self.sensor_scl_pin = config_dict.get('sensor_scl_pin', DEFAULT_SENSOR_SCL_PIN)
+            self.sensor_measurement_pin = config_dict.get(
+                'sensor_measurement_pin', DEFAULT_SENSOR_MEASUREMENT_PIN)
+            self.sensor_power_pin = config_dict.get(
+                'sensor_power_pin', DEFAULT_SENSOR_POWER_PIN)
+            self.sensor_type = config_dict.get(
+                'sensor_type', DEFAULT_SENSOR_TYPE)
+            self.sensor_sda_pin = config_dict.get(
+                'sensor_sda_pin', DEFAULT_SENSOR_SDA_PIN)
+            self.sensor_scl_pin = config_dict.get(
+                'sensor_scl_pin', DEFAULT_SENSOR_SCL_PIN)
 
             # Other
             self.ap_config_done = config_dict.get(
@@ -198,17 +228,38 @@ class ESPConfig:
 
             # KAA
             self.kaa_user = config_dict.get('kaa_user', DEFAULT_KAA_USER)
-            self.kaa_password = config_dict.get('kaa_password', DEFAULT_KAA_PASSWORD)
+            self.kaa_password = config_dict.get(
+                'kaa_password', DEFAULT_KAA_PASSWORD)
             self.kaa_endpoint = config_dict.get(
                 'kaa_endpoint', DEFAULT_KAA_ENDPOINT)
             self.kaa_app_version = config_dict.get(
                 'kaa_app_version', DEFAULT_KAA_APP_VERSION)
             self.kaa_topic = config_dict.get('kaa_topic', DEFAULT_KAA_TOPIC)
 
+            # ThingsBoard
+            self.thingsboard_host = config_dict.get(
+                'thingsboard_host', DEFAULT_THINGSBOARD_HOST)
+            self.thingsboard_device_client_id = config_dict.get(
+                'thingsboard_device_client_id', DEFAULT_THINGSBOARD_DEVICE_CLIENT_ID)
+            self.thingsboard_device_username = config_dict.get(
+                'thingsboard_device_username', DEFAULT_THINGSBOARD_DEVICE_USERNAME)
+            self.thingsboard_device_password = config_dict.get(
+                'thingsboard_device_password', DEFAULT_THINGSBOARD_DEVICE_PASSWORD)
+            self.thingsboard_device_name = config_dict.get(
+                'thingsboard_device_name', DEFAULT_THINGSBOARD_DEVICE_NAME)
+            self.thingsboard_username = config_dict.get(
+                'thingsboard_username', DEFAULT_THINGSBOARD_USERNAME)
+            self.thingsboard_password = config_dict.get(
+                'thingsboard_password', DEFAULT_THINGSBOARD_PASSWORD)
+            self.thingsboard_jwt_token = config_dict.get(
+                'thingsboard_jwt_token', DEFAULT_THINGSBOARD_JWT_TOKEN)
+            self.thingsboard_device_id = config_dict.get(
+                'thingsboard_device_id', DEFAULT_THINGSBOARD_DEVICE_ID)
+            self.thingsboard_attributes_exists = config_dict.get(
+                'thingsboard_attributes_exists', DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS)
+
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
-                # self.device_uid = config_dict.get(
-                #     'device_uid', DEFAULT_DEVICE_UID)
 
         if not config_file_exists:
             self.save()
@@ -224,8 +275,7 @@ class ESPConfig:
 
         config_dict['cloud_provider'] = self.cloud_provider
 
-        config_dict['ssid'] = self.ssid
-        config_dict['password'] = self.password
+        config_dict['access_points'] = self.access_points
 
         # Connection
         config_dict['data_publishing_period_ms'] = self.data_publishing_period_in_ms
@@ -264,6 +314,18 @@ class ESPConfig:
         config_dict['kaa_endpoint'] = self.kaa_endpoint
         config_dict['kaa_app_version'] = self.kaa_app_version
         config_dict['kaa_topic'] = self.kaa_topic
+
+        # ThingsBoard
+        config_dict['thingsboard_host'] = self.thingsboard_host
+        config_dict['thingsboard_device_client_id'] = self.thingsboard_device_client_id
+        config_dict['thingsboard_device_username'] = self.thingsboard_device_username
+        config_dict['thingsboard_device_password'] = self.thingsboard_device_password
+        config_dict['thingsboard_device_name'] = self.thingsboard_device_name
+        config_dict['thingsboard_username'] = self.thingsboard_username
+        config_dict['thingsboard_password'] = self.thingsboard_password
+        config_dict['thingsboard_jwt_token'] = self.thingsboard_jwt_token
+        config_dict['thingsboard_device_id'] = self.thingsboard_device_id
+        config_dict['thingsboard_attributes_exists'] = self.thingsboard_attributes_exists
 
         return config_dict
 

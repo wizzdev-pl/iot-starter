@@ -1,47 +1,41 @@
 import gc
 import logging
-import urequests
 import machine
-from ujson import dumps, load
+import urequests
+
 from os import mkdir
+from ujson import dumps, load
 
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import MainControllerEvent, MainControllerEventType
+from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
 class AWS_cloud(CloudProvider):
-    def __init__(self) -> None:
-        # TODO: Any initialization at constructor for a given cloud?
-        pass
-
-    def device_configuration(self, data: dict) -> int:
+    def device_configuration(self, data: list[dict]) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-        ssid = data['ssid']
-        password = data['password']
+        logging.info("Wifi access point configuration:")
 
-        config.cfg.ssid = ssid
-        config.cfg.password = password
-        config.cfg.save()
-
-        logging.info(
-            "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
+        for access_point in data:
+            logging.info("Ssid: {} Password: {}".format(
+                access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:
-            utils.connect_to_wifi(wireless_controller)
+            utils.connect_to_wifi(wireless_controller, data)
             logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_aws_thing()
+            config.cfg.access_points = data
         except Exception as e:
-            logging.error("Exception catched: {}".format(e))
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
-            return 1
+            logging.error("Exception caught: {}".format(e))
+            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
+            config.cfg.save()
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()
@@ -70,8 +64,6 @@ class AWS_cloud(CloudProvider):
             return True
         else:
             logging.error("Problem with authorization")
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
             return False
 
     def configure_data_from_terraform(self) -> None:
@@ -133,7 +125,8 @@ class AWS_cloud(CloudProvider):
             with open(config.CA_CERTIFICATE_PATH, "w", encoding="utf8") as infile:
                 infile.write(ca_certificate_string)
 
-    def read_certificates(self, parse: bool = False) -> tuple(bool, str, str):
+    @staticmethod
+    def read_certificates(parse: bool = False) -> tuple(bool, str, str):
         """
         Read certificates from files.
         :return: Error code (True - OK, False - at least one certificate does not exist), text of certificates.

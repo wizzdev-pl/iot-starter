@@ -1,15 +1,10 @@
 import logging
-import random
-from random import randint
-
 import machine
 import ujson
+
 from common import config, utils
 from communication import wirerless_connection_controller
-from controller.main_controller_event import (MainControllerEvent,
-                                              MainControllerEventType)
-from utime import time
-
+from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -38,7 +33,8 @@ class KAA_cloud(CloudProvider):
             if msg == '':
                 logging.info('Operation successful\n')
             else:
-                logging.info('Operation successful with return code: {}\n'.format(msg))
+                logging.info(
+                    'Operation successful with return code: {}\n'.format(msg))
         elif topic == self.publish_error_topic:
             status_code = msg['statusCode']
             reason = msg['reasonPhrase']
@@ -48,32 +44,29 @@ class KAA_cloud(CloudProvider):
         else:
             logging.info('On topic: {} received msg: {}'.format(topic, msg))
 
-    def device_configuration(self, data: dict) -> int:
+    def device_configuration(self, data: list[dict]) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
         :param data: parameters to connect to wifi.
         :return: Error code (0 - OK, 1 - Error).
         """
-        ssid = data['ssid']
-        password = data['password']
+        logging.info("Wifi access point configuration:")
 
-        config.cfg.ssid = ssid
-        config.cfg.password = password
-        config.cfg.save()
-
-        logging.info(
-            "Wifi config. Wifi ssid {} Wifi password {}".format(ssid, password))
+        for access_point in data:
+            logging.info("Ssid: {} Password: {}".format(
+                access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:
-            utils.connect_to_wifi(wireless_controller)
+            utils.connect_to_wifi(wireless_controller, data)
             logging.info(wireless_controller.sta_handler.ifconfig())
             self.configure_data()
+            config.cfg.access_points = data
         except Exception as e:
-            logging.error("Exception catched: {}".format(e))
-            event = MainControllerEvent(MainControllerEventType.ERROR_OCCURRED)
-            self.add_event(event)
-            return 1
+            logging.error("Exception caught: {}".format(e))
+            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
+            config.cfg.save()
+            return MainControllerEventType.ERROR_OCCURRED
 
         config.cfg.ap_config_done = True
         config.cfg.save()
@@ -88,7 +81,7 @@ class KAA_cloud(CloudProvider):
         """
         logging.debug("KAA_cloud/configure_data()")
         kaa_configuration = self.load_kaa_config_from_file()
-        
+
         config.cfg.kaa_user = kaa_configuration.get(
             "kaa_user", config.DEFAULT_KAA_USER)
 
@@ -97,14 +90,14 @@ class KAA_cloud(CloudProvider):
 
         config.cfg.kaa_app_version = kaa_configuration.get(
             "kaa_app_version", config.DEFAULT_KAA_APP_VERSION)
-        
+
         config.cfg.kaa_endpoint = kaa_configuration.get(
             "kaa_endpoint", config.DEFAULT_KAA_APP_VERSION)
 
         # Update in case app_version of kaa_endpoint changed
         config.cfg.kaa_topic = 'kp1/{}/dcx/{}/json/{}'.format(
-            config.cfg.kaa_app_version, 
-            config.cfg.kaa_endpoint, 
+            config.cfg.kaa_app_version,
+            config.cfg.kaa_endpoint,
             config.cfg.mqqt_request_id
         )
 
@@ -137,7 +130,7 @@ class KAA_cloud(CloudProvider):
             # Unpack outer list and extract values to variables
             (_, value), = values
             formatted_data[key] = value
-        
+
         return formatted_data
 
     def publish_data(self, data):
@@ -160,7 +153,7 @@ class KAA_cloud(CloudProvider):
         data = self._format_data(data)
 
         logging.debug("data to send = {}".format(data))
-        
+
         mqtt_communicator.publish_message(
             payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
         )
@@ -184,7 +177,6 @@ class KAA_cloud(CloudProvider):
                 logging.debug(
                     "Tried to send data three times, failed! Aborting current measurement."
                 )
-
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
