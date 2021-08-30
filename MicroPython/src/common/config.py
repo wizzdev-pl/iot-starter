@@ -1,6 +1,6 @@
 from ujson import dump, load
-
 from lib import logging
+
 from common import utils
 from communication.wirerless_connection_controller import \
     get_mac_address_as_string
