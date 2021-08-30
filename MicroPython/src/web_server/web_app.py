@@ -1,12 +1,10 @@
-import ujson
-import utime
 import machine
 import picoweb
-import ure as re
+import ujson
 import ulogging as logging
-
+import ure as re
+import utime
 from common import config
-
 
 app = picoweb.WebApp(__name__)
 hooks = {}
@@ -15,6 +13,7 @@ CONFIGURE_DEVICE_HOOK = 'CONFIGURE_WIFI'
 CONFIGURE_AWS_HOOK = 'CONFIGURE_AWS'
 CONFIGURE_SENSOR_HOOK = "CONFIGURE_SENSOR"
 GET_STATUS_HOOK = 'GET_STATUS'
+
 
 # API helpers
 def create_success_response(data: dict):
@@ -75,7 +74,7 @@ def get_last_measurement(req, resp):
         voltage = battery_v.read() * ADC_11DB_TO_VOLT
 
         voltage_divider_ratio = config.cfg.voltage_divider_r2_k / \
-                                (config.cfg.voltage_divider_r1_k + config.cfg.voltage_divider_r2_k)
+            (config.cfg.voltage_divider_r1_k + config.cfg.voltage_divider_r2_k)
 
         voltage = voltage / voltage_divider_ratio
     except:
@@ -124,6 +123,7 @@ def get_static_file(req, resp):
     logging.info('About to send file: ' + file_path)
     yield from app.sendfile(resp, file_path)
 
+
 @app.route(re.compile("/start_test_data_acquisition"))
 def start_test_data_acquisition(req, resp):
     hooks['start_test_data_acquisition']()
@@ -171,6 +171,7 @@ def run():
 
     logging.info('About to start server...')
     app.run(debug=1, port=80, host='0.0.0.0')
+
 
 def stop_server():
     app.stop_server()

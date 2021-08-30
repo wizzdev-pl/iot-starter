@@ -36,7 +36,7 @@ def save_additional_arguments(cloud_provider, sensor_type):
     """
     if sensor_type == None:
         sensor_type = "DHT22"
-    
+
     cfg = {'cloud_provider': cloud_provider, 'sensor_type': sensor_type}
     with open(CONFIG_OUTPUT_PATH, 'w') as outfile:
         json.dump(cfg, outfile)
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     else:
         raise Exception("Wrong cloud provider! Only: {} are valid".format(
             Providers.print_providers()))
-    
+
     save_additional_arguments(args['cloud'], args['sensor'])
     erase_chip(args['port'])
     flash_micropython(args['port'])

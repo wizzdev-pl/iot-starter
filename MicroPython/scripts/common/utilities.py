@@ -7,6 +7,7 @@ def file_exists(path: str) -> bool:
     else:
         return False
 
+
 def remove_file(path: str, suppress=False) -> None:
     if file_exists(path):
         Path(path).unlink()

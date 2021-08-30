@@ -126,7 +126,7 @@ if __name__ == '__main__':
     else:
         print("At least one provided credential is empty! Aborting...")
         sys.exit(-1)
-    
+
     client = provision_client.get_new_client()
     if client:
         client.on_connect = on_connected

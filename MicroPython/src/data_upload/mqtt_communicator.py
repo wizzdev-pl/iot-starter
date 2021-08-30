@@ -1,12 +1,13 @@
 import gc
 import logging
-
 import ujson
 import utime
+
+from umqtt.simple import MQTTClient  # micropython-umqtt library
+
 from cloud.AWS_cloud import AWS_cloud
 from cloud.cloud_interface import Providers
 from common import config, utils
-from umqtt.simple import MQTTClient  # micropython-umqtt library
 
 
 class MQTTCommunicator:
@@ -21,11 +22,12 @@ class MQTTCommunicator:
 
         if cloud_provider == Providers.AWS:
             # Secure socket layer MQTT communication
-            
-            result, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
+
+            result, aws_certificate, aws_key = AWS_cloud.read_certificates(
+                True)
             if not result:
                 raise Exception("Failed to read AWS certificate or key")
-            
+
             ssl_parameters = {
                 "server_side": False,
                 "key": aws_key,
@@ -190,7 +192,7 @@ class MQTTCommunicator:
         return False
 
     def publish_message(self, payload, topic, qos):
-        
+
         if config.cfg.cloud_provider == Providers.AWS:
             mqtt_message = {
                 'client_id': self.client_id,
