@@ -1,6 +1,9 @@
 # Set up ThingsBoard locally on your computer
 The instruction walks you through the process of creating your own IoT device in just a few steps.
 
+An example dashboard that might be created can look like this:
+![Example dashboard](ThingsBoard_dashboard.png "ThingsBoard dashboard")
+
 ## What is ThingsBoard
 ThingsBoard is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version.
 

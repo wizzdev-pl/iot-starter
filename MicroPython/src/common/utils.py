@@ -1,15 +1,14 @@
 import logging
-
 import esp32
 import machine
 import ntptime
 import uos
 import utime
+
 from communication import wirerless_connection_controller
 from communication.wirerless_connection_controller import \
     WirelessConnectionController
 from data_upload.mqtt_communicator import MQTTCommunicator
-
 from common import config
 
 TIME_EPOCH_SHIFT = 946684800000
@@ -83,11 +82,13 @@ def get_ntp_time() -> bool:
     try:
         ntptime.settime()
         time_after = get_current_timestamp_ms()
-        print("Sync finished successful time before {} time after {}".format(time_before, time_after))
+        print("Sync finished successful time before {} time after {}".format(
+            time_before, time_after))
         return True
     except:
         time_after = get_current_timestamp_ms()
-        print("Sync finished unsuccessful time before {} time after {}".format(time_before, time_after))
+        print("Sync finished unsuccessful time before {} time after {}".format(
+            time_before, time_after))
         return False
 
 
@@ -154,7 +155,8 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
 
     try:
-        connect_to_wifi(wireless_controller, config.cfg.access_points, sync_time)
+        connect_to_wifi(wireless_controller,
+                        config.cfg.access_points, sync_time)
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
                                              timeout=config.cfg.mqtt_timeout)
 

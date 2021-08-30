@@ -1,6 +1,9 @@
 # Set up account and device on KaaIoT cloud platform
 The instruction walks you through the process of creating your own IoT device in just a few steps.
 
+An example dashboard that might be created can look like this:
+![Example dashboard](Kaa_dashboard.png "KaaIoT dashboard")
+
 ## What is KaaIoT
 KaaIoT is a cloud service provider allowing for device management, data collection and visualization. You can create a powerful dashboard in a matter of seconds. It's free of charge with a limit of up to 5 devices.
 

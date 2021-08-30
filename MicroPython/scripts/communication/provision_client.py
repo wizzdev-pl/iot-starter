@@ -34,7 +34,8 @@ class ProvisionClient(Client):
             provision_request = dumps(self.__provision_request)
             client.publish(self.PROVISION_REQUEST_TOPIC, provision_request)
         else:
-            print("Cannot connect to ThingsBoard!, result: {}".format(RESULT_CODES[rc]))
+            print("Cannot connect to ThingsBoard!, result: {}".format(
+                RESULT_CODES[rc]))
 
     def __on_message(self, client, userdata, msg):
         decoded_payload = msg.payload.decode("UTF-8")
@@ -48,7 +49,7 @@ class ProvisionClient(Client):
                 provision_device_status, decoded_message["errorMsg"]))
             # Needed as it can cause errors while checking if device was created
             remove_file(CREDENTIALS_PATH, suppress=True)
-            
+
         self.disconnect()
 
     def provision(self):

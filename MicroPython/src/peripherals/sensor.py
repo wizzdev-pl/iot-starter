@@ -1,9 +1,8 @@
 import logging
-
 import dht
-import lib.bme280 as bme280
 import machine
 import utime
+import lib.bme280 as bme280
 
 TIME_TO_DHT11_TO_WAKE_UP_S = 1
 TIME_TO_DHT22_TO_WAKE_UP_S = 0.5
@@ -16,8 +15,9 @@ class Sensor:
     """
     Class to wrap function to communicate with sensor
     """
-    def __init__(self, sensor_type, sensor_measurement_pin_number, 
-                sensor_sda_pin_number, sensor_scl_pin_number, sensor_power_pin_number):
+
+    def __init__(self, sensor_type, sensor_measurement_pin_number,
+                 sensor_sda_pin_number, sensor_scl_pin_number, sensor_power_pin_number):
         """
         Constructor.
         :param sensor_type: Type of sensor.
@@ -28,7 +28,8 @@ class Sensor:
         """
         logging.debug("Sensor.__init__()")
         self.sensor_type = sensor_type
-        self.sensor_power_pin = machine.Pin(sensor_power_pin_number, machine.Pin.OUT)
+        self.sensor_power_pin = machine.Pin(
+            sensor_power_pin_number, machine.Pin.OUT)
         self.sensor_power_on = False
         self.sensor_last_measure_status = False
 
@@ -41,12 +42,13 @@ class Sensor:
         elif self.sensor_type == "BME280":
             self.sensor_sda_pin = machine.Pin(sensor_sda_pin_number)
             self.sensor_scl_pin = machine.Pin(sensor_scl_pin_number)
-            self.i2c = machine.SoftI2C(scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000) 
+            self.i2c = machine.SoftI2C(
+                scl=self.sensor_scl_pin, sda=self.sensor_sda_pin, freq=100000)
             self.sensor = bme280.BME280(i2c=self.i2c)
         else:
-            raise Exception("Wrong sensor type provided! " + self.sensor_type + " is not supported")
-        
-        
+            raise Exception("Wrong sensor type provided! " +
+                            self.sensor_type + " is not supported")
+
     def measure(self) -> None:
         """
         Measure.
@@ -62,7 +64,8 @@ class Sensor:
                 continue
             break
         else:
-            logging.error("Error while sensor measure. Check if your sensor is connected correctly")
+            logging.error(
+                "Error while sensor measure. Check if your sensor is connected correctly")
             self.sensor_last_measure_status = False
 
     def humidity(self) -> float:
@@ -71,10 +74,12 @@ class Sensor:
         :return: Humidity
         """
         if self.sensor_last_measure_status:
-            logging.debug("Sensor.humidity() = {}".format(self.sensor.humidity()))
+            logging.debug("Sensor.humidity() = {}".format(
+                self.sensor.humidity()))
             return self.sensor.humidity()
         else:
-            logging.debug("Sensor.humidity() = {}".format(FAILED_TO_MEASURE_VALUE))
+            logging.debug("Sensor.humidity() = {}".format(
+                FAILED_TO_MEASURE_VALUE))
             return FAILED_TO_MEASURE_VALUE
 
     def temperature(self) -> float:
@@ -83,10 +88,12 @@ class Sensor:
         :return: Temperature
         """
         if self.sensor_last_measure_status:
-            logging.debug("Sensor.temperature() = {}".format(self.sensor.temperature()))
+            logging.debug("Sensor.temperature() = {}".format(
+                self.sensor.temperature()))
             return self.sensor.temperature()
         else:
-            logging.debug("Sensor.temperature() = {}".format(FAILED_TO_MEASURE_VALUE))
+            logging.debug("Sensor.temperature() = {}".format(
+                FAILED_TO_MEASURE_VALUE))
             return FAILED_TO_MEASURE_VALUE
 
     def turn_on(self) -> None:

@@ -1,11 +1,10 @@
 import logging
-
 import machine
 import ujson
+
 from common import config, utils
 from communication import wirerless_connection_controller
 from controller.main_controller_event import MainControllerEventType
-
 from cloud.cloud_interface import CloudProvider
 
 
@@ -34,7 +33,8 @@ class KAA_cloud(CloudProvider):
             if msg == '':
                 logging.info('Operation successful\n')
             else:
-                logging.info('Operation successful with return code: {}\n'.format(msg))
+                logging.info(
+                    'Operation successful with return code: {}\n'.format(msg))
         elif topic == self.publish_error_topic:
             status_code = msg['statusCode']
             reason = msg['reasonPhrase']
@@ -53,7 +53,8 @@ class KAA_cloud(CloudProvider):
         logging.info("Wifi access point configuration:")
 
         for access_point in data:
-            logging.info("Ssid: {} Password: {}".format(access_point["ssid"], access_point["password"]))
+            logging.info("Ssid: {} Password: {}".format(
+                access_point["ssid"], access_point["password"]))
 
         wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
         try:

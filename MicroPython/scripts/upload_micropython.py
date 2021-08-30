@@ -7,10 +7,11 @@ import esptool
 
 MICROPYTHON_BIN_FILE_NAME = "esp32-20210623-v1.16.bin"
 MICROPYTHON_BIN_FILE_DIR = "MicroPython_firmware/"
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+ROOT_DIR = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..'))
 
 
-#read -n 1 -s -r -p "Reset ESP32 into bootloader mode - Hold BOOT button and click EN button. Release BOOT. Then press any key to continue"
+# read -n 1 -s -r -p "Reset ESP32 into bootloader mode - Hold BOOT button and click EN button. Release BOOT. Then press any key to continue"
 def erase_chip_advanced(port):
     print('Erasing Chip...')
     esp = esptool.ESPLoader.detect_chip(port=port)
@@ -34,7 +35,8 @@ def erase_chip(port):
 
 
 def flash_micropython(port):
-    micropython_bin_file_path = os.path.join(ROOT_DIR, MICROPYTHON_BIN_FILE_DIR, MICROPYTHON_BIN_FILE_NAME)
+    micropython_bin_file_path = os.path.join(
+        ROOT_DIR, MICROPYTHON_BIN_FILE_DIR, MICROPYTHON_BIN_FILE_NAME)
 
     command = ["--chip", "esp32", "--port", port,
                "--baud", "230400", "--after", "hard_reset",
@@ -55,4 +57,3 @@ if __name__ == '__main__':
 
     erase_chip(args['port'])
     flash_micropython(args['port'])
-

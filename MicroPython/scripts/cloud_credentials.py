@@ -60,8 +60,10 @@ def set_credentials(cloud):
 
         host = input("Hostname [{}]: ".format(old_host))
         client_id = input("Client ID [{}]: ".format(old_client_id))
-        device_username = input("Device username [{}]: ".format(old_device_username))
-        device_password = input("Device password [{}]: ".format(old_device_password))
+        device_username = input(
+            "Device username [{}]: ".format(old_device_username))
+        device_password = input(
+            "Device password [{}]: ".format(old_device_password))
         device_name = input("Device name [{}]: ".format(old_device_name))
         username = input("ThingsBoard username [{}]: ".format(old_username))
         password = input("ThingsBoard password [{}]: ".format(old_password))
@@ -101,6 +103,7 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     if args['cloud'] not in Providers.get_providers():
-        print('Invalid choice! Only:', Providers.print_providers(), 'clouds are supported!')
+        print('Invalid choice! Only:',
+              Providers.print_providers(), 'clouds are supported!')
     else:
         set_credentials(args['cloud'])

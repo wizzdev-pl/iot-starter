@@ -43,7 +43,8 @@ class WirelessConnectionController:
         if self.ap_handler:
             return False
 
-        logging.info('About to start Wi-Fi AP: {}, pass: {}'.format(ssid, password))
+        logging.info(
+            'About to start Wi-Fi AP: {}, pass: {}'.format(ssid, password))
         self.ap_handler = network.WLAN(network.AP_IF)
         self.ap_handler.active(True)
         self.ap_handler.config(essid=ssid, password=password)
@@ -88,7 +89,8 @@ class WirelessConnectionController:
 
         # Sort detected networks according to signal strength in descending order and filter out the ones to
         # which credentials were not given
-        detected_networks.sort(reverse=True, key=lambda network_: network_[NetworkParams.RSSI])
+        detected_networks.sort(reverse=True, key=lambda network_: network_[
+                               NetworkParams.RSSI])
         logging.info("Networks detected: {}".format(detected_networks))
 
         networks_authorized = []
@@ -99,7 +101,8 @@ class WirelessConnectionController:
                         network_ssid not in networks_authorized:
                     networks_authorized.append(network_ssid)
 
-        logging.info("Networks detected that are also on AP ssid & password list: {}".format(networks_authorized))
+        logging.info("Networks detected that are also on AP ssid & password list: {}".format(
+            networks_authorized))
 
         for network_ssid in networks_authorized:
             # There could be many SSID & Password pairs saved for a single network therefore a list
@@ -111,9 +114,11 @@ class WirelessConnectionController:
                     credentials_for_ap.append(wifi_credentials)
 
             for wifi_credentials in credentials_for_ap:
-                print("Connecting to wifi: {}, pass: {}".format(wifi_credentials["ssid"], wifi_credentials["password"]))
+                print("Connecting to wifi: {}, pass: {}".format(
+                    wifi_credentials["ssid"], wifi_credentials["password"]))
                 try:
-                    self.sta_handler.connect(wifi_credentials["ssid"], wifi_credentials["password"])
+                    self.sta_handler.connect(
+                        wifi_credentials["ssid"], wifi_credentials["password"])
                 except Exception:
                     raise Exception(
                         "Failed to connect to access point (wifi ssid='{}')".format(wifi_credentials["ssid"]))
@@ -131,9 +136,11 @@ class WirelessConnectionController:
                     self.sta_handler.ifconfig()
                     return True, ""
                 else:
-                    logging.info("Failed to connect to AP: {}".format(wifi_credentials["ssid"]))
+                    logging.info("Failed to connect to AP: {}".format(
+                        wifi_credentials["ssid"]))
         self.disconnect_station()
-        raise Exception("Failed to connect to any AP, please restart your board")
+        raise Exception(
+            "Failed to connect to any AP, please restart your board")
 
     def disconnect_station(self) -> bool:
         """
