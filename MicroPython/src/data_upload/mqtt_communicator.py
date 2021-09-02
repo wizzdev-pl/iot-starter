@@ -22,10 +22,14 @@ class MQTTCommunicator:
 
         if cloud_provider == Providers.AWS:
             # Secure socket layer MQTT communication
+            certificates_existence, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
+            if not certificates_existence:
+                logging.debug("No AWS Certificates, configure_aws_thing()")
+                aws = AWS_cloud()
+                aws.configure_aws_thing()
+                certificates_existence, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
 
-            result, aws_certificate, aws_key = AWS_cloud.read_certificates(
-                True)
-            if not result:
+            if not certificates_existence:
                 raise Exception("Failed to read AWS certificate or key")
 
             ssl_parameters = {
