@@ -29,7 +29,6 @@ class AWS_cloud(CloudProvider):
         try:
             utils.connect_to_wifi(wireless_controller, data)
             logging.info(wireless_controller.sta_handler.ifconfig())
-            self.configure_aws_thing()
             config.cfg.access_points = data
         except Exception as e:
             logging.error("Exception caught: {}".format(e))
@@ -226,11 +225,6 @@ class AWS_cloud(CloudProvider):
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
-
-        certificates_existence, *_ = self.read_certificates()
-        if not certificates_existence:
-            logging.debug("No AWS Certificates, configure_aws_thing()")
-            self.configure_aws_thing()
 
         logging.debug("data to send = {}".format(data))
         logging.info(config.cfg.aws_topic)

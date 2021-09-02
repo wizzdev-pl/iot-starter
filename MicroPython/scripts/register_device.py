@@ -85,7 +85,7 @@ def parse_arguments():
 
     parser.add_argument('-c', '--cloud', metavar='CLOUD', type=str, required=True,
                         help="Cloud provider for IoT Starter: {}".format(
-                            Providers.print_providers()))
+                            Providers.THINGSBOARD))
 
     args = vars(parser.parse_args())
     return args
