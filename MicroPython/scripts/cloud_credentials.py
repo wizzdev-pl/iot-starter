@@ -4,17 +4,17 @@ import json
 from common.cloud_providers import Providers
 from common.utilities import file_exists
 
-KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
-THINGSBOARD_CONFIG_SRC_PATH = 'src/thingsboard_config.json'
+CLOUD_CONFIG_PATH = "src/{}_config.json"
 
 
 def set_credentials(cloud):
     """
     Asks user for credentials for cloud similar to "awscli"
     """
+    cloud_config_path = CLOUD_CONFIG_PATH.format(cloud.lower())
     if cloud == Providers.KAA:
-        if file_exists(KAA_CONFIG_SRC_PATH):
-            with open(KAA_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
+        if file_exists(cloud_config_path):
+            with open(cloud_config_path, 'r', encoding='utf8') as infile:
                 config = json.load(infile)
         else:
             config = {}
@@ -39,12 +39,12 @@ def set_credentials(cloud):
         if password:
             config['kaa_password'] = password
 
-        with open(KAA_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
+        with open(cloud_config_path, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
 
     elif cloud == Providers.THINGSBOARD:
-        if file_exists(THINGSBOARD_CONFIG_SRC_PATH):
-            with open(THINGSBOARD_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
+        if file_exists(cloud_config_path):
+            with open(cloud_config_path, 'r', encoding='utf8') as infile:
                 config = json.load(infile)
         else:
             config = {}
@@ -84,7 +84,34 @@ def set_credentials(cloud):
         if password:
             config['thingsboard_password'] = password
 
-        with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as outfile:
+        with open(cloud_config_path, 'w', encoding='utf8') as outfile:
+            json.dump(config, outfile)
+
+    elif cloud == Providers.BLYNK:
+        if file_exists(cloud_config_path):
+            with open(cloud_config_path, 'r', encoding='utf8') as infile:
+                config = json.load(infile)
+        else:
+            config = {}
+
+        print("Please provide Blynk credentials:")
+        old_auth_token = config.get('blynk_auth_token', None)
+        old_temp_pin = config.get('blynk_temp_pin', None)
+        old_humidity_pin = config.get('blynk_humidity_pin', None)
+
+        auth_token = input("Authentication token [{}]: ".format(old_auth_token))
+        temp_pin = input("Temperature virtual pin [{}]: ".format(old_temp_pin))
+        humidity_pin = input("Humidity virtual pin [{}]: ".format(old_humidity_pin))
+
+        # If values were not updated; leave the old ones
+        if auth_token:
+            config['blynk_auth_token'] = auth_token
+        if temp_pin:
+            config['blynk_temp_pin'] = temp_pin
+        if humidity_pin:
+            config['blynk_humidity_pin'] = humidity_pin
+
+        with open(cloud_config_path, 'w', encoding='utf8') as outfile:
             json.dump(config, outfile)
 
 
