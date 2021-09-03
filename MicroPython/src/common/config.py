@@ -62,7 +62,6 @@ CA_CERTIFICATE_PATH = "{}/{}".format(CERTIFICATES_DIR, "AWS.ca_certificate")
 DEFAULT_JSON_HEADER = {'Content-Type': 'application/json'}
 
 # KAA stuff
-KAA_CONFIG_SRC_PATH = 'src/kaa_config.json'
 KAA_CONFIG_PATH = "/resources/kaa_config.json"
 DEFAULT_KAA_KPC_HOST = "mqtt.cloud.kaaiot.com"
 DEFAULT_KAA_APP_VERSION = ""
@@ -85,6 +84,12 @@ DEFAULT_THINGSBOARD_PASSWORD = "tenant"
 DEFAULT_THINGSBOARD_JWT_TOKEN = ''
 DEFAULT_THINGSBOARD_DEVICE_ID = ''
 DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS = False
+
+# Blunk stuff
+BLYNK_CONFIG_PATH = 'resources/blynk_config.json'
+DEFAULT_BLYNK_AUTH_TOKEN = ''
+DEFAULT_BLYNK_TEMP_PIN = -1
+DEFAULT_BLYNK_HUMIDITY_PIN = -1
 
 
 class ESPConfig:
@@ -156,6 +161,11 @@ class ESPConfig:
         self.thingsboard_jwt_token = DEFAULT_THINGSBOARD_JWT_TOKEN
         self.thingsboard_device_id = DEFAULT_THINGSBOARD_DEVICE_ID
         self.thingsboard_attributes_exists = DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS
+
+        # Blynk
+        self.blynk_auth_token = DEFAULT_BLYNK_AUTH_TOKEN
+        self.blynk_temp_pin = DEFAULT_BLYNK_TEMP_PIN
+        self.blynk_humidity_pin = DEFAULT_BLYNK_HUMIDITY_PIN
 
     def load_from_file(self) -> None:
         """
@@ -258,6 +268,14 @@ class ESPConfig:
             self.thingsboard_attributes_exists = config_dict.get(
                 'thingsboard_attributes_exists', DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS)
 
+            # Blynk
+            self.blynk_auth_token = config_dict.get(
+                'blynk_auth_token', DEFAULT_BLYNK_AUTH_TOKEN)
+            self.blynk_temp_pin = config_dict.get(
+                'blynk_temp_pin', DEFAULT_BLYNK_TEMP_PIN)
+            self.blynk_humidity_pin = config_dict.get(
+                'blynk_humidity_pin', DEFAULT_BLYNK_HUMIDITY_PIN)
+
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
 
@@ -326,6 +344,11 @@ class ESPConfig:
         config_dict['thingsboard_jwt_token'] = self.thingsboard_jwt_token
         config_dict['thingsboard_device_id'] = self.thingsboard_device_id
         config_dict['thingsboard_attributes_exists'] = self.thingsboard_attributes_exists
+
+        # Blynk
+        config_dict['blynk_auth_token'] = self.blynk_auth_token
+        config_dict['blynk_temp_pin'] = self.blynk_temp_pin
+        config_dict['blynk_humidity_pin'] = self.blynk_humidity_pin
 
         return config_dict
 
