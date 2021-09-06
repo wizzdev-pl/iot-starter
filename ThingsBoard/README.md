@@ -5,7 +5,7 @@ An example dashboard that might be created can look like this:
 ![Example dashboard](ThingsBoard_dashboard.png "ThingsBoard dashboard")
 
 ## What is ThingsBoard
-ThingsBoard is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version.
+[ThingsBoard](https://thingsboard.io/) is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version.
 
 ## Requirements
 

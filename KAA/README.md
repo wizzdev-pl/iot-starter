@@ -5,7 +5,7 @@ An example dashboard that might be created can look like this:
 ![Example dashboard](Kaa_dashboard.png "KaaIoT dashboard")
 
 ## What is KaaIoT
-KaaIoT is a cloud service provider allowing for device management, data collection and visualization. You can create a powerful dashboard in a matter of seconds. It's free of charge with a limit of up to 5 devices.
+[KaaIoT](https://www.kaaiot.com/) is a cloud service provider allowing for device management, data collection and visualization. You can create a powerful dashboard in a matter of seconds. It's free of charge with a limit of up to 5 devices.
 
 ## Requirements
 
