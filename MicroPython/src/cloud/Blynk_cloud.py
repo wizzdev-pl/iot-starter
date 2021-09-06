@@ -35,7 +35,7 @@ class Blynk_cloud(CloudProvider):
         get_url = "http://blynk.cloud/external/api/get?token={}&v{}"
         for ind, pin in enumerate(pins):
             server_value = urequests.get(get_url.format(self.auth_token, pin))
-            if round(float(server_value.text), 2) != values[ind]:
+            if round(float(server_value.text), 1) != values[ind]:
                 logging.error("Error sending value to server! Sent value is: {}, received: {}".format(
                     values[ind], float(server_value.text)))
                 return False
@@ -111,7 +111,7 @@ class Blynk_cloud(CloudProvider):
         for _, (key, values) in enumerate(data.items()):
             # Unpack outer list and extract values to variables
             (_, value), = values
-            formatted_data[key] = value
+            formatted_data[key] = round(value, 1)
 
         return formatted_data
 
