@@ -39,7 +39,7 @@ Open the project MicroPython with PyCharm and mark *src* and *ulib_mocks* direct
 
 ## Cloud service provider: 
 
-### - KAA
+### KAA
 Make sure that your KAA cloud is configured. For more information please go to README in "KAA" directory [here](../KAA/README.md).
 
 By now, you should have four things:
@@ -48,7 +48,9 @@ By now, you should have four things:
  - username
  - password
 
-### - AWS
+---
+
+### AWS
 Make sure that your AWS cloud is configured. For more information please go to 
 README in "terraform" directory [here](../terraform/README.md).
 
@@ -56,7 +58,9 @@ If you already have configured AWS infrastructure, make sure that:
 - terraform exists either in ".terraform" directory or installed through the package manager
 - you have configured ssh connections with AWS (aws configure)
 
-### - ThingsBoard
+---
+
+### ThingsBoard
 Make sure your ThingsBoard server is configured. For more information please go to README in "ThingsBoard" directory [here](../ThingsBoard/README.md)
 
 Now we will make use of credentials we have saved in previous steps:
@@ -83,8 +87,18 @@ You'll need to also provide new credentials for your device:
 
 After you execute the script, you should see "Provisioning successful!" message. If something went wrong, please try again, validate your provision keys and make sure that the device you're trying to register is not already taken (both client ID and its name).
 
+---
 
-### Basic Setup of the ESP32
+### Blynk
+Make sure that your Blynk cloud is configured. For more information please go to README in "Blynk" directory [here](../Blynk/README.md).
+
+By now, you should have three things:
+ - Virtual pin for temperature
+ - Virtual pin for humidity
+ - Device auth token
+
+
+## Basic Setup of the ESP32
 To set up a new board or flash the old one. <br>
 Make sure that your cloud is configured and in case of using **AWS** make sure that your computer has AWS credentials.
 
@@ -112,7 +126,7 @@ After finding the correct port, execute:
 ```bash
 python scripts/upload_all.py -p <port> -c <cloud> -s <sensor>
 ```
-where \<cloud\> is your chosen cloud service provider (KAA, AWS or THINGSBOARD).<br>
+where \<cloud\> is your chosen cloud service provider (KAA, AWS, THINGSBOARD or Blynk).<br>
 where \<sensor\> is your currently used sensor (DHT11, DHT22 or BME280). Defaults to DHT22.<br>
 After flashing the board please reset it using button EN button.
 

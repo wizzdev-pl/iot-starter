@@ -3,9 +3,10 @@
 ## Overview
 This repository contains the WizzDev mobile IoT application in the "Starter" version. The project is based on ESP32 MCU and one of supported cloud service providers infrastructure. ESP32 is responsible for gathering data from the sensor (in this case DHT22), with a specified period of time, and sending them to the chosen cloud using the MQTT protocol. Depending on the chosen cloud, data can be viewed:
 
-- AWS: directly on the AWS, or on the dedicated visualization page.
-- KAA: directly on the Kaa on the created dashboard for a device.
-- ThingsBoard: directly on the dashboard in ThingsBoard local page
+- [AWS](https://aws.amazon.com/): directly on the AWS, or on the dedicated visualization page
+- [KAA](https://www.kaaiot.com/): directly on the Kaa on the created dashboard for a device
+- [ThingsBoard](https://thingsboard.io/): directly on the dashboard in ThingsBoard local page
+- [Blynk](https://blynk.io/): directly on the dashboard on mobile app or on the website
 
 The board was programmed using MicroPython, which is a Python implementation for embedded devices. If you are a novice and / or just want to try a solution that works without putting much work into it, we recommend using Kaa cloud which is much faster to set up.
 
@@ -76,6 +77,9 @@ AWS's configuration is handled using terraform. Detailed description of this pro
 ### **ThingsBoard configuration:** 
 As ThingsBoard is hosted locally on your device you need to configure it first. Detailed description of the whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
 
+### **Blynk configuration:**
+In order to set up Blynk, you'll need to create manually a device. Detailed description of this procedure is available in the "Blynk" directory [here](Blynk/README.md).
+
 ---
 ## **After cloud setup:**
 
@@ -97,6 +101,8 @@ Log in to your KAA account. From the side pane select "Device management" -> "De
 
 Another way of visualization of the data is to create a dashboard. You can use already created widgets or create custom ones. For more information visit [documentation](https://docs.kaaiot.io/KAA/docs/v1.3.0/Features/Visualization/WD/Dashboards/).
 
+---
+
 ## **For ThingsBoard:**
 
 ### Device management
@@ -106,6 +112,14 @@ Log in to your ThingsBoard page and from the side pane select the "Devices" tab.
 ### Dashboard
 
 To visualize data you need to create a dashboard. Whole process of setting up dashboard is described [here](https://thingsboard.io/docs/user-guide/dashboards/). In order to change your SleepTime attribute from dashboard, you need to click on the "Add new widget" button in the right bottom corner, then: "Create new widget" -> "Input widgets" -> "Update server integer attribute". Add datasource and as an attribute select SleepTime. In the widget settings change its title, in the "Advanced" tab add error message and set "Min value" to 30(seconds). Smaller value may cause software problems.
+
+---
+
+## **For Blynk:**
+
+### Dashboard
+
+You can view your data on the dashboard in either the Blynk.Console in a "Web Dashboard" or on the mobile app in a "Mobile Dashboard". For each device template you can set your "Web Dashboard" ("Templates" --> \<your template\> --> "Web Dashboard" (edit option)) in the Blynk.Console or a "Mobile Dashboard" directly in "Blynk IoT" mobile app.
 
 ---
 
