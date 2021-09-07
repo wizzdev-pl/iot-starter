@@ -5,13 +5,13 @@ import ujson
 import urequests
 import utime
 
+from lib.BlynkLib import Blynk
+
 from common import config, utils
 from common.utils import ConnectionError
 from communication.wirerless_connection_controller import (
     WirelessConnectionController, get_wireless_connection_controller_instance)
 from controller.main_controller_event import MainControllerEventType
-from lib.BlynkLib import Blynk
-
 from cloud.cloud_interface import CloudProvider
 
 
