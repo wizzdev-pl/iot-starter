@@ -15,13 +15,17 @@ from lib.BlynkLib import Blynk
 from cloud.cloud_interface import CloudProvider
 
 
-class Blynk_cloud(CloudProvider):
+class InvalidData(Exception):
+    pass
+
+
+class BlynkCloud(CloudProvider):
     def __init__(self) -> None:
         if not config.cfg.blynk_auth_token:
             self.configure_data()
 
         self.auth_token = config.cfg.blynk_auth_token
-        self.temp_pin = config.cfg.blynk_temp_pin
+        self.temperature_pin = config.cfg.blynk_temperature_pin
         self.humidity_pin = config.cfg.blynk_humidity_pin
         self.blynk = Blynk(self.auth_token)
 
@@ -94,8 +98,8 @@ class Blynk_cloud(CloudProvider):
 
         config.cfg.blynk_auth_token = blynk_configuration.get(
             'blynk_auth_token', config.DEFAULT_BLYNK_AUTH_TOKEN)
-        config.cfg.blynk_temp_pin = blynk_configuration.get(
-            'blynk_temp_pin', config.DEFAULT_BLYNK_TEMP_PIN)
+        config.cfg.blynk_temperature_pin = blynk_configuration.get(
+            'blynk_temperature_pin', config.DEFAULT_BLYNK_TEMPERATURE_PIN)
         config.cfg.blynk_humidity_pin = blynk_configuration.get(
             'blynk_humidity_pin', config.DEFAULT_BLYNK_HUMIDITY_PIN)
 
@@ -127,7 +131,8 @@ class Blynk_cloud(CloudProvider):
         try:
             wireless_controller = get_wireless_connection_controller_instance()
             utils.connect_to_wifi(wireless_controller,
-                                  config.cfg.access_points, sync_time)
+                                  config.cfg.access_points,
+                                  sync_time)
 
             while not wireless_controller.sta_handler.isconnected():
                 utime.sleep_ms(1)
@@ -141,18 +146,21 @@ class Blynk_cloud(CloudProvider):
         return wireless_controller
 
     def publish_data(self, data):
-        wireless_controller = Blynk_cloud.wifi_connect(sync_time=False)
+        wireless_controller = BlynkCloud.wifi_connect(sync_time=False)
 
         data = self._format_data(data)
-        temperature, humidity = data.get('temperature'), data.get('humidity')
-
+        temperature, humidity = data.get(
+            'temperature', None), data.get('humidity', None)
         logging.debug("data to send = {}".format(data))
+
+        if temperature is None or humidity is None:
+            raise InvalidData("Invalid data format!")
 
         self.blynk.connect()
         self.blynk.run()
 
         # Send data
-        self.blynk.virtual_write(self.temp_pin, temperature)
+        self.blynk.virtual_write(self.temperature_pin, temperature)
         self.blynk.virtual_write(self.humidity_pin, humidity)
 
         gc.collect()
@@ -160,7 +168,7 @@ class Blynk_cloud(CloudProvider):
 
         # Check if operation was successful
         res = self.receive_message(
-            pins=[self.temp_pin, self.humidity_pin],
+            pins=[self.temperature_pin, self.humidity_pin],
             values=[temperature, humidity])
 
         if res:

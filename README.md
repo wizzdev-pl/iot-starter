@@ -34,6 +34,24 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
     - install [python](https://www.python.org/downloads/windows/) (3.6 / 3.7) with pip and virtualenv - no need to install if you've chosen anaconda-python
     - install drivers for ESP32 from this [link](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) - make sure to select Universal Windows Driver
 
+
+### Python 3, PIP 
+Python can be downloaded from this [website](https://www.python.org/downloads) (in case of using [Anaconda environment](https://www.anaconda.com/products/individual), please skip this part and refer to the next section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
+After installation, you can check if it is installed correctly by typing the following commands in your terminal:
+
+* Linux
+```bash
+python3 --version
+pip3 --version
+```
+If python3 is not recognized, try "python"
+
+* Windows:
+```bash
+python --version
+pip --version
+```
+
 Make sure you have access to required hardware:
 
 - **(For AWS only)** Account with ACCESS_CODE and SECRET_CODE - [more info](https://github.com/wizzdev-pl/iot-starter/blob/devel/terraform/README.md#Additional-information-and-help)

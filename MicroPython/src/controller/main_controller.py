@@ -1,13 +1,13 @@
 import _thread
 import logging
-from cloud.Blynk_cloud import Blynk_cloud
+from cloud.Blynk_cloud import BlynkCloud
 import machine
 import utime
 
-from cloud.AWS_cloud import AWS_cloud
+from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import CloudProvider, Providers
-from cloud.KAA_cloud import KAA_cloud
-from cloud.Things_cloud import ThingsBoard_cloud
+from cloud.KAA_cloud import KAACloud
+from cloud.Things_cloud import ThingsBoardCloud
 from common import config, utils
 from communication import wirerless_connection_controller
 from data_acquisition import data_acquisitor
@@ -109,13 +109,13 @@ class MainController:
         :return: CloudProvider
         """
         if config.cfg.cloud_provider == Providers.AWS:
-            return AWS_cloud()
+            return AWSCloud()
         elif config.cfg.cloud_provider == Providers.KAA:
-            return KAA_cloud()
+            return KAACloud()
         elif config.cfg.cloud_provider == Providers.THINGSBOARD:
-            return ThingsBoard_cloud()
+            return ThingsBoardCloud()
         elif config.cfg.cloud_provider == Providers.BLYNK:
-            return Blynk_cloud()
+            return BlynkCloud()
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
@@ -264,7 +264,7 @@ class MainController:
 
             mqtt_communicator.disconnect()
         else:
-            wireless_controller = Blynk_cloud.wifi_connect(sync_time=True)
+            wireless_controller = BlynkCloud.wifi_connect(sync_time=True)
 
         wireless_controller.disconnect_station()
 

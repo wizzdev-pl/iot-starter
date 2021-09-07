@@ -88,7 +88,7 @@ DEFAULT_THINGSBOARD_ATTRIBUTES_EXISTS = False
 # Blunk stuff
 BLYNK_CONFIG_PATH = 'resources/blynk_config.json'
 DEFAULT_BLYNK_AUTH_TOKEN = ''
-DEFAULT_BLYNK_TEMP_PIN = -1
+DEFAULT_BLYNK_TEMPERATURE_PIN = -1
 DEFAULT_BLYNK_HUMIDITY_PIN = -1
 
 
@@ -164,7 +164,7 @@ class ESPConfig:
 
         # Blynk
         self.blynk_auth_token = DEFAULT_BLYNK_AUTH_TOKEN
-        self.blynk_temp_pin = DEFAULT_BLYNK_TEMP_PIN
+        self.blynk_temperature_pin = DEFAULT_BLYNK_TEMPERATURE_PIN
         self.blynk_humidity_pin = DEFAULT_BLYNK_HUMIDITY_PIN
 
     def load_from_file(self) -> None:
@@ -271,8 +271,8 @@ class ESPConfig:
             # Blynk
             self.blynk_auth_token = config_dict.get(
                 'blynk_auth_token', DEFAULT_BLYNK_AUTH_TOKEN)
-            self.blynk_temp_pin = config_dict.get(
-                'blynk_temp_pin', DEFAULT_BLYNK_TEMP_PIN)
+            self.blynk_temperature_pin = config_dict.get(
+                'blynk_temperature_pin', DEFAULT_BLYNK_TEMPERATURE_PIN)
             self.blynk_humidity_pin = config_dict.get(
                 'blynk_humidity_pin', DEFAULT_BLYNK_HUMIDITY_PIN)
 
@@ -347,7 +347,7 @@ class ESPConfig:
 
         # Blynk
         config_dict['blynk_auth_token'] = self.blynk_auth_token
-        config_dict['blynk_temp_pin'] = self.blynk_temp_pin
+        config_dict['blynk_temperature_pin'] = self.blynk_temperature_pin
         config_dict['blynk_humidity_pin'] = self.blynk_humidity_pin
 
         return config_dict

@@ -5,7 +5,7 @@ import utime
 
 from umqtt.simple import MQTTClient  # micropython-umqtt library
 
-from cloud.AWS_cloud import AWS_cloud
+from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import Providers
 from common import config, utils
 
@@ -22,12 +22,12 @@ class MQTTCommunicator:
 
         if cloud_provider == Providers.AWS:
             # Secure socket layer MQTT communication
-            certificates_existence, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
+            certificates_existence, aws_certificate, aws_key = AWSCloud.read_certificates(True)
             if not certificates_existence:
                 logging.debug("No AWS Certificates, configure_aws_thing()")
-                aws = AWS_cloud()
+                aws = AWSCloud()
                 aws.configure_aws_thing()
-                certificates_existence, aws_certificate, aws_key = AWS_cloud.read_certificates(True)
+                certificates_existence, aws_certificate, aws_key = AWSCloud.read_certificates(True)
 
             if not certificates_existence:
                 raise Exception("Failed to read AWS certificate or key")

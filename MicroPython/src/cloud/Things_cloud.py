@@ -10,7 +10,7 @@ from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
-class ThingsBoard_cloud(CloudProvider):
+class ThingsBoardCloud(CloudProvider):
     def __init__(self) -> None:
         self.request_topic = 'v1/devices/me/rpc/request/+'
         self.publish_topic = 'v1/devices/me/telemetry'

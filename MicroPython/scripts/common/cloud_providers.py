@@ -13,5 +13,5 @@ class Providers:
             cls.AWS, cls.KAA, cls.THINGSBOARD, cls.BLYNK)
 
     @classmethod
-    def get_providers(cls) -> Tuple[str, str, str]:
+    def get_providers(cls) -> Tuple[str, ...]:
         return cls.AWS, cls.KAA, cls.THINGSBOARD, cls.BLYNK

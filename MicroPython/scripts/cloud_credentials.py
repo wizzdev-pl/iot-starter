@@ -96,18 +96,18 @@ def set_credentials(cloud):
 
         print("Please provide Blynk credentials:")
         old_auth_token = config.get('blynk_auth_token', None)
-        old_temp_pin = config.get('blynk_temp_pin', None)
+        old_temperature_pin = config.get('blynk_temperature_pin', None)
         old_humidity_pin = config.get('blynk_humidity_pin', None)
 
         auth_token = input("Authentication token [{}]: ".format(old_auth_token))
-        temp_pin = input("Temperature virtual pin [{}]: ".format(old_temp_pin))
+        temperature_pin = input("Temperature virtual pin [{}]: ".format(old_temperature_pin))
         humidity_pin = input("Humidity virtual pin [{}]: ".format(old_humidity_pin))
 
         # If values were not updated; leave the old ones
         if auth_token:
             config['blynk_auth_token'] = auth_token
-        if temp_pin:
-            config['blynk_temp_pin'] = temp_pin
+        if temperature_pin:
+            config['blynk_temperature_pin'] = temperature_pin
         if humidity_pin:
             config['blynk_humidity_pin'] = humidity_pin
 
