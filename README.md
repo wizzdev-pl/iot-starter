@@ -60,6 +60,54 @@ Make sure you have access to required hardware:
 - DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed) or BME280 (IMPORTANT! Default measurement pin for DHT sensors is 27! BME280 uses pins 21 as SCL and 22 as SDA)
 - WiFi connection
 
+### Create virtual environment:
+First, you need to create virtual environment (either with python venv module or anaconda-python):
+
+Note, that **"ENV_NAME"** is the name of the environment you’re creating.
+
+Enter main directory of the project (iot-starter):
+```bash
+cd iot-starter
+```
+
+* For anaconda (either in terminal - Linux or anaconda prompt - Windows):
+  ```
+  conda create --name ENV_NAME python=3.7 pip
+  ```
+
+* For venv:
+  * Linux:
+  ```
+  python3 -m venv ENV_NAME
+  ```
+
+  * Windows:
+  ```
+  python -m venv ENV_NAME
+  ```
+
+Next, you should activate it. This step is platform dependent:
+#### Windows
+* For anaconda:
+  ```
+  conda activate ENV_NAME
+  ```
+
+* For venv:
+  ```
+  ENV_NAME/Scripts/activate.bat
+  ```
+
+#### Linux/ Mac OS
+* For anaconda:
+  ```
+  conda activate ENV_NAME
+  ```
+
+* For venv:
+  ```
+  source ENV_NAME/bin/activate
+  ```
 
 ## Cloning repository
 
