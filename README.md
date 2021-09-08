@@ -3,9 +3,10 @@
 ## Overview
 This repository contains the WizzDev mobile IoT application in the "Starter" version. The project is based on ESP32 MCU and one of supported cloud service providers infrastructure. ESP32 is responsible for gathering data from the sensor (in this case DHT22), with a specified period of time, and sending them to the chosen cloud using the MQTT protocol. Depending on the chosen cloud, data can be viewed:
 
-- AWS: directly on the AWS, or on the dedicated visualization page.
-- KAA: directly on the Kaa on the created dashboard for a device.
-- ThingsBoard: directly on the dashboard in ThingsBoard local page
+- [AWS](https://aws.amazon.com/): directly on the AWS, or on the dedicated visualization page
+- [KAA](https://www.kaaiot.com/): directly on the Kaa on the created dashboard for a device
+- [ThingsBoard](https://thingsboard.io/): directly on the dashboard in ThingsBoard local page
+- [Blynk](https://blynk.io/): directly on the dashboard on mobile app or on the website
 
 The board was programmed using MicroPython, which is a Python implementation for embedded devices. If you are a novice and / or just want to try a solution that works without putting much work into it, we recommend using Kaa cloud which is much faster to set up.
 
@@ -33,6 +34,24 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
     - install [python](https://www.python.org/downloads/windows/) (3.6 / 3.7) with pip and virtualenv - no need to install if you've chosen anaconda-python
     - install drivers for ESP32 from this [link](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) - make sure to select Universal Windows Driver
 
+
+### Python 3, PIP 
+Python can be downloaded from this [website](https://www.python.org/downloads) (in case of using [Anaconda environment](https://www.anaconda.com/products/individual), please skip this part and refer to the next section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
+After installation, you can check if it is installed correctly by typing the following commands in your terminal:
+
+* Linux
+```bash
+python3 --version
+pip3 --version
+```
+If python3 is not recognized, try "python"
+
+* Windows:
+```bash
+python --version
+pip --version
+```
+
 Make sure you have access to required hardware:
 
 - **(For AWS only)** Account with ACCESS_CODE and SECRET_CODE - [more info](https://github.com/wizzdev-pl/iot-starter/blob/devel/terraform/README.md#Additional-information-and-help)
@@ -41,6 +60,54 @@ Make sure you have access to required hardware:
 - DHT11 or DHT22 sensor with cables (additional 10k pull-up resistor may be needed) or BME280 (IMPORTANT! Default measurement pin for DHT sensors is 27! BME280 uses pins 21 as SCL and 22 as SDA)
 - WiFi connection
 
+### Create virtual environment:
+First, you need to create virtual environment (either with python venv module or anaconda-python):
+
+Note, that **"ENV_NAME"** is the name of the environment you’re creating.
+
+Enter main directory of the project (iot-starter):
+```bash
+cd iot-starter
+```
+
+* For anaconda (either in terminal - Linux or anaconda prompt - Windows):
+  ```
+  conda create --name ENV_NAME python=3.7 pip
+  ```
+
+* For venv:
+  * Linux:
+  ```
+  python3 -m venv ENV_NAME
+  ```
+
+  * Windows:
+  ```
+  python -m venv ENV_NAME
+  ```
+
+Next, you should activate it. This step is platform dependent:
+#### Windows
+* For anaconda:
+  ```
+  conda activate ENV_NAME
+  ```
+
+* For venv:
+  ```
+  ENV_NAME/Scripts/activate.bat
+  ```
+
+#### Linux/ Mac OS
+* For anaconda:
+  ```
+  conda activate ENV_NAME
+  ```
+
+* For venv:
+  ```
+  source ENV_NAME/bin/activate
+  ```
 
 ## Cloning repository
 
@@ -76,6 +143,9 @@ AWS's configuration is handled using terraform. Detailed description of this pro
 ### **ThingsBoard configuration:** 
 As ThingsBoard is hosted locally on your device you need to configure it first. Detailed description of the whole procedure is available in "ThingsBoard" directory [here](ThingsBoard/README.md)
 
+### **Blynk configuration:**
+In order to set up Blynk, you'll need to create manually a device. Detailed description of this procedure is available in the "Blynk" directory [here](Blynk/README.md).
+
 ---
 ## **After cloud setup:**
 
@@ -97,6 +167,8 @@ Log in to your KAA account. From the side pane select "Device management" -> "De
 
 Another way of visualization of the data is to create a dashboard. You can use already created widgets or create custom ones. For more information visit [documentation](https://docs.kaaiot.io/KAA/docs/v1.3.0/Features/Visualization/WD/Dashboards/).
 
+---
+
 ## **For ThingsBoard:**
 
 ### Device management
@@ -106,6 +178,14 @@ Log in to your ThingsBoard page and from the side pane select the "Devices" tab.
 ### Dashboard
 
 To visualize data you need to create a dashboard. Whole process of setting up dashboard is described [here](https://thingsboard.io/docs/user-guide/dashboards/). In order to change your SleepTime attribute from dashboard, you need to click on the "Add new widget" button in the right bottom corner, then: "Create new widget" -> "Input widgets" -> "Update server integer attribute". Add datasource and as an attribute select SleepTime. In the widget settings change its title, in the "Advanced" tab add error message and set "Min value" to 30(seconds). Smaller value may cause software problems.
+
+---
+
+## **For Blynk:**
+
+### Dashboard
+
+You can view your data on the dashboard in either the Blynk.Console in a "Web Dashboard" or on the mobile app in a "Mobile Dashboard". For each device template you can set your "Web Dashboard" ("Templates" --> \<your template\> --> "Web Dashboard" (edit option)) in the Blynk.Console or a "Mobile Dashboard" directly in "Blynk IoT" mobile app.
 
 ---
 

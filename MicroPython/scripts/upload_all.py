@@ -9,9 +9,7 @@ from generate_terraform import save_terraform_output_as_file
 from upload_micropython import erase_chip, flash_micropython
 from upload_scripts import flash_scripts
 
-TERRAFORM_OUTPUT_PATH = "src/aws_config.json"
-KAA_CONFIG_PATH = 'src/kaa_config.json'
-THINGSBOARD_CONFIG_PATH = 'src/thingsboard_config.json'
+CLOUD_CONFIG_PATH = "src/{}_config.json"
 CONFIG_OUTPUT_PATH = "src/config.json"
 
 
@@ -45,16 +43,12 @@ def save_additional_arguments(cloud_provider, sensor_type):
 if __name__ == '__main__':
     args = parse_arguments()
 
+    cloud_config_file_path = CLOUD_CONFIG_PATH.format(args['cloud'].lower())
     if args['cloud'] == Providers.AWS:
-        if not os.path.isfile(TERRAFORM_OUTPUT_PATH):
+        if not os.path.isfile(cloud_config_file_path):
             print("Generating terraform output..")
-            save_terraform_output_as_file(TERRAFORM_OUTPUT_PATH)
-        cloud_config_file_path = TERRAFORM_OUTPUT_PATH
-    elif args['cloud'] == Providers.KAA:
-        cloud_config_file_path = KAA_CONFIG_PATH
-        set_credentials(args['cloud'])
-    elif args['cloud'] == Providers.THINGSBOARD:
-        cloud_config_file_path = THINGSBOARD_CONFIG_PATH
+            save_terraform_output_as_file(cloud_config_file_path)
+    elif args['cloud'] in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK):
         set_credentials(args['cloud'])
     else:
         raise Exception("Wrong cloud provider! Only: {} are valid".format(

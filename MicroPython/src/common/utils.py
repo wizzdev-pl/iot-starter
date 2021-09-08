@@ -15,6 +15,10 @@ TIME_EPOCH_SHIFT = 946684800000
 NUMBER_OF_NTP_SYNCHRONIZATION_ATTEMPTS = 5
 
 
+class ConnectionError(Exception):
+    pass
+
+
 def button_irq(p: machine.Pin) -> None:
     """
     Callback of interrupt of BOOT button. Resets ESP.
@@ -175,7 +179,7 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
         except Exception:
             logging.error("Error in disconnecting WiFi controller")
 
-        logging.debug("Unable to publish data - no WIFI connection available. Retrying in {}ms".format(
+        logging.debug("Unable to publish data. Retrying in {}ms".format(
             config.cfg.data_publishing_period_in_ms))
         machine.deepsleep(config.cfg.data_publishing_period_in_ms)
 
@@ -202,7 +206,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_cred
             wireless_controller.disconnect_station()
         except Exception:
             pass
-        raise Exception(e)
+        raise ConnectionError(e)
 
     if sync_time:
         try:

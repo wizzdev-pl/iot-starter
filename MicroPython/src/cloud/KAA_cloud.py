@@ -8,7 +8,7 @@ from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
-class KAA_cloud(CloudProvider):
+class KAACloud(CloudProvider):
     def __init__(self) -> None:
         self.publish_success_topic = config.cfg.kaa_topic + '/status'
         self.publish_error_topic = config.cfg.kaa_topic + '/error'

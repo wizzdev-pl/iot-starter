@@ -1,12 +1,13 @@
 import _thread
 import logging
+from cloud.Blynk_cloud import BlynkCloud
 import machine
 import utime
 
-from cloud.AWS_cloud import AWS_cloud
+from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import CloudProvider, Providers
-from cloud.KAA_cloud import KAA_cloud
-from cloud.Things_cloud import ThingsBoard
+from cloud.KAA_cloud import KAACloud
+from cloud.Things_cloud import ThingsBoardCloud
 from common import config, utils
 from communication import wirerless_connection_controller
 from data_acquisition import data_acquisitor
@@ -61,7 +62,7 @@ class MainController:
                           start_data_acquisition=self.start_data_acquisition_hook,
                           get_status_hook=self.get_status)
 
-        elif config.cfg.cloud_provider == Providers.KAA or config.cfg.cloud_provider == Providers.THINGSBOARD:
+        elif config.cfg.cloud_provider in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK):
             web_app.setup(
                 get_measurement_hook=self.get_measurement,
                 configure_device_hook=self.cloud_provider.device_configuration,
@@ -108,11 +109,13 @@ class MainController:
         :return: CloudProvider
         """
         if config.cfg.cloud_provider == Providers.AWS:
-            return AWS_cloud()
+            return AWSCloud()
         elif config.cfg.cloud_provider == Providers.KAA:
-            return KAA_cloud()
+            return KAACloud()
         elif config.cfg.cloud_provider == Providers.THINGSBOARD:
-            return ThingsBoard()
+            return ThingsBoardCloud()
+        elif config.cfg.cloud_provider == Providers.BLYNK:
+            return BlynkCloud()
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
@@ -255,10 +258,14 @@ class MainController:
 
     @staticmethod
     def test_connection_with_wifi_and_cloud() -> None:
-        wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
-            sync_time=True)
+        if config.cfg.cloud_provider != Providers.BLYNK:
+            wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
+                sync_time=True)
 
-        mqtt_communicator.disconnect()
+            mqtt_communicator.disconnect()
+        else:
+            wireless_controller = BlynkCloud.wifi_connect(sync_time=True)
+
         wireless_controller.disconnect_station()
 
     @staticmethod
