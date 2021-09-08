@@ -126,7 +126,7 @@ After finding the correct port, execute:
 ```bash
 python scripts/upload_all.py -p <port> -c <cloud> -s <sensor>
 ```
-where \<cloud\> is your chosen cloud service provider (KAA, AWS, THINGSBOARD or Blynk).<br>
+where \<cloud\> is your chosen cloud service provider (KAA, AWS, THINGSBOARD or BLYNK).<br>
 where \<sensor\> is your currently used sensor (DHT11, DHT22 or BME280). Defaults to DHT22.<br>
 After flashing the board please reset it using button EN button.
 
