@@ -31,7 +31,7 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
 * Windows:
 
     - install [git](https://git-scm.com/downloads)
-    - install [python](https://www.python.org/downloads/windows/) (3.6 / 3.7) with pip and virtualenv - no need to install if you've chosen anaconda-python
+    - install [python](https://www.python.org/downloads/windows/) (**3.7 version is needed!**) with pip and virtualenv - no need to install if you've chosen anaconda-python
     - install drivers for ESP32 from this [link](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) - make sure to select Universal Windows Driver
 
 
