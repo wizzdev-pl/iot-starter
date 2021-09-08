@@ -5,79 +5,11 @@ An example dashboard that might be created can look like this:
 ![Example dashboard](ThingsBoard_dashboard.png "ThingsBoard dashboard")
 
 ## What is ThingsBoard
-ThingsBoard is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version.
-
-## Requirements
-
-### Python 3, PIP 
-Python can be downloaded from this [website](https://www.python.org/downloads) (in case of using [Anaconda environment](https://www.anaconda.com/products/individual), please skip this part and refer to "**Installation**" section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
-After installation, you can check if it is installed correctly by typing the following commands in your terminal:
-
-* Linux
-```bash
-python3 --version
-pip3 --version
-```
-If python3 is not recognized, try "python"
-
-* Windows:
-```bash
-python --version
-pip --version
-```
+[ThingsBoard](https://thingsboard.io/) is an open-source IoT platform that enables rapid development, management, and scaling of IoT projects. You can host it locally on your device or use the paid cloud version.
 
 ## Installation
 
-### 1. Create virtual environment:
-First, you need to create virtual environment (either with python venv module or anaconda-python):
-
-Note, that **"ENV_NAME"** is the name of the environment you’re creating.
-
-Enter main directory of the project (iot-starter):
-```bash
-cd iot-starter
-```
-
-* For anaconda (either in terminal - Linux or anaconda prompt - Windows):
-  ```
-  conda create --name ENV_NAME python=3.7 pip
-  ```
-
-* For venv:
-  * Linux:
-  ```
-  python3 -m venv ENV_NAME
-  ```
-
-  * Windows:
-  ```
-  python -m venv ENV_NAME
-  ```
-
-Next, you should activate it. This step is platform dependent:
-#### Windows
-* For anaconda:
-  ```
-  conda activate ENV_NAME
-  ```
-
-* For venv:
-  ```
-  ENV_NAME/Scripts/activate.bat
-  ```
-
-#### Linux/ Mac OS
-* For anaconda:
-  ```
-  conda activate ENV_NAME
-  ```
-
-* For venv:
-  ```
-  source ENV_NAME/bin/activate
-  ```
-
-### 2. Install requirements
+### Install requirements
 
 After you've created virtual environment, your current directory should be "iot-starter"
 

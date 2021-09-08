@@ -12,7 +12,7 @@ from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
-class AWS_cloud(CloudProvider):
+class AWSCloud(CloudProvider):
     def device_configuration(self, data: list[dict]) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.

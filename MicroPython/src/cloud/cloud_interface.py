@@ -2,6 +2,7 @@ class Providers:
     AWS = "AWS"
     KAA = "KAA"
     THINGSBOARD = "THINGSBOARD"
+    BLYNK = "BLYNK"
 
 
 class CloudProvider:
