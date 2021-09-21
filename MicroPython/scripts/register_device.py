@@ -3,15 +3,15 @@ import json
 import sys
 from json import loads
 
-from cloud_credentials import THINGSBOARD_CONFIG_SRC_PATH
+from cloud_credentials import CLOUD_CONFIG_PATH
 from common.cloud_providers import Providers
 from common.utilities import file_exists
 from communication.provision_client import RESULT_CODES, ProvisionClient
 
 
 def collect_data():
-    if file_exists(THINGSBOARD_CONFIG_SRC_PATH):
-        with open(THINGSBOARD_CONFIG_SRC_PATH, 'r', encoding='utf8') as infile:
+    if file_exists(CLOUD_CONFIG_PATH):
+        with open(CLOUD_CONFIG_PATH, 'r', encoding='utf8') as infile:
             config = json.load(infile)
     else:
         config = {}
@@ -76,7 +76,7 @@ def on_connected(client, userdata, flags, rc):
 
 
 def save_config(config):
-    with open(THINGSBOARD_CONFIG_SRC_PATH, 'w', encoding='utf8') as cfg_file:
+    with open(CLOUD_CONFIG_PATH, 'w', encoding='utf8') as cfg_file:
         json.dump(config, cfg_file)
 
 
