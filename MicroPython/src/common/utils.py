@@ -1,3 +1,4 @@
+import gc
 import logging
 import esp32
 import machine
@@ -197,7 +198,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_cred
     """
     logging.debug("utils.py/connect_to_wifi({})".format(sync_time))
     wireless_controller.setup_station(access_points=wifi_credentials)
-
+    gc.collect()
     try:
         wireless_controller.configure_station()
     except Exception as e:

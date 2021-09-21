@@ -144,41 +144,23 @@ class IBMCloud(CloudProvider):
             sync_time=False
         )
 
-        result_suc_topic = mqtt_communicator.subscribe(
-            topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
-        )
-        result_err_topic = mqtt_communicator.subscribe(
-            topic=self.publish_error_topic, callback=self.receive_message, qos=config.cfg.QOS
-        )
-        if not result_suc_topic or not result_err_topic:
-            logging.error(
-                "Error subscribing to topics with MQTT in publish_data()")
-
-        # TODO: Add SSL connection
-
         data = self._format_data(data)
 
         logging.debug("data to send = {}".format(data))
 
-        mqtt_communicator.publish_message(
-            payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
+        ret = mqtt_communicator.publish_message(
+            payload=data, topic=config.cfg.ibm_topic, qos=config.cfg.QOS
         )
-
-        try:
-            mqtt_communicator.MQTT_client.wait_msg()
-        except OSError:
-            # Data probably did not arrive cloud
-            # Try to send data one more time up to three times
+        if ret == False:
             for _ in range(3):
-                mqtt_communicator.publish_message(
-                    payload=data, topic=config.cfg.kaa_topic, qos=config.cfg.QOS
+                ret = mqtt_communicator.publish_message(
+                    payload=data, topic=config.cfg.ibm_topic, qos=config.cfg.QOS
                 )
-                try:
-                    mqtt_communicator.MQTT_client.wait_msg()
-                except OSError:
-                    # Failed again, trying up to three times
-                    continue
-                break
+                logging.debug(
+                    "Trying to send data again"
+                )
+                if ret:
+                    break
             else:
                 logging.debug(
                     "Tried to send data three times, failed! Aborting current measurement."

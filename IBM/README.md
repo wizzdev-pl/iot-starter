@@ -1,11 +1,11 @@
-# Set up account and device on KaaIoT cloud platform
+# Set up account and device on IBM Watson IoT platform
 The instruction walks you through the process of creating your own IoT device in just a few steps.
 
 An example dashboard that might be created can look like this:
-![Example dashboard](Kaa_dashboard.png "KaaIoT dashboard")
+![Example dashboard](IBM_dashboard.png "IBM Watson IoT Platform dashboard")
 
 ## What is KaaIoT
-[KaaIoT](https://www.kaaiot.com/) is a cloud service provider allowing for device management, data collection and visualization. You can create a powerful dashboard in a matter of seconds. It's free of charge with a limit of up to 5 devices.
+[IBM Watson IoT Platform](https://internetofthings.ibmcloud.com/) is a clean and simple UI where you can simply and easily add and manage your devices, control access to your IoT service, and monitor your usage. It's free of charge with a limit of up to 500 devices and 200MB of data transfer.
 
 ## Installation
 
@@ -20,22 +20,22 @@ pip install -r KAA/requirements.txt
 
 ## Set up KaaIoT account
 
-If you are stuck or something will be unclear in next few steps, we recommend looking at official Kaa documentation about connecting your first device at this [link](https://docs.kaaiot.io/KAA/docs/v1.3.0/Tutorials/getting-started/connecting-your-first-device/).
+If you are stuck or something will be unclear in next few steps, we recommend looking at official IBM documentation about Getting Started at this [link](https://cloud.ibm.com/docs/IoT/devices/mqtt.html#).
 
 ### 1. Create account
 
-First, you need to create an account on KaaIoT website: [kaaiot.com](https://www.kaaiot.com/).
-Click at the "Use Kaa for free" button at top right corner and follow standard procedure of registration.
+First, you need to create an account on IBM Watson IoT Platform website: [ibm.com](https://internetofthings.ibmcloud.com/).
+
 
 ### 2. Create your first application and device endpoint
 
-After you log in into your new account (as a root user!), familiarize yourself with the UI and the options at the left side pane. 
+Create an IoT Platform Service Lite instance directly from the [Platform Service Page in the IBM Cloud Service Catalog](https://cloud.ibm.com/catalog/services/internet-of-things-platform).  
 
-#### **Application version and autoextract:**
+### 3. Create a device
 
- 1. Hover over the "Device management" option (first one) and select "Applications". In the right top corner click "Add application" and enter the name of your application and (optional) description.
- 2. Click on the created application to expand it. On the right side look for "epts" and click on it. There you should see an option **"Autoextract"**. Make sure that the checkbox is checked.
- 3. Go back to the application menu and expand the created application again. On the left side of the expanded window you will see “versions”. Click on the plus sign next to add a new version. You should see the "Name" field with a long sequence of random characters (like this one: c2t3ac6gul4q7qik0ol0-). There you should specify a version of your application. Let's go with something simple, add "v1" at the input field. **It is important for you to write this application version down as we will need it later - in this example it looks like: "c2t3ac6gul4q7qik0ol0-v1"**. You can add some optional display name and description for your convenience. After it is created, repeat step 2. but for the created version.
+1.In your IBM Watson IoT Platform dashboard, hover over the left side panel, and choose "Devices"
+2.Click "Add Device" in the top right corner
+3.Create a device type. The device type name must be no more than 36 characters and contain only: Alpha-numeric characters, Hyphens(-), Underscores(_) and Periods(.). For example (IoTStarter)
 
 #### **Device endpoint:**
 
