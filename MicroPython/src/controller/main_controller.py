@@ -32,7 +32,6 @@ class MainController:
         """
         MainController constructor.
         """
-        logging.debug("MainController.__init__()")
         self.controller_state = MainControllerState()
         self.events_queue = []
         self.lock = _thread.allocate_lock()
