@@ -5,7 +5,6 @@ import utime
 
 from umqtt.simple import MQTTClient  # micropython-umqtt library
 
-from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import Providers
 from common import config, utils
 
@@ -21,6 +20,7 @@ class MQTTCommunicator:
         self.timeout = timeout
 
         if cloud_provider == Providers.AWS:
+            from cloud.AWS_cloud import AWSCloud
             # Secure socket layer MQTT communication
             certificates_existence, aws_certificate, aws_key = AWSCloud.read_certificates(True)
             if not certificates_existence:
