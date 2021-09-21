@@ -147,6 +147,8 @@ class BlynkCloud(CloudProvider):
 
     def publish_data(self, data):
         wireless_controller = BlynkCloud.wifi_connect(sync_time=False)
+        if not wireless_controller:
+            return False
 
         data = self._format_data(data)
         temperature, humidity = data.get(
@@ -154,15 +156,18 @@ class BlynkCloud(CloudProvider):
         logging.debug("data to send = {}".format(data))
 
         if temperature is None or humidity is None:
-            raise InvalidData("Invalid data format!")
+            logging.error("Invalid data format!")
+            return False
 
-        self.blynk.connect()
-        self.blynk.run()
+        if wireless_controller.sta_handler.isconnected():
+            self.blynk.connect()
+            self.blynk.run()
 
-        # Send data
-        self.blynk.virtual_write(self.temperature_pin, temperature)
-        self.blynk.virtual_write(self.humidity_pin, humidity)
-
+            # Send data
+            self.blynk.virtual_write(self.temperature_pin, temperature)
+            self.blynk.virtual_write(self.humidity_pin, humidity)
+        else:
+            logging.info("No Wifi connection, can't send data")
         gc.collect()
         utime.sleep(1)
 
@@ -175,3 +180,4 @@ class BlynkCloud(CloudProvider):
             logging.info("Operation successful!")
 
         wireless_controller.disconnect_station()
+        return True

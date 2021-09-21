@@ -115,6 +115,44 @@ def set_credentials(cloud):
             json.dump(config, outfile)
 
 
+    elif cloud == Providers.IBM:
+        if file_exists(cloud_config_path):
+            with open(cloud_config_path, 'r', encoding='utf8') as infile:
+                config = json.load(infile)
+        else:
+            config = {}
+        print("Please provide IBM credentials:")
+        old_device_id = config.get('ibm_device_id', None)
+        old_user = config.get('ibm_user', None)
+        old_password = config.get('ibm_password', None)
+        old_organisation_id = config.get('ibm_organisation_id', None)
+        old_event_id = config.get('ibm_event_id', None)
+        old_device_type = config.get('ibm_device_type', None)
+
+
+        device_id = input("Device ID [{}]: ".format(old_device_id))
+        user = input("User [{}]: ".format(old_user))
+        password = input("Password [{}]: ".format(old_password))
+        organisation_id = input("Organisation ID [{}]: ".format(old_organisation_id))
+        event_id = input("Event ID [{}]: ".format(old_event_id))
+        device_type = input("Device Type [{}]: ".format(old_device_type))
+        # If values were not updated; leave the old ones
+        if device_id:
+            config['ibm_device_id'] = device_id
+        if user:
+            config['ibm_user'] = user
+        if password:
+            config['ibm_password'] = password
+        if organisation_id:
+            config['ibm_organisation_id'] = organisation_id
+        if event_id:
+            config['ibm_event_id'] = event_id
+        if device_type:
+            config['ibm_device_type'] = device_type
+
+        with open(cloud_config_path, 'w', encoding='utf8') as outfile:
+            json.dump(config, outfile)
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
 

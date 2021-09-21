@@ -3,7 +3,7 @@ class Providers:
     KAA = "KAA"
     THINGSBOARD = "THINGSBOARD"
     BLYNK = "BLYNK"
-
+    IBM = "IBM"
 
 class CloudProvider:
     def device_configuration(self):
