@@ -1,6 +1,6 @@
-import logging
-import gc
 import esp32
+import gc
+import logging
 import machine
 import ntptime
 import uos
@@ -158,7 +158,7 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     """
     logging.debug("utils.py/connect_to_wifi_and_cloud({})".format(sync_time))
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-    logging.debug('WIFI CONNECTION FAILED BEFORE? {}'.format(config.cfg.wifi_connection_failed))
+
     try:
         connect_to_wifi(wireless_controller,
                         config.cfg.access_points, sync_time)
