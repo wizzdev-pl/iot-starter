@@ -1,13 +1,9 @@
 import _thread
 import logging
-from cloud.Blynk_cloud import BlynkCloud
 import machine
 import utime
 
-from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import CloudProvider, Providers
-from cloud.KAA_cloud import KAACloud
-from cloud.Things_cloud import ThingsBoardCloud
 from common import config, utils
 from communication import wirerless_connection_controller
 from data_acquisition import data_acquisitor
@@ -36,6 +32,7 @@ class MainController:
         """
         MainController constructor.
         """
+        logging.debug("MainController.__init__()")
         self.controller_state = MainControllerState()
         self.events_queue = []
         self.lock = _thread.allocate_lock()
@@ -109,12 +106,16 @@ class MainController:
         :return: CloudProvider
         """
         if config.cfg.cloud_provider == Providers.AWS:
+            from cloud.AWS_cloud import AWSCloud
             return AWSCloud()
         elif config.cfg.cloud_provider == Providers.KAA:
+            from cloud.KAA_cloud import KAACloud
             return KAACloud()
         elif config.cfg.cloud_provider == Providers.THINGSBOARD:
+            from cloud.ThingsBoard_cloud import ThingsBoardCloud
             return ThingsBoardCloud()
         elif config.cfg.cloud_provider == Providers.BLYNK:
+            from cloud.Blynk_cloud import BlynkCloud
             return BlynkCloud()
 
     def process_event(self, event: MainControllerEvent) -> None:
@@ -173,8 +174,7 @@ class MainController:
             if self.got_sensor_data:
                 logging.debug("GOT SENSOR DATA")
                 logging.debug("Publishing data to cloud")
-                self.cloud_provider.publish_data(self.data_acquisitor.data)
-                self.published_to_cloud = True
+                self.published_to_cloud = self.cloud_provider.publish_data(self.data_acquisitor.data)
             else:
                 logging.debug("FAILED GETTING SENSOR DATA")
                 logging.debug("Skipping publish...")
@@ -264,6 +264,7 @@ class MainController:
 
             mqtt_communicator.disconnect()
         else:
+            from cloud.Blynk_cloud import BlynkCloud
             wireless_controller = BlynkCloud.wifi_connect(sync_time=True)
 
         wireless_controller.disconnect_station()

@@ -10,7 +10,7 @@ from upload_micropython import erase_chip, flash_micropython
 from upload_scripts import flash_scripts
 
 CLOUD_CONFIG_PATH = "src/{}_config.json"
-CONFIG_OUTPUT_PATH = "src/config.json"
+CONFIG_OUTPUT_PATH = "config.json"
 
 
 def parse_arguments():
@@ -36,7 +36,7 @@ def save_additional_arguments(cloud_provider, sensor_type):
         sensor_type = "DHT22"
 
     cfg = {'cloud_provider': cloud_provider, 'sensor_type': sensor_type}
-    with open(CONFIG_OUTPUT_PATH, 'w') as outfile:
+    with open("src/" + CONFIG_OUTPUT_PATH, 'w') as outfile:
         json.dump(cfg, outfile)
 
 
@@ -58,4 +58,4 @@ if __name__ == '__main__':
     erase_chip(args['port'])
     flash_micropython(args['port'])
     time.sleep(4)
-    flash_scripts(args['port'], cloud_config_file_path)
+    flash_scripts(args['port'], cloud_config_file_path, args['cloud'], CONFIG_OUTPUT_PATH)
