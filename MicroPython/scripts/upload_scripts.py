@@ -110,6 +110,10 @@ def upload_dir(repo_path: str, device_path, cloud: str, config_name: str):
         if 'cloud' in device_path:
             if cloud.lower() not in file_name.lower() and 'interface' not in file_name:
                 continue
+        
+        if cloud.lower() != 'blynk':
+            if file_name == 'BlynkLib.py':
+                continue
 
         full_repo_file_path = os.path.join(full_repo_path, file_name)
         if os.path.isfile(full_repo_file_path):
