@@ -133,20 +133,23 @@ class KAACloud(CloudProvider):
 
         return formatted_data
 
-    def publish_data(self, data):
+    def publish_data(self, data) -> bool:
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
 
-        result_suc_topic = mqtt_communicator.subscribe(
-            topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
-        )
-        result_err_topic = mqtt_communicator.subscribe(
-            topic=self.publish_error_topic, callback=self.receive_message, qos=config.cfg.QOS
-        )
-        if not result_suc_topic or not result_err_topic:
-            logging.error(
-                "Error subscribing to topics with MQTT in publish_data()")
+        try:
+            mqtt_communicator.subscribe(
+                topic=self.publish_success_topic, callback=self.receive_message, qos=config.cfg.QOS
+            )
+            mqtt_communicator.subscribe(
+                topic=self.publish_error_topic, callback=self.receive_message, qos=config.cfg.QOS
+            )
+        except OSError:
+            logging.error("Error subscribing to topics with MQTT in publish_data()")
+            mqtt_communicator.disconnect()
+            wireless_controller.disconnect_station()
+            return False
 
         # TODO: Add SSL connection
 
@@ -177,6 +180,10 @@ class KAACloud(CloudProvider):
                 logging.debug(
                     "Tried to send data three times, failed! Aborting current measurement."
                 )
+                mqtt_communicator.disconnect()
+                wireless_controller.disconnect_station()
+                return False
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
+        return True

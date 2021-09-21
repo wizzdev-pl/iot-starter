@@ -221,7 +221,7 @@ class AWSCloud(CloudProvider):
             config_dict = load(infile)
         return config_dict
 
-    def publish_data(self, data) -> None:
+    def publish_data(self, data) -> bool:
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
@@ -233,6 +233,10 @@ class AWSCloud(CloudProvider):
 
         if not result:
             logging.error("Error publishing data to MQTT in publish_data()")
+            mqtt_communicator.disconnect()
+            wireless_controller.disconnect_station()
+            return False
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
+        return True

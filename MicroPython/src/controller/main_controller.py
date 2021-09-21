@@ -179,10 +179,11 @@ class MainController:
                 logging.debug("Skipping publish...")
 
         elif event.event_type == MainControllerEventType.GO_TO_SLEEP:
-
+            logging.debug("WAITING FOR DATA TO BE PUBLISHED TO CLOUD")
             if self.published_to_cloud:
-                logging.debug("WAITING FOR PUBLISHED TO CLOUD")
                 logging.debug("GOT PUBLISHED TO CLOUD")
+            else:
+                logging.debug("COULD NOT PUBLISH TO CLOUD")
 
             self.go_to_sleep(event)
 

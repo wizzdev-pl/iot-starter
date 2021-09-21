@@ -293,7 +293,7 @@ class ThingsBoardCloud(CloudProvider):
 
         return formatted_data
 
-    def publish_data(self, data: dict):
+    def publish_data(self, data: dict) -> bool:
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False)
 
@@ -326,3 +326,4 @@ class ThingsBoardCloud(CloudProvider):
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
+        return True
