@@ -1,4 +1,5 @@
 import logging
+import gc
 import esp32
 import machine
 import ntptime
@@ -157,10 +158,15 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     """
     logging.debug("utils.py/connect_to_wifi_and_cloud({})".format(sync_time))
     wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-
+    logging.debug('WIFI CONNECTION FAILED BEFORE? {}'.format(config.cfg.wifi_connection_failed))
     try:
         connect_to_wifi(wireless_controller,
                         config.cfg.access_points, sync_time)
+        if config.cfg.wifi_connection_failed:
+            logging.debug("Resetting due to previous problem with WIFI connection")
+            config.cfg.wifi_connection_failed = False
+            config.cfg.save()
+            machine.reset()
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
                                              timeout=config.cfg.mqtt_timeout)
 
@@ -181,6 +187,8 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
 
         logging.debug("Unable to publish data. Retrying in {}ms".format(
             config.cfg.data_publishing_period_in_ms))
+        config.cfg.wifi_connection_failed = True
+        config.cfg.save()
         machine.deepsleep(config.cfg.data_publishing_period_in_ms)
 
     return wireless_controller, mqtt_communicator
@@ -197,7 +205,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_cred
     """
     logging.debug("utils.py/connect_to_wifi({})".format(sync_time))
     wireless_controller.setup_station(access_points=wifi_credentials)
-
+    gc.collect()
     try:
         wireless_controller.configure_station()
     except Exception as e:

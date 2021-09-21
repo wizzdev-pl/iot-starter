@@ -8,7 +8,7 @@ from communication.wirerless_connection_controller import \
 
 cfg = None
 
-DEFAULT_CLOUD_PROVIDER = 'KAA'
+DEFAULT_CLOUD_PROVIDER = ''
 
 DEFAULT_ACCESS_POINTS = []
 
@@ -18,10 +18,11 @@ DEFAULT_WIFI_TIMEOUT = 5000
 DEFAULT_MQTT_PORT = 1883
 DEFAULT_MQTT_REQUEST_ID = 42
 DEFAULT_MQTT_PORT_SSL = 8883
-DEFAULT_MQTT_TIMEOUT = 400
+DEFAULT_MQTT_TIMEOUT = 60
 DEFAULT_THINGSBOARD_PORT = 8080
 DEFAULT_QOS = 1
 DEFAULT_TESTED_CONNECTION_CLOUD = False
+DEFAULT_WIFI_CONNECTION_FAILED = False
 
 DEFAULT_PRIV_KEY = ""
 DEFAULT_CERT_PEM = ""
@@ -117,6 +118,7 @@ class ESPConfig:
         self.mqtt_timeout = DEFAULT_MQTT_TIMEOUT
         self.QOS = DEFAULT_QOS
         self.tested_connection_cloud = DEFAULT_TESTED_CONNECTION_CLOUD
+        self.wifi_connection_failed = DEFAULT_WIFI_CONNECTION_FAILED
 
         self.private_key = DEFAULT_PRIV_KEY
         self.cert_pem = DEFAULT_CERT_PEM
@@ -205,6 +207,8 @@ class ESPConfig:
             self.QOS = config_dict.get('QOS', DEFAULT_QOS)
             self.tested_connection_cloud = config_dict.get(
                 'tested_connection_cloud', DEFAULT_TESTED_CONNECTION_CLOUD)
+            self.wifi_connection_failed = config_dict.get(
+                'wifi_connection_failed', DEFAULT_WIFI_CONNECTION_FAILED)
 
             self.private_key = config_dict.get('private_key', DEFAULT_PRIV_KEY)
             self.cert_pem = config_dict.get('cert_pem', DEFAULT_CERT_PEM)
@@ -304,6 +308,7 @@ class ESPConfig:
         config_dict['mqtt_timeout'] = self.mqtt_timeout
         config_dict['QOS'] = self.QOS
         config_dict['tested_connection_cloud'] = self.tested_connection_cloud
+        config_dict['wifi_connection_failed'] = self.wifi_connection_failed
 
         config_dict['private_key'] = self.private_key
         config_dict['cert_pem'] = self.cert_pem
