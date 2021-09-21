@@ -32,7 +32,6 @@ class MainController:
         """
         MainController constructor.
         """
-        logging.debug("MainController.__init__()")
         self.controller_state = MainControllerState()
         self.events_queue = []
         self.lock = _thread.allocate_lock()
@@ -180,7 +179,7 @@ class MainController:
                 logging.debug("Skipping publish...")
 
         elif event.event_type == MainControllerEventType.GO_TO_SLEEP:
-            logging.debug("WAITING FOR PUBLISHED TO CLOUD")
+            logging.debug("WAITING FOR DATA TO BE PUBLISHED TO CLOUD")
             if self.published_to_cloud:
                 logging.debug("GOT PUBLISHED TO CLOUD")
             else:
