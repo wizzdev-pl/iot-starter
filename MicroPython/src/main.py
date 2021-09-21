@@ -11,7 +11,7 @@ def main():
     logging.debug("=== MAIN START ===")
 
     # Increase stack size per thread this increases micropython recursion depth
-    _thread.stack_size(8192 * 3)
+    _thread.stack_size(8192 * 2)
 
     # Read and parse configuration from config.json
     utils.init()

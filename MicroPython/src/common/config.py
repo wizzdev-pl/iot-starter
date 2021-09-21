@@ -100,9 +100,12 @@ DEFAULT_IBM_PASSWORD = ""
 DEFAULT_IBM_EVENT_ID =""
 DEFAULT_IBM_DEVICE_TYPE = "IoTStarter"
 DEFAULT_IBM_TOPIC = 'iot-2/evt/{}/fmt/json'.format(
-    DEFAULT_IBM_EVENT_ID
-)
+     DEFAULT_IBM_EVENT_ID
+ )
+#DEFAULT_IBM_TOPIC = 'iot-2/evt/topi/fmt/json'
+
 DEFAULT_IBM_HOST = '{}.messaging.internetofthings.ibmcloud.com'.format(DEFAULT_IBM_ORGANISATION_ID)
+#'tf2veq.messaging.internetofthings.ibmcloud.com'
 #DEFAULT_IBM_CLIENT_ID = 'd:tf2veq:IoTStarter:IoTStarter-test'
 DEFAULT_IBM_CLIENT_ID = 'd:{}:{}:{}'.format(
     DEFAULT_IBM_ORGANISATION_ID, DEFAULT_IBM_DEVICE_TYPE, DEFAULT_IBM_DEVICE_ID
@@ -409,7 +412,7 @@ class ESPConfig:
         config_dict['ibm_password'] = self.ibm_password
         config_dict['ibm_event_id'] = self.ibm_event_id
         config_dict['ibm_device_type']= self.ibm_device_type
-        config_dict['topic']=self.ibm_topic
+        config_dict['ibm_topic']=self.ibm_topic
         config_dict['ibm_client_id'] = self.ibm_client_id
 
         return config_dict

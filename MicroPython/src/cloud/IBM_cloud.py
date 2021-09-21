@@ -95,8 +95,9 @@ class IBMCloud(CloudProvider):
             "ibm_event_id", config.DEFAULT_IBM_EVENT_ID)
         config.cfg.ibm_device_type = ibm_configuration.get(
             "ibm_device_type", config.DEFAULT_IBM_DEVICE_TYPE)
-        config.cfg.ibm_topic = ibm_configuration.get(
-            "ibm_topic", config.DEFAULT_IBM_TOPIC)
+        config.cfg.ibm_topic = 'iot-2/evt/{}/fmt/json'.format(
+            config.cfg.ibm_event_id
+        )
 
         config.cfg.ibm_client_id = ibm_configuration.get(
             "ibm_client_id", config.DEFAULT_IBM_CLIENT_ID
@@ -104,8 +105,8 @@ class IBMCloud(CloudProvider):
         config.cfg.ibm_client_id = 'd:{}:{}:{}'.format(
             config.cfg.ibm_organisation_id, config.cfg.ibm_device_type, config.cfg.ibm_device_id
         )
-        config.cfg.ibm_host = 'iot-2/evt/{}/fmt/json'.format(
-            config.cfg.ibm_event_id)
+        config.cfg.ibm_host = '{}.messaging.internetofthings.ibmcloud.com'.format(
+            config.cfg.ibm_organisation_id)
 
         self.publish_success_topic = config.cfg.kaa_topic + '/status'
         self.publish_error_topic = config.cfg.kaa_topic + '/error'

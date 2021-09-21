@@ -22,8 +22,5 @@ collect()
 debug("Free memory: " + str(mem_free()))
 fs_stat = statvfs('//')
 debug("Free flash: {} MB".format((fs_stat[0]*fs_stat[3])/1048576))
-debug("Optimalisation level: []".format(micropython.opt_level()))
-micropython.opt_level(3)
-debug("Optimalisation level: [{}]".format(micropython.opt_level()))
-micropython.alloc_emergency_exception_buf(1000)
+
 del fs_stat
