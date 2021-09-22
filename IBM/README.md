@@ -1,4 +1,4 @@
-# Set up account and device on IBM Watson IoT platform
+﻿# Set up account and device on IBM Watson IoT platform
 The instruction walks you through the process of creating your own IoT device in just a few steps.
 
 An example dashboard that might be created can look like this:
@@ -36,20 +36,20 @@ https://<org_id>.internetofthings.ibmcloud.com/dashboard/#/overview Where org_id
 
 ### 3. Create a device
 
-1.In your IBM Watson IoT Platform dashboard, hover over the left side panel, and choose "Devices"
-2.Click "Add Device" in the top right corner
-3.Create a device type. The device type name must be no more than 36 characters and contain only: Alpha-numeric characters, Hyphens(-), Underscores(_) and Periods(.). For example (IoTStarter)
-4.Enter a device ID and click "Next"
-5.Optional: Enter device type attributes and metadata and click "Next". (You can add and edit it later)
-6.Enter an Authentication Token or click "Next" to auto-generate a Token.
-7.Verify your information about the device and select "Finish" to add the device
-8.IMPORTANT: Save your device credentials, as you will need them to connect a device. The Authentication token is non-recoverable.
+1. In your IBM Watson IoT Platform dashboard, hover over the left side panel, and choose "Devices".
+2. Click "Add Device" in the top right corner.
+3. Create a device type. The device type name must be no more than 36 characters and contain only: Alpha-numeric characters, Hyphens(-), Underscores(_) and Periods(.). For example (IoTStarter)
+4. Enter a device ID and click "Next".
+5. Optional: Enter device type attributes and metadata and click "Next". (You can add and edit it later)
+6. Enter an Authentication Token or click "Next" to auto-generate a Token.
+7. Verify your information about the device and select "Finish" to add the device
+8. IMPORTANT: Save your device credentials, as you will need them to connect a device. The Authentication token is non-recoverable.
 
 After all steps above, you should have saved five things:
-    -Organization ID
-    -Device Type
-    -Device ID
-    -Authentication Method: "use-token-auth" by default
-    -Authentication Token
+    • Organization ID
+    • Device Type
+    • Device ID
+    • Authentication Method: "use-token-auth" by default
+    • Authentication Token
 
 

@@ -8,6 +8,7 @@ This repository contains the WizzDev mobile IoT application in the "Starter" ver
 - [ThingsBoard](https://thingsboard.io/): directly on the dashboard in ThingsBoard local page
 - [Blynk](https://blynk.io/): directly on the dashboard on mobile app or on the website
 - [IBM](https://internetofthings.ibmcloud.com/): directly on the IBM Watson, on the created dashboard for a device
+
 The board was programmed using MicroPython, which is a Python implementation for embedded devices. If you are a novice and / or just want to try a solution that works without putting much work into it, we recommend using Kaa cloud which is much faster to set up.
 
 
@@ -194,7 +195,7 @@ You can view your data on the dashboard in either the Blynk.Console in a "Web Da
 
 ### Dashboard
 
-After you connected your device, you can log in again to your IBM Watson IoT Platform account. You can select your device and check the Recent Events and connection Logs. To create a dashboard, hover over the left side panel and chose Boards. While creating a Widget, chose the device and event_id from which the data will be displayed.
+After you connected your device, you can log in again to your IBM Watson IoT Platform account. You can select your device and check the Recent Events and connection Logs. To create a dashboard, hover over the left side panel and chose Boards. While creating a Widget, chose the device and event_id from which the data will be displayed.<br>
 Note, that IBM does not have a database implemented by default, no historical data is shown on your dashboard. Only recent events, that were sent while your dashboard is open are displayed.
 
 
