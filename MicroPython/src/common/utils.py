@@ -209,7 +209,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_cred
     try:
         wireless_controller.configure_station()
     except Exception as e:
-        logging.info("Failed to connect to wifi {}".format(e))
+        logging.info("Failed to connect to wifi - {}".format(e))
         try:
             wireless_controller.disconnect_station()
         except Exception:

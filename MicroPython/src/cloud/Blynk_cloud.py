@@ -1,6 +1,5 @@
 import gc
 import logging
-import machine
 import ujson
 import urequests
 import utime
@@ -11,7 +10,6 @@ from common import config, utils
 from common.utils import ConnectionError
 from communication.wirerless_connection_controller import (
     WirelessConnectionController, get_wireless_connection_controller_instance)
-from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -45,37 +43,6 @@ class BlynkCloud(CloudProvider):
                 return False
 
         return True
-
-    def device_configuration(self, wifi_credentials: list[dict]) -> int:
-        """
-        Configures device in the cloud. Function used as hook to web_app.
-        :param wifi_credentials: parameters to connect to wifi.
-        :return: Error code (0 - OK, 1 - Error).
-        """
-        logging.debug("Wifi access point configuration:")
-
-        for access_point in wifi_credentials:
-            logging.info("Ssid: {} Password: {}".format(
-                access_point["ssid"], access_point["password"]))
-
-        wireless_controller = get_wireless_connection_controller_instance()
-        try:
-            utils.connect_to_wifi(wireless_controller, wifi_credentials)
-            logging.info(wireless_controller.sta_handler.ifconfig())
-            wireless_controller.disconnect_station()
-            config.cfg.access_points = wifi_credentials
-        except Exception as e:
-            logging.error("Exception caught: {}".format(e))
-            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
-            print("A")
-            config.cfg.save()
-            return MainControllerEventType.ERROR_OCCURRED
-
-        config.cfg.ap_config_done = True
-        config.cfg.save()
-        machine.reset()
-
-        return 0
 
     def load_blynk_config_from_file(self) -> dict:
         """
@@ -187,3 +154,4 @@ class BlynkCloud(CloudProvider):
 
         wireless_controller.disconnect_station()
         return True
+        
