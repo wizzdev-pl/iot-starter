@@ -125,7 +125,7 @@ def set_credentials(cloud):
         old_device_id = config.get('ibm_device_id', None)
         old_user = config.get('ibm_user', None)
         old_password = config.get('ibm_password', None)
-        old_organisation_id = config.get('ibm_organisation_id', None)
+        old_organization_id = config.get('ibm_organization_id', None)
         old_event_id = config.get('ibm_event_id', None)
         old_device_type = config.get('ibm_device_type', None)
 
@@ -133,7 +133,7 @@ def set_credentials(cloud):
         device_id = input("Device ID [{}]: ".format(old_device_id))
         user = input("User [{}]: ".format(old_user))
         password = input("Password [{}]: ".format(old_password))
-        organisation_id = input("Organisation ID [{}]: ".format(old_organisation_id))
+        organization_id = input("Organization ID [{}]: ".format(old_organization_id))
         event_id = input("Event ID [{}]: ".format(old_event_id))
         device_type = input("Device Type [{}]: ".format(old_device_type))
         # If values were not updated; leave the old ones
@@ -143,8 +143,8 @@ def set_credentials(cloud):
             config['ibm_user'] = user
         if password:
             config['ibm_password'] = password
-        if organisation_id:
-            config['ibm_organisation_id'] = organisation_id
+        if organization_id:
+            config['ibm_organization_id'] = organization_id
         if event_id:
             config['ibm_event_id'] = event_id
         if device_type:

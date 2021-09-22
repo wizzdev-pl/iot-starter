@@ -95,7 +95,7 @@ DEFAULT_BLYNK_HUMIDITY_PIN = -1
 IBM_CONFIG_PATH = "/resources/ibm_config.json"
 DEFAULT_IBM_DEVICE_ID = ""
 DEFAULT_IBM_USER = "use-token-auth"
-DEFAULT_IBM_ORGANISATION_ID = ""
+DEFAULT_IBM_ORGANIZATION_ID = ""
 DEFAULT_IBM_PASSWORD = ""
 DEFAULT_IBM_EVENT_ID =""
 DEFAULT_IBM_DEVICE_TYPE = "IoTStarter"
@@ -104,11 +104,11 @@ DEFAULT_IBM_TOPIC = 'iot-2/evt/{}/fmt/json'.format(
  )
 #DEFAULT_IBM_TOPIC = 'iot-2/evt/topi/fmt/json'
 
-DEFAULT_IBM_HOST = '{}.messaging.internetofthings.ibmcloud.com'.format(DEFAULT_IBM_ORGANISATION_ID)
+DEFAULT_IBM_HOST = '{}.messaging.internetofthings.ibmcloud.com'.format(DEFAULT_IBM_ORGANIZATION_ID)
 #'tf2veq.messaging.internetofthings.ibmcloud.com'
 #DEFAULT_IBM_CLIENT_ID = 'd:tf2veq:IoTStarter:IoTStarter-test'
 DEFAULT_IBM_CLIENT_ID = 'd:{}:{}:{}'.format(
-    DEFAULT_IBM_ORGANISATION_ID, DEFAULT_IBM_DEVICE_TYPE, DEFAULT_IBM_DEVICE_ID
+    DEFAULT_IBM_ORGANIZATION_ID, DEFAULT_IBM_DEVICE_TYPE, DEFAULT_IBM_DEVICE_ID
 )
 
 class ESPConfig:
@@ -190,7 +190,7 @@ class ESPConfig:
         self.ibm_host = DEFAULT_IBM_HOST
         self.ibm_device_id = DEFAULT_IBM_DEVICE_ID
         self.ibm_user = DEFAULT_IBM_USER
-        self.ibm_organisation_id = DEFAULT_IBM_ORGANISATION_ID
+        self.ibm_organization_id = DEFAULT_IBM_ORGANIZATION_ID
         self.ibm_password =  DEFAULT_IBM_PASSWORD
         self.ibm_event_id = DEFAULT_IBM_EVENT_ID
         self.ibm_device_type = DEFAULT_IBM_DEVICE_TYPE
@@ -315,8 +315,8 @@ class ESPConfig:
                 'ibm_device_id', DEFAULT_IBM_DEVICE_ID)
             self.ibm_user = config_dict.get(
                 'ibm_user', DEFAULT_IBM_USER)
-            self.ibm_organisation_id =  config_dict.get(
-                'ibm_organisation_id', DEFAULT_IBM_ORGANISATION_ID)
+            self.ibm_organization_id =  config_dict.get(
+                'ibm_organization_id', DEFAULT_IBM_ORGANIZATION_ID)
             self.ibm_password = config_dict.get(
                 'ibm_password', DEFAULT_IBM_PASSWORD)
             self.ibm_event_id = config_dict.get(
@@ -408,7 +408,7 @@ class ESPConfig:
         config_dict['ibm_host'] = self.ibm_host
         config_dict['ibm_device_id'] = self.ibm_device_id
         config_dict['ibm_user'] = self.ibm_user
-        config_dict['ibm_organisation_id'] = self.ibm_organisation_id
+        config_dict['ibm_organization_id'] = self.ibm_organization_id
         config_dict['ibm_password'] = self.ibm_password
         config_dict['ibm_event_id'] = self.ibm_event_id
         config_dict['ibm_device_type']= self.ibm_device_type

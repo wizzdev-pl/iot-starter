@@ -89,8 +89,8 @@ class IBMCloud(CloudProvider):
             "ibm_password", config.DEFAULT_IBM_PASSWORD)
         config.cfg.ibm_device_id = ibm_configuration.get(
             "ibm_device_id", config.DEFAULT_IBM_DEVICE_ID)
-        config.cfg.ibm_organisation_id = ibm_configuration.get(
-            "ibm_organisation_id", config.DEFAULT_IBM_ORGANISATION_ID)
+        config.cfg.ibm_organization_id = ibm_configuration.get(
+            "ibm_organization_id", config.DEFAULT_IBM_ORGANIZATION_ID)
         config.cfg.ibm_event_id = ibm_configuration.get(
             "ibm_event_id", config.DEFAULT_IBM_EVENT_ID)
         config.cfg.ibm_device_type = ibm_configuration.get(
@@ -103,10 +103,10 @@ class IBMCloud(CloudProvider):
             "ibm_client_id", config.DEFAULT_IBM_CLIENT_ID
         )
         config.cfg.ibm_client_id = 'd:{}:{}:{}'.format(
-            config.cfg.ibm_organisation_id, config.cfg.ibm_device_type, config.cfg.ibm_device_id
+            config.cfg.ibm_organization_id, config.cfg.ibm_device_type, config.cfg.ibm_device_id
         )
         config.cfg.ibm_host = '{}.messaging.internetofthings.ibmcloud.com'.format(
-            config.cfg.ibm_organisation_id)
+            config.cfg.ibm_organization_id)
 
         self.publish_success_topic = config.cfg.kaa_topic + '/status'
         self.publish_error_topic = config.cfg.kaa_topic + '/error'

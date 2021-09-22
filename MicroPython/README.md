@@ -97,6 +97,17 @@ By now, you should have three things:
  - Virtual pin for humidity
  - Device auth token
 
+### IBM
+Make sure that your IBM Watson cloud is configured. For more information please go to README in "IBM" directory [here](../IBM/README.md).
+
+By now, you should have saved five things:
+    -Organization ID
+    -Device Type
+    -Device ID
+    -Authentication Method: "use-token-auth" by default
+    -Authentication Token
+
+You will also need to provide an Event ID. 
 
 ## Basic Setup of the ESP32
 To set up a new board or flash the old one. <br>
@@ -126,7 +137,7 @@ After finding the correct port, execute:
 ```bash
 python scripts/upload_all.py -p <port> -c <cloud> -s <sensor>
 ```
-where \<cloud\> is your chosen cloud service provider (KAA, AWS, THINGSBOARD or BLYNK).<br>
+where \<cloud\> is your chosen cloud service provider (KAA, AWS, THINGSBOARD, BLYNK or IBM).<br>
 where \<sensor\> is your currently used sensor (DHT11, DHT22 or BME280). Defaults to DHT22.<br>
 After flashing the board please reset it using button EN button.
 
