@@ -5,7 +5,6 @@ import utime
 
 from umqtt.simple import MQTTClient  # micropython-umqtt library
 
-from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import Providers
 from common import config, utils
 
@@ -21,6 +20,7 @@ class MQTTCommunicator:
         self.timeout = timeout
 
         if cloud_provider == Providers.AWS:
+            from cloud.AWS_cloud import AWSCloud
             # Secure socket layer MQTT communication
             certificates_existence, aws_certificate, aws_key = AWSCloud.read_certificates(True)
             if not certificates_existence:
@@ -81,6 +81,20 @@ class MQTTCommunicator:
                 user=self.username,
                 password=self.password
             )
+        elif cloud_provider == Providers.IBM:
+            self.port = config.cfg.mqtt_port
+            self.server = config.cfg.ibm_host
+            self.client_id = config.cfg.ibm_client_id
+            self.username = config.cfg.ibm_user
+            self.password = config.cfg.ibm_password
+            self.MQTT_client = MQTTClient(
+                client_id=self.client_id,
+                server=self.server,
+                port=self.port,
+                keepalive=self.timeout,
+                user=self.username,
+                password=self.password
+                )
 
         else:
             # Not implemented for other clouds yet
@@ -210,7 +224,7 @@ class MQTTCommunicator:
         try:
             # if qos == 1 it's a blocking method
             if self.publish(data=ujson.dumps(mqtt_message), topic=topic, qos=qos):
-                if config.cfg.cloud_provider in (Providers.AWS, Providers.THINGSBOARD):
+                if config.cfg.cloud_provider in (Providers.AWS, Providers.THINGSBOARD, Providers.IBM):
                     logging.info("Publishing message successful!")
                 # Kaa subscribes to specific topics to know if publish is successful or not
                 return True

@@ -1,13 +1,9 @@
 import _thread
 import logging
-from cloud.Blynk_cloud import BlynkCloud
 import machine
 import utime
 
-from cloud.AWS_cloud import AWSCloud
 from cloud.cloud_interface import CloudProvider, Providers
-from cloud.KAA_cloud import KAACloud
-from cloud.Things_cloud import ThingsBoardCloud
 from common import config, utils
 from communication import wirerless_connection_controller
 from data_acquisition import data_acquisitor
@@ -62,7 +58,7 @@ class MainController:
                           start_data_acquisition=self.start_data_acquisition_hook,
                           get_status_hook=self.get_status)
 
-        elif config.cfg.cloud_provider in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK):
+        elif config.cfg.cloud_provider in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK, Providers.IBM):
             web_app.setup(
                 get_measurement_hook=self.get_measurement,
                 configure_device_hook=self.cloud_provider.device_configuration,
@@ -109,13 +105,20 @@ class MainController:
         :return: CloudProvider
         """
         if config.cfg.cloud_provider == Providers.AWS:
+            from cloud.AWS_cloud import AWSCloud
             return AWSCloud()
         elif config.cfg.cloud_provider == Providers.KAA:
+            from cloud.KAA_cloud import KAACloud
             return KAACloud()
         elif config.cfg.cloud_provider == Providers.THINGSBOARD:
+            from cloud.ThingsBoard_cloud import ThingsBoardCloud
             return ThingsBoardCloud()
         elif config.cfg.cloud_provider == Providers.BLYNK:
+            from cloud.Blynk_cloud import BlynkCloud
             return BlynkCloud()
+        elif config.cfg.cloud_provider == Providers.IBM:
+            from cloud.IBM_cloud import IBMCloud
+            return IBMCloud()
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
@@ -173,17 +176,17 @@ class MainController:
             if self.got_sensor_data:
                 logging.debug("GOT SENSOR DATA")
                 logging.debug("Publishing data to cloud")
-                self.cloud_provider.publish_data(self.data_acquisitor.data)
-                self.published_to_cloud = True
+                self.published_to_cloud = self.cloud_provider.publish_data(self.data_acquisitor.data)
             else:
                 logging.debug("FAILED GETTING SENSOR DATA")
                 logging.debug("Skipping publish...")
 
         elif event.event_type == MainControllerEventType.GO_TO_SLEEP:
-
+            logging.debug("WAITING FOR DATA TO BE PUBLISHED TO CLOUD")
             if self.published_to_cloud:
-                logging.debug("WAITING FOR PUBLISHED TO CLOUD")
                 logging.debug("GOT PUBLISHED TO CLOUD")
+            else:
+                logging.debug("COULD NOT PUBLISH TO CLOUD")
 
             self.go_to_sleep(event)
 
@@ -264,6 +267,7 @@ class MainController:
 
             mqtt_communicator.disconnect()
         else:
+            from cloud.Blynk_cloud import BlynkCloud
             wireless_controller = BlynkCloud.wifi_connect(sync_time=True)
 
         wireless_controller.disconnect_station()

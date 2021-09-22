@@ -1,6 +1,5 @@
 import gc
 import logging
-import machine
 import ujson
 import urequests
 import utime
@@ -11,7 +10,6 @@ from common import config, utils
 from common.utils import ConnectionError
 from communication.wirerless_connection_controller import (
     WirelessConnectionController, get_wireless_connection_controller_instance)
-from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
@@ -45,35 +43,6 @@ class BlynkCloud(CloudProvider):
                 return False
 
         return True
-
-    def device_configuration(self, data: list[dict]) -> int:
-        """
-        Configures device in the cloud. Function used as hook to web_app.
-        :param data: parameters to connect to wifi.
-        :return: Error code (0 - OK, 1 - Error).
-        """
-        logging.debug("Wifi access point configuration:")
-
-        for access_point in data:
-            logging.info("Ssid: {} Password: {}".format(
-                access_point["ssid"], access_point["password"]))
-
-        wireless_controller = get_wireless_connection_controller_instance()
-        try:
-            utils.connect_to_wifi(wireless_controller, data)
-            logging.info(wireless_controller.sta_handler.ifconfig())
-            config.cfg.access_points = data
-        except Exception as e:
-            logging.error("Exception caught: {}".format(e))
-            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
-            config.cfg.save()
-            return MainControllerEventType.ERROR_OCCURRED
-
-        config.cfg.ap_config_done = True
-        config.cfg.save()
-        machine.reset()
-
-        return 0
 
     def load_blynk_config_from_file(self) -> dict:
         """
@@ -145,8 +114,10 @@ class BlynkCloud(CloudProvider):
 
         return wireless_controller
 
-    def publish_data(self, data):
+    def publish_data(self, data) -> bool:
         wireless_controller = BlynkCloud.wifi_connect(sync_time=False)
+        if not wireless_controller:
+            return False
 
         data = self._format_data(data)
         temperature, humidity = data.get(
@@ -154,14 +125,21 @@ class BlynkCloud(CloudProvider):
         logging.debug("data to send = {}".format(data))
 
         if temperature is None or humidity is None:
-            raise InvalidData("Invalid data format!")
+            logging.error("Invalid data format!")
+            wireless_controller.disconnect_station()
+            return False
+        
+        try:
+            self.blynk.connect()
+            self.blynk.run()
 
-        self.blynk.connect()
-        self.blynk.run()
-
-        # Send data
-        self.blynk.virtual_write(self.temperature_pin, temperature)
-        self.blynk.virtual_write(self.humidity_pin, humidity)
+            # Send data
+            self.blynk.virtual_write(self.temperature_pin, temperature)
+            self.blynk.virtual_write(self.humidity_pin, humidity)
+        except Exception as e:
+            logging.error("BlynkCloud publish_data() exception: {}".format(e))
+            wireless_controller.disconnect_station()
+            return False
 
         gc.collect()
         utime.sleep(1)
@@ -175,3 +153,5 @@ class BlynkCloud(CloudProvider):
             logging.info("Operation successful!")
 
         wireless_controller.disconnect_station()
+        return True
+        

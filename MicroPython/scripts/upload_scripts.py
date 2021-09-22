@@ -16,7 +16,6 @@ esp_board = None
 
 DEVICE_RESOURCES_FILE_DIR = "/resources"
 
-
 def remove_some_dirs_from_path():
     # because there may be a library that interferes with ampy (and actually is)
     dirs_to_remove = ['lib', 'stabs']
@@ -40,10 +39,12 @@ CACHE = {
 }
 
 
-def is_ignored_file(file: str):
+def is_ignored_file(file: str, cloud: str, config_name: str):
     if file.endswith('.orig'):
         return True
     if file.endswith('.pyc'):
+        return True
+    if file.endswith('.json') and cloud.lower() not in file.lower() and file != config_name:
         return True
     if file in ['__pycache__']:
         return True
@@ -97,14 +98,23 @@ def dev_create_dir(path: str, skip_subpaths=True):
     _create_dir(path=path)
 
 
-def upload_dir(repo_path: str, device_path):
+def upload_dir(repo_path: str, device_path, cloud: str, config_name: str):
     if device_path:
         dev_create_dir(path=device_path, skip_subpaths=False)
     full_repo_path = os.path.join(ROOT_DIR, repo_path)
 
     for file_name in os.listdir(full_repo_path):
-        if is_ignored_file(file_name):
+        if is_ignored_file(file_name, cloud, config_name):
             continue
+        
+        if 'cloud' in device_path:
+            if cloud.lower() not in file_name.lower() and 'interface' not in file_name:
+                continue
+        
+        if cloud.lower() != 'blynk':
+            if file_name == 'BlynkLib.py':
+                continue
+
         full_repo_file_path = os.path.join(full_repo_path, file_name)
         if os.path.isfile(full_repo_file_path):
             if device_path:
@@ -124,7 +134,7 @@ def upload_dir(repo_path: str, device_path):
                 MICROPYTHON_FILESYSTEM_SEPARATOR + file_name
 
             upload_dir(repo_path=full_repo_file_path,
-                       device_path=devive_directory_name)
+                       device_path=devive_directory_name, cloud=cloud, config_name=config_name)
 
 
 def _read_commit_info():
@@ -166,7 +176,7 @@ def parse_arguments():
     return args
 
 
-def flash_scripts(port, cloud_config_file_path):
+def flash_scripts(port, cloud_config_file_path, cloud, config_name):
     global esp_board
 
     remove_some_dirs_from_path()
@@ -179,7 +189,7 @@ def flash_scripts(port, cloud_config_file_path):
         esp_board.close()
         sys.exit(1)
 
-    upload_dir(repo_path='src', device_path='')
+    upload_dir(repo_path='src', device_path='', cloud=cloud, config_name=config_name)
     dev_create_dir(DEVICE_RESOURCES_FILE_DIR)
 
     cloud_config_device_path = DEVICE_RESOURCES_FILE_DIR + \

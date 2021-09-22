@@ -8,9 +8,7 @@ from common.cloud_providers import Providers
 from generate_terraform import save_terraform_output_as_file
 from upload_micropython import erase_chip, flash_micropython
 from upload_scripts import flash_scripts
-
-CLOUD_CONFIG_PATH = "src/{}_config.json"
-CONFIG_OUTPUT_PATH = "src/config.json"
+from common.common_variables import CLOUD_CONFIG_PATH, CONFIG_OUTPUT_FILE_NAME, CONFIG_OUTPUT_FILE_PATH
 
 
 def parse_arguments():
@@ -36,7 +34,7 @@ def save_additional_arguments(cloud_provider, sensor_type):
         sensor_type = "DHT22"
 
     cfg = {'cloud_provider': cloud_provider, 'sensor_type': sensor_type}
-    with open(CONFIG_OUTPUT_PATH, 'w') as outfile:
+    with open(CONFIG_OUTPUT_FILE_PATH, 'w') as outfile:
         json.dump(cfg, outfile)
 
 
@@ -48,7 +46,7 @@ if __name__ == '__main__':
         if not os.path.isfile(cloud_config_file_path):
             print("Generating terraform output..")
             save_terraform_output_as_file(cloud_config_file_path)
-    elif args['cloud'] in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK):
+    elif args['cloud'] in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK, Providers.IBM):
         set_credentials(args['cloud'])
     else:
         raise Exception("Wrong cloud provider! Only: {} are valid".format(
@@ -58,4 +56,4 @@ if __name__ == '__main__':
     erase_chip(args['port'])
     flash_micropython(args['port'])
     time.sleep(4)
-    flash_scripts(args['port'], cloud_config_file_path)
+    flash_scripts(args['port'], cloud_config_file_path, args['cloud'], CONFIG_OUTPUT_FILE_NAME)
