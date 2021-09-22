@@ -3,7 +3,6 @@ import logging
 import machine
 import utime
 
-
 from cloud.cloud_interface import CloudProvider, Providers
 from common import config, utils
 from communication import wirerless_connection_controller

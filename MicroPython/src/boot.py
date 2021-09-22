@@ -1,7 +1,6 @@
 from uos import statvfs
 from gc import collect, enable, mem_alloc, mem_free, threshold
 from logging import DEBUG, basicConfig, debug, getLogger
-import micropython
 from common import utils
 
 # Logger config

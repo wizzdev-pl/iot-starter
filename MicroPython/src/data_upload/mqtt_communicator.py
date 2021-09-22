@@ -90,7 +90,6 @@ class MQTTCommunicator:
             self.MQTT_client = MQTTClient(
                 client_id=self.client_id,
                 server=self.server,
-                #server='tf2veq.messaging.internetofthings.ibmcloud.com',
                 port=self.port,
                 keepalive=self.timeout,
                 user=self.username,

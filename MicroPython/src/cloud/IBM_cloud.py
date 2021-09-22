@@ -9,40 +9,6 @@ from cloud.cloud_interface import CloudProvider
 
 
 class IBMCloud(CloudProvider):
-    def __init__(self) -> None:
-        self.publish_success_topic = config.cfg.kaa_topic + '/status'
-        self.publish_error_topic = config.cfg.kaa_topic + '/error'
-
-    def device_configuration(self, data: list[dict]) -> int:
-        """
-        Configures device in the cloud. Function used as hook to web_app.
-        :param data: parameters to connect to wifi.
-        :return: Error code (0 - OK, 1 - Error).
-        """
-        logging.info("Wifi access point configuration:")
-
-        for access_point in data:
-            logging.info("Ssid: {} Password: {}".format(
-                access_point["ssid"], access_point["password"]))
-
-        wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-        try:
-            utils.connect_to_wifi(wireless_controller, data)
-            logging.info(wireless_controller.sta_handler.ifconfig())
-            self.configure_data()
-            config.cfg.access_points = data
-        except Exception as e:
-            logging.error("Exception caught: {}".format(e))
-            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
-            config.cfg.save()
-            return MainControllerEventType.ERROR_OCCURRED
-
-        config.cfg.ap_config_done = True
-        config.cfg.save()
-        machine.reset()
-
-        return 0
-
     def configure_data(self) -> None:
         """
         Setup data from ibm_config file and save it to general config file
@@ -64,21 +30,13 @@ class IBMCloud(CloudProvider):
             "ibm_event_id", config.DEFAULT_IBM_EVENT_ID)
         config.cfg.ibm_device_type = ibm_configuration.get(
             "ibm_device_type", config.DEFAULT_IBM_DEVICE_TYPE)
-        config.cfg.ibm_topic = 'iot-2/evt/{}/fmt/json'.format(
-            config.cfg.ibm_event_id
-        )
 
-        config.cfg.ibm_client_id = ibm_configuration.get(
-            "ibm_client_id", config.DEFAULT_IBM_CLIENT_ID
-        )
         config.cfg.ibm_client_id = 'd:{}:{}:{}'.format(
-            config.cfg.ibm_organization_id, config.cfg.ibm_device_type, config.cfg.ibm_device_id
-        )
+            config.cfg.ibm_organization_id, config.cfg.ibm_device_type, config.cfg.ibm_device_id)
+        config.cfg.ibm_topic = 'iot-2/evt/{}/fmt/json'.format(
+            config.cfg.ibm_event_id)
         config.cfg.ibm_host = '{}.messaging.internetofthings.ibmcloud.com'.format(
             config.cfg.ibm_organization_id)
-
-        self.publish_success_topic = config.cfg.kaa_topic + '/status'
-        self.publish_error_topic = config.cfg.kaa_topic + '/error'
 
         config.cfg.save()
 
@@ -109,7 +67,7 @@ class IBMCloud(CloudProvider):
 
         return formatted_data
 
-    def publish_data(self, data):
+    def publish_data(self, data) -> bool:
         wireless_controller, mqtt_communicator = utils.get_wifi_and_cloud_handlers(
             sync_time=False
         )
@@ -118,23 +76,27 @@ class IBMCloud(CloudProvider):
 
         logging.debug("data to send = {}".format(data))
 
-        ret = mqtt_communicator.publish_message(
+        message_published = mqtt_communicator.publish_message(
             payload=data, topic=config.cfg.ibm_topic, qos=config.cfg.QOS
         )
-        if ret == False:
+        if not message_published:
             for _ in range(3):
-                ret = mqtt_communicator.publish_message(
+                message_published = mqtt_communicator.publish_message(
                     payload=data, topic=config.cfg.ibm_topic, qos=config.cfg.QOS
                 )
                 logging.debug(
                     "Trying to send data again"
                 )
-                if ret:
+                if message_published:
                     break
             else:
                 logging.debug(
                     "Tried to send data three times, failed! Aborting current measurement."
                 )
+                mqtt_communicator.disconnect()
+                wireless_controller.disconnect_station()
+                return False
 
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
+        return True

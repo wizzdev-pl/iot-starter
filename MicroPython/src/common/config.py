@@ -99,18 +99,15 @@ DEFAULT_IBM_USER = "use-token-auth"
 DEFAULT_IBM_ORGANIZATION_ID = ""
 DEFAULT_IBM_PASSWORD = ""
 DEFAULT_IBM_EVENT_ID =""
-DEFAULT_IBM_DEVICE_TYPE = "IoTStarter"
+DEFAULT_IBM_DEVICE_TYPE = ""
+DEFAULT_IBM_CLIENT_ID = ""
 DEFAULT_IBM_TOPIC = 'iot-2/evt/{}/fmt/json'.format(
      DEFAULT_IBM_EVENT_ID
  )
-#DEFAULT_IBM_TOPIC = 'iot-2/evt/topi/fmt/json'
-
-DEFAULT_IBM_HOST = '{}.messaging.internetofthings.ibmcloud.com'.format(DEFAULT_IBM_ORGANIZATION_ID)
-#'tf2veq.messaging.internetofthings.ibmcloud.com'
-#DEFAULT_IBM_CLIENT_ID = 'd:tf2veq:IoTStarter:IoTStarter-test'
-DEFAULT_IBM_CLIENT_ID = 'd:{}:{}:{}'.format(
-    DEFAULT_IBM_ORGANIZATION_ID, DEFAULT_IBM_DEVICE_TYPE, DEFAULT_IBM_DEVICE_ID
+DEFAULT_IBM_HOST = '{}.messaging.internetofthings.ibmcloud.com'.format(
+    DEFAULT_IBM_ORGANIZATION_ID
 )
+
 
 class ESPConfig:
     """
