@@ -45,11 +45,10 @@ https://<org_id>.internetofthings.ibmcloud.com/dashboard/#/overview Where org_id
 7. Verify your information about the device and select "Finish" to add the device
 8. IMPORTANT: Save your device credentials, as you will need them to connect a device. The Authentication token is non-recoverable.
 
-After all steps above, you should have saved five things:
-    • Organization ID
-    • Device Type
-    • Device ID
-    • Authentication Method: "use-token-auth" by default
-    • Authentication Token
-
+After all steps above, you should have five things:
+ - Organization ID
+ - Device Type
+ - Device ID
+ - Authentication Method: "use-token-auth" by default
+ - Authentication Token
 

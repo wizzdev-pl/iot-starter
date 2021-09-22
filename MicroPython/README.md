@@ -100,12 +100,13 @@ By now, you should have three things:
 ### IBM
 Make sure that your IBM Watson cloud is configured. For more information please go to README in "IBM" directory [here](../IBM/README.md).
 
-By now, you should have saved five things:
-    • Organization ID
-    • Device Type
-    • Device ID
-    • Authentication Method: "use-token-auth" by default
-    • Authentication Token
+By now, you should have five things:
+ - Organization ID
+ - Device Type
+ - Device ID
+ - Authentication Method: "use-token-auth" by default
+ - Authentication Token
+
 
 
 You will also need to provide an Event ID. 
