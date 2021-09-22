@@ -46,7 +46,7 @@ if __name__ == '__main__':
         if not os.path.isfile(cloud_config_file_path):
             print("Generating terraform output..")
             save_terraform_output_as_file(cloud_config_file_path)
-    elif args['cloud'] in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK):
+    elif args['cloud'] in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK, Providers.IBM):
         set_credentials(args['cloud'])
     else:
         raise Exception("Wrong cloud provider! Only: {} are valid".format(

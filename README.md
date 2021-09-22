@@ -7,6 +7,7 @@ This repository contains the WizzDev mobile IoT application in the "Starter" ver
 - [KAA](https://www.kaaiot.com/): directly on the Kaa on the created dashboard for a device
 - [ThingsBoard](https://thingsboard.io/): directly on the dashboard in ThingsBoard local page
 - [Blynk](https://blynk.io/): directly on the dashboard on mobile app or on the website
+- [IBM](https://internetofthings.ibmcloud.com/): directly on the IBM Watson, on the created dashboard for a device
 
 The board was programmed using MicroPython, which is a Python implementation for embedded devices. If you are a novice and / or just want to try a solution that works without putting much work into it, we recommend using Kaa cloud which is much faster to set up.
 
@@ -36,7 +37,7 @@ sudo dnf install git wget bison gperf python python-pip python3-virtualenv pytho
 
 
 ### Python 3, PIP 
-Python can be downloaded from this [website](https://www.python.org/downloads) (in case of using [Anaconda environment](https://www.anaconda.com/products/individual), please skip this part and refer to the next section). The Python version required for this project is: either 3.6 or 3.7 (preferably). Please follow installation instructions from their website. 
+Python can be downloaded from this [website](https://www.python.org/downloads) (in case of using [Anaconda environment](https://www.anaconda.com/products/individual), please skip this part and refer to the next section). The Python version required for this project is 3.7. Please follow installation instructions from their website. 
 After installation, you can check if it is installed correctly by typing the following commands in your terminal:
 
 * Linux
@@ -146,6 +147,9 @@ As ThingsBoard is hosted locally on your device you need to configure it first. 
 ### **Blynk configuration:**
 In order to set up Blynk, you'll need to create manually a device. Detailed description of this procedure is available in the "Blynk" directory [here](Blynk/README.md).
 
+### **IBM configuration:**
+IBM configuration requires to create a free account and add devices manually. Detailed description of this procedure is available in the "IBM" directory [here](IBM/README.md).
+
 ---
 ## **After cloud setup:**
 
@@ -187,7 +191,13 @@ To visualize data you need to create a dashboard. Whole process of setting up da
 
 You can view your data on the dashboard in either the Blynk.Console in a "Web Dashboard" or on the mobile app in a "Mobile Dashboard". For each device template you can set your "Web Dashboard" ("Templates" --> \<your template\> --> "Web Dashboard" (edit option)) in the Blynk.Console or a "Mobile Dashboard" directly in "Blynk IoT" mobile app.
 
----
+## **For IBM:**
+
+### Dashboard
+
+After you connected your device, you can log in again to your IBM Watson IoT Platform account. You can select your device and check the Recent Events and connection Logs. To create a dashboard, hover over the left side panel and chose Boards. While creating a Widget, chose the device and event_id from which the data will be displayed.<br>
+Note, that IBM does not have a database implemented by default, no historical data is shown on your dashboard. Only recent events, that were sent while your dashboard is open are displayed.
+
 
 ## **For AWS:**
 

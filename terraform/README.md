@@ -91,7 +91,6 @@ cd iot-starter
 
 Run the following commands to install requirements:
 ```
-pip install pyserial cryptography click future pyelftools setuptools
 pip install -r requirements.txt
 ```
 ### 3. Configure aws credentials:

@@ -92,6 +92,22 @@ DEFAULT_BLYNK_AUTH_TOKEN = ''
 DEFAULT_BLYNK_TEMPERATURE_PIN = -1
 DEFAULT_BLYNK_HUMIDITY_PIN = -1
 
+# IBM stuff
+IBM_CONFIG_PATH = "/resources/ibm_config.json"
+DEFAULT_IBM_DEVICE_ID = ""
+DEFAULT_IBM_USER = "use-token-auth"
+DEFAULT_IBM_ORGANIZATION_ID = ""
+DEFAULT_IBM_PASSWORD = ""
+DEFAULT_IBM_EVENT_ID =""
+DEFAULT_IBM_DEVICE_TYPE = ""
+DEFAULT_IBM_CLIENT_ID = ""
+DEFAULT_IBM_TOPIC = 'iot-2/evt/{}/fmt/json'.format(
+     DEFAULT_IBM_EVENT_ID
+ )
+DEFAULT_IBM_HOST = '{}.messaging.internetofthings.ibmcloud.com'.format(
+    DEFAULT_IBM_ORGANIZATION_ID
+)
+
 
 class ESPConfig:
     """
@@ -168,6 +184,19 @@ class ESPConfig:
         self.blynk_auth_token = DEFAULT_BLYNK_AUTH_TOKEN
         self.blynk_temperature_pin = DEFAULT_BLYNK_TEMPERATURE_PIN
         self.blynk_humidity_pin = DEFAULT_BLYNK_HUMIDITY_PIN
+
+        # IBM
+        self.ibm_host = DEFAULT_IBM_HOST
+        self.ibm_device_id = DEFAULT_IBM_DEVICE_ID
+        self.ibm_user = DEFAULT_IBM_USER
+        self.ibm_organization_id = DEFAULT_IBM_ORGANIZATION_ID
+        self.ibm_password =  DEFAULT_IBM_PASSWORD
+        self.ibm_event_id = DEFAULT_IBM_EVENT_ID
+        self.ibm_device_type = DEFAULT_IBM_DEVICE_TYPE
+        self.ibm_topic = DEFAULT_IBM_TOPIC
+        self.ibm_client_id = DEFAULT_IBM_CLIENT_ID
+
+
 
     def load_from_file(self) -> None:
         """
@@ -280,6 +309,28 @@ class ESPConfig:
             self.blynk_humidity_pin = config_dict.get(
                 'blynk_humidity_pin', DEFAULT_BLYNK_HUMIDITY_PIN)
 
+            # IBM
+            self.ibm_host = config_dict.get(
+                'ibm_host', DEFAULT_IBM_HOST)
+            self.ibm_device_id = config_dict.get(
+                'ibm_device_id', DEFAULT_IBM_DEVICE_ID)
+            self.ibm_user = config_dict.get(
+                'ibm_user', DEFAULT_IBM_USER)
+            self.ibm_organization_id =  config_dict.get(
+                'ibm_organization_id', DEFAULT_IBM_ORGANIZATION_ID)
+            self.ibm_password = config_dict.get(
+                'ibm_password', DEFAULT_IBM_PASSWORD)
+            self.ibm_event_id = config_dict.get(
+                'ibm_event_id', DEFAULT_IBM_EVENT_ID)
+            self.ibm_device_type = config_dict.get(
+                'ibm_device_type', DEFAULT_IBM_DEVICE_TYPE)
+            self.ibm_topic = config_dict.get(
+                'ibm_topic', DEFAULT_IBM_TOPIC)
+            self.ibm_client_id = config_dict.get(
+                'ibm_client_id', DEFAULT_IBM_CLIENT_ID)
+
+
+
             if not self.device_uid:
                 self.device_uid = get_mac_address_as_string()
 
@@ -354,6 +405,17 @@ class ESPConfig:
         config_dict['blynk_auth_token'] = self.blynk_auth_token
         config_dict['blynk_temperature_pin'] = self.blynk_temperature_pin
         config_dict['blynk_humidity_pin'] = self.blynk_humidity_pin
+
+        # IBM
+        config_dict['ibm_host'] = self.ibm_host
+        config_dict['ibm_device_id'] = self.ibm_device_id
+        config_dict['ibm_user'] = self.ibm_user
+        config_dict['ibm_organization_id'] = self.ibm_organization_id
+        config_dict['ibm_password'] = self.ibm_password
+        config_dict['ibm_event_id'] = self.ibm_event_id
+        config_dict['ibm_device_type']= self.ibm_device_type
+        config_dict['ibm_topic']=self.ibm_topic
+        config_dict['ibm_client_id'] = self.ibm_client_id
 
         return config_dict
 

@@ -4,3 +4,9 @@ esptool==2.8
 gitpython==3.1.17
 adafruit-ampy==1.0.5
 docopt>=0.6.2,<0.7
+pyserial==3.5
+cryptography==3.4.8
+click==8.0.1
+future==0.18.2
+pyelftools==0.27
+setuptools==47.1.0

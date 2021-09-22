@@ -58,7 +58,7 @@ class MainController:
                           start_data_acquisition=self.start_data_acquisition_hook,
                           get_status_hook=self.get_status)
 
-        elif config.cfg.cloud_provider in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK):
+        elif config.cfg.cloud_provider in (Providers.KAA, Providers.THINGSBOARD, Providers.BLYNK, Providers.IBM):
             web_app.setup(
                 get_measurement_hook=self.get_measurement,
                 configure_device_hook=self.cloud_provider.device_configuration,
@@ -116,6 +116,9 @@ class MainController:
         elif config.cfg.cloud_provider == Providers.BLYNK:
             from cloud.Blynk_cloud import BlynkCloud
             return BlynkCloud()
+        elif config.cfg.cloud_provider == Providers.IBM:
+            from cloud.IBM_cloud import IBMCloud
+            return IBMCloud()
 
     def process_event(self, event: MainControllerEvent) -> None:
         """
