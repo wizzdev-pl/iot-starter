@@ -106,9 +106,7 @@ By now, you should have five things:
  - Device ID
  - Authentication Method: "use-token-auth" by default
  - Authentication Token
-
-
-
+ 
 You will also need to provide an Event ID. 
 
 ## Basic Setup of the ESP32

@@ -42,7 +42,7 @@ class IBMCloud(CloudProvider):
 
     def load_ibm_config_from_file(self) -> dict:
         """
-        Load configuration of KAA from file.
+        Load configuration of IBM from file.
         :return: Configuration in dict.
         """
         if utils.check_if_file_exists(config.IBM_CONFIG_PATH) == 0:
@@ -55,7 +55,7 @@ class IBMCloud(CloudProvider):
 
     def _format_data(self, data: dict) -> dict:
         """
-        Helper function for formatting data to match Kaa expected input
+        Helper function for formatting data to match IBM expected input
         :param data: Data in dict to be formatted
         :return dict: Formatted data
         """

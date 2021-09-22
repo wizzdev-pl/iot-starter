@@ -14,7 +14,6 @@ An example dashboard that might be created can look like this:
 After you've created virtual environment, your current directory should be "iot-starter"
 
 ``` 
-pip install pyserial cryptography click future pyelftools setuptools
 pip install -r IBM/requirements.txt
 ```
 
@@ -38,7 +37,7 @@ https://<org_id>.internetofthings.ibmcloud.com/dashboard/#/overview Where org_id
 
 1. In your IBM Watson IoT Platform dashboard, hover over the left side panel, and choose "Devices".
 2. Click "Add Device" in the top right corner.
-3. Create a device type. The device type name must be no more than 36 characters and contain only: Alpha-numeric characters, Hyphens(-), Underscores(_) and Periods(.). For example (IoTStarter)
+3. Create a device type. The device type name can be up to 36 characters long and contain only: Alpha-numeric characters, Hyphens(-), Underscores(_) and Periods(.). For example (IoTStarter)
 4. Enter a device ID and click "Next".
 5. Optional: Enter device type attributes and metadata and click "Next". (You can add and edit it later)
 6. Enter an Authentication Token or click "Next" to auto-generate a Token.

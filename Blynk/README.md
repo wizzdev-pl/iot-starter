@@ -14,7 +14,6 @@ An example web dashboard that might be created can look like this:
 After you've created virtual environment, your current directory should be "iot-starter"
 
 ``` 
-pip install pyserial cryptography click future pyelftools setuptools
 pip install -r Blynk/requirements.txt
 ```
 
