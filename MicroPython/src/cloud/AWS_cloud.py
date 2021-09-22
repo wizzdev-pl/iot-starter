@@ -1,47 +1,15 @@
 import gc
 import logging
-import machine
 import urequests
 
 from os import mkdir
 from ujson import dumps, load
 
 from common import config, utils
-from communication import wirerless_connection_controller
-from controller.main_controller_event import MainControllerEventType
 from cloud.cloud_interface import CloudProvider
 
 
 class AWSCloud(CloudProvider):
-    def device_configuration(self, data: list[dict]) -> int:
-        """
-        Configures device in the cloud. Function used as hook to web_app.
-        :param data: parameters to connect to wifi.
-        :return: Error code (0 - OK, 1 - Error).
-        """
-        logging.info("Wifi access point configuration:")
-
-        for access_point in data:
-            logging.info("Ssid: {} Password: {}".format(
-                access_point["ssid"], access_point["password"]))
-
-        wireless_controller = wirerless_connection_controller.get_wireless_connection_controller_instance()
-        try:
-            utils.connect_to_wifi(wireless_controller, data)
-            logging.info(wireless_controller.sta_handler.ifconfig())
-            config.cfg.access_points = data
-        except Exception as e:
-            logging.error("Exception caught: {}".format(e))
-            config.cfg.access_points = config.DEFAULT_ACCESS_POINTS
-            config.cfg.save()
-            return MainControllerEventType.ERROR_OCCURRED
-
-        config.cfg.ap_config_done = True
-        config.cfg.save()
-        machine.reset()
-
-        return 0
-
     def configure_aws_thing(self) -> bool:
         """
         Register ESP as thing in AWS cloud.
@@ -240,3 +208,4 @@ class AWSCloud(CloudProvider):
         mqtt_communicator.disconnect()
         wireless_controller.disconnect_station()
         return True
+        
