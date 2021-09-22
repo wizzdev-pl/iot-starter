@@ -121,26 +121,23 @@ def set_credentials(cloud):
                 config = json.load(infile)
         else:
             config = {}
+
         print("Please provide IBM credentials:")
         old_device_id = config.get('ibm_device_id', None)
-        old_user = config.get('ibm_user', None)
         old_password = config.get('ibm_password', None)
         old_organization_id = config.get('ibm_organization_id', None)
         old_event_id = config.get('ibm_event_id', None)
         old_device_type = config.get('ibm_device_type', None)
 
 
-        device_id = input("Device ID [{}]: ".format(old_device_id))
-        user = input("User [{}]: ".format(old_user))
-        password = input("Password [{}]: ".format(old_password))
         organization_id = input("Organization ID [{}]: ".format(old_organization_id))
+        password = input("Authentication Token [{}]: ".format(old_password))
         event_id = input("Event ID [{}]: ".format(old_event_id))
         device_type = input("Device Type [{}]: ".format(old_device_type))
+        device_id = input("Device ID [{}]: ".format(old_device_id))
         # If values were not updated; leave the old ones
         if device_id:
             config['ibm_device_id'] = device_id
-        if user:
-            config['ibm_user'] = user
         if password:
             config['ibm_password'] = password
         if organization_id:

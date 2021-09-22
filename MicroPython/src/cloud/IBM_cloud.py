@@ -13,37 +13,6 @@ class IBMCloud(CloudProvider):
         self.publish_success_topic = config.cfg.kaa_topic + '/status'
         self.publish_error_topic = config.cfg.kaa_topic + '/error'
 
-    def receive_message(self, topic, msg) -> None:
-        """
-        Callback method for MQTT client
-        :param topic: Topic of the message received encoded as bytes
-        :param msg: Message received encoded as bytes
-        :return: None 
-        """
-        logging.debug('cloud/IBM_cloud.py/receive_message()')
-        topic = topic.decode()
-
-        # Check if msg is in json format, if not decode as str
-        if b'{' in msg and b'}' in msg:
-            msg = ujson.loads(msg)
-        else:
-            msg = msg.decode()
-
-        if topic == self.publish_success_topic:
-            if msg == '':
-                logging.info('Operation successful\n')
-            else:
-                logging.info(
-                    'Operation successful with return code: {}\n'.format(msg))
-        elif topic == self.publish_error_topic:
-            status_code = msg['statusCode']
-            reason = msg['reasonPhrase']
-            logging.info('Operation failed with error code: {} - reason: {}\n'.format(
-                status_code, reason
-            ))
-        else:
-            logging.info('On topic: {} received msg: {}'.format(topic, msg))
-
     def device_configuration(self, data: list[dict]) -> int:
         """
         Configures device in the cloud. Function used as hook to web_app.
