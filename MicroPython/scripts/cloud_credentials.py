@@ -3,8 +3,7 @@ import json
 
 from common.cloud_providers import Providers
 from common.utilities import file_exists
-
-CLOUD_CONFIG_PATH = "src/{}_config.json"
+from common.common_variables import CLOUD_CONFIG_PATH
 
 
 def set_credentials(cloud):

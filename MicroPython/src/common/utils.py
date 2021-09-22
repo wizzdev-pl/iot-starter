@@ -1,6 +1,6 @@
+import esp32
 import gc
 import logging
-import esp32
 import machine
 import ntptime
 import uos
@@ -162,6 +162,11 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
     try:
         connect_to_wifi(wireless_controller,
                         config.cfg.access_points, sync_time)
+        if config.cfg.wifi_connection_failed:
+            logging.debug("Resetting due to previous problem with WIFI connection")
+            config.cfg.wifi_connection_failed = False
+            config.cfg.save()
+            machine.reset()
         mqtt_communicator = MQTTCommunicator(cloud_provider=config.cfg.cloud_provider,
                                              timeout=config.cfg.mqtt_timeout)
 
@@ -182,6 +187,8 @@ def get_wifi_and_cloud_handlers(sync_time: bool = False) -> (WirelessConnectionC
 
         logging.debug("Unable to publish data. Retrying in {}ms".format(
             config.cfg.data_publishing_period_in_ms))
+        config.cfg.wifi_connection_failed = True
+        config.cfg.save()
         machine.deepsleep(config.cfg.data_publishing_period_in_ms)
 
     return wireless_controller, mqtt_communicator
@@ -202,7 +209,7 @@ def connect_to_wifi(wireless_controller: WirelessConnectionController, wifi_cred
     try:
         wireless_controller.configure_station()
     except Exception as e:
-        logging.info("Failed to connect to wifi {}".format(e))
+        logging.info("Failed to connect to wifi - {}".format(e))
         try:
             wireless_controller.disconnect_station()
         except Exception:
