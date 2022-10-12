@@ -7,7 +7,7 @@
 ## Activate virtual environment.
 
 ```
-cd Micropython
+cd MicroPython
 ```
 
 This step is platform dependent:
