@@ -1,2 +1,2 @@
-pynamodb==4.3.3
-awscli==1.18.17
+pynamodb==5.4.0
+awscli==1.27.72

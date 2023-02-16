@@ -7,23 +7,23 @@
 
 resource "aws_lambda_function" "collect_measurements_lambda" {
   function_name = local.lambda_collect_measurements_name
-  handler = var.lambda_collect_measurements.function_handler
-  timeout = var.lambda_collect_measurements.function_timeout_in_seconds
+  handler       = var.lambda_collect_measurements.function_handler
+  timeout       = var.lambda_collect_measurements.function_timeout_in_seconds
 
-  runtime = "python3.6"
+  runtime     = "python3.8"
   memory_size = 128
 
-  role = aws_iam_role.collect_measurements_iam_role.arn
-  filename = data.archive_file.collect_measurements_lambda_zip.output_path
+  role             = aws_iam_role.collect_measurements_iam_role.arn
+  filename         = data.archive_file.collect_measurements_lambda_zip.output_path
   source_code_hash = data.archive_file.collect_measurements_lambda_zip.output_base64sha256
 
   tags = var.tags
   environment {
     variables = {
       DATABASE_PREFIX = "${var.mode}_db"
-      SENTRY = var.collect_measurements_sentry_dsn
-      IOT_AWS_REGION = var.region
-      MODE = var.mode
+      SENTRY          = var.collect_measurements_sentry_dsn
+      IOT_AWS_REGION  = var.region
+      MODE            = var.mode
     }
   }
 }
@@ -31,9 +31,9 @@ resource "aws_lambda_function" "collect_measurements_lambda" {
 resource "aws_iot_topic_rule" "collect_measurements_iot_core_topic" {
   name = local.lambda_collect_measurements_name_
 
-  sql = "SELECT * FROM 'topic/data'"
+  sql         = "SELECT * FROM 'topic/data'"
   sql_version = "2015-10-08"
-  enabled = true
+  enabled     = true
 
   lambda {
     function_arn = aws_lambda_function.collect_measurements_lambda.arn
@@ -43,7 +43,7 @@ resource "aws_iot_topic_rule" "collect_measurements_iot_core_topic" {
 resource "aws_iam_role" "collect_measurements_iam_role" {
   name = local.lambda_collect_measurements_name
 
-  description = "IAM role for 'collecting measurements'"
+  description        = "IAM role for 'collecting measurements'"
   assume_role_policy = data.aws_iam_policy_document.lambda_standard_role_policy_document.json
 
   tags = var.tags
@@ -74,8 +74,8 @@ data "archive_file" "collect_measurements_lambda_zip" {
   depends_on = [
     null_resource.collect_measurements_lambda_trigger
   ]
-  type = "zip"
-  source_dir = "./.tmp/lambda_collect_measurements"
+  type        = "zip"
+  source_dir  = "./.tmp/lambda_collect_measurements"
   output_path = "./.tmp/${var.lambda_collect_measurements.function_name}.zip"
 }
 

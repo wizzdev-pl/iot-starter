@@ -1,13 +1,13 @@
-pynamodb==4.3.3
-flask==1.1.2
-flask-restx==0.2.0
-flask_accepts
-marshmallow-pynamo-db==0.10.6
-awscli==1.18.17
-pytest==6.0.2
-requests==2.24.0
+pynamodb==5.4.0
+flask==2.2.3
+flask-restx==1.0.6
+flask-accepts==0.18.4
+marshmallow-pynamo-db==1.1.0
+awscli==1.27.72
+pytest==7.2.1
+requests==2.28.2
 flask-lambda-support==0.1.5
-flask_jwt_extended==3.25.0
-sentry_sdk==0.17.4
-werkzeug
+flask-jwt-extended==4.4.4
+sentry_sdk==1.15.0
+werkzeug==2.2.3
 
