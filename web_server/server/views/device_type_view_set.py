@@ -29,7 +29,7 @@ class DeviceTypeAllApi(flask_restx.Resource):
     @device_type_namespace.response(HTTPStatus.CREATED.real,
                                     "Device type was successfully created",
                                     device_type_schema.api_model)
-    @jwt_required
+    @jwt_required()
     def post(self):
         """ Create new device """
         device_type_data = device_type_schema.loads_required(flask.request.data)
@@ -47,7 +47,7 @@ class DeviceTypeSelectedApi(flask_restx.Resource):
         return create_success_response(data=device_type_schema.serialize(device_type))
 
     @device_type_namespace.response(HTTPStatus.NO_CONTENT.real, "Device type was successfully removed")
-    @jwt_required
+    @jwt_required()
     def delete(self, hash_key: str):
         """ Remove selected device type """
         device_type = DeviceTypeService.get(hash_key)
@@ -56,7 +56,7 @@ class DeviceTypeSelectedApi(flask_restx.Resource):
 
     @device_type_namespace.expect(device_type_schema.api_model)
     @device_type_namespace.response(HTTPStatus.OK.real, "Edited device type", device_type_schema.api_model)
-    @jwt_required
+    @jwt_required()
     def put(self, hash_key: str):
         """ Edit selected device type """
         device_type_data = device_type_schema.loads_required(flask.request.data)

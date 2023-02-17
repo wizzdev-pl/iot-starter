@@ -45,7 +45,7 @@ if sentry_dsn:
     sentry_sdk.init(sentry_dsn, environment=os.environ.get("MODE", "undefined"))
 
 
-@jwt.user_claims_loader
+@jwt.additional_claims_loader
 def add_claims_to_access_token(access_level):
     return {'access_level': access_level}
 

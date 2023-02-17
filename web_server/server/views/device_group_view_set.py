@@ -29,7 +29,7 @@ class DeviceGroupAllApi(flask_restx.Resource):
     @device_group_namespace.response(HTTPStatus.CREATED.real,
                                      "Device group was successfully created",
                                      device_group_schema.api_model)
-    @jwt_required
+    @jwt_required()
     def post(self):
         """ Create new device """
         device_group_data = device_group_schema.loads_required(flask.request.data)
@@ -47,7 +47,7 @@ class DeviceGroupSelectedApi(flask_restx.Resource):
         return create_success_response(data=device_group_schema.serialize(device_group))
 
     @device_group_namespace.response(HTTPStatus.NO_CONTENT.real, "Device group was successfully removed")
-    @jwt_required
+    @jwt_required()
     def delete(self, hash_key: str):
         """ Remove selected device group """
         device_group = DeviceGroupService.get(hash_key)
@@ -56,7 +56,7 @@ class DeviceGroupSelectedApi(flask_restx.Resource):
 
     @device_group_namespace.expect(device_group_schema.api_model)
     @device_group_namespace.response(HTTPStatus.OK.real, "Edited device group", device_group_schema.api_model)
-    @jwt_required
+    @jwt_required()
     def put(self, hash_key: str):
         """ Edit selected device group """
         device_group_data = device_group_schema.loads_required(flask.request.data)
