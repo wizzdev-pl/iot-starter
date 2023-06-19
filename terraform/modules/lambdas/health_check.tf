@@ -7,23 +7,23 @@
 
 resource "aws_lambda_function" "health_check_lambda" {
   function_name = local.lambda_health_check_name
-  handler = var.lambda_health_check.function_handler
-  timeout = var.lambda_health_check.function_timeout_in_seconds
+  handler       = var.lambda_health_check.function_handler
+  timeout       = var.lambda_health_check.function_timeout_in_seconds
 
-  runtime = "python3.6"
+  runtime     = "python3.8"
   memory_size = 128
 
-  role = aws_iam_role.health_check_iam_role.arn
-  filename = data.archive_file.health_check_lambda_zip.output_path
+  role             = aws_iam_role.health_check_iam_role.arn
+  filename         = data.archive_file.health_check_lambda_zip.output_path
   source_code_hash = data.archive_file.health_check_lambda_zip.output_base64sha256
 
   tags = var.tags
   environment {
     variables = {
       DATABASE_PREFIX = "${var.mode}_db"
-      SENTRY = var.health_check_sentry_dsn
-      IOT_AWS_REGION = var.region
-      MODE = var.mode
+      SENTRY          = var.health_check_sentry_dsn
+      IOT_AWS_REGION  = var.region
+      MODE            = var.mode
     }
   }
 }
@@ -31,7 +31,7 @@ resource "aws_lambda_function" "health_check_lambda" {
 resource "aws_iam_role" "health_check_iam_role" {
   name = local.lambda_health_check_name
 
-  description = "IAM role for 'collecting measurements'"
+  description        = "IAM role for 'collecting measurements'"
   assume_role_policy = data.aws_iam_policy_document.lambda_standard_role_policy_document.json
 
   tags = var.tags
@@ -44,8 +44,8 @@ resource "aws_iam_role_policy_attachment" "health_check_join_policy" {
 }
 
 resource "aws_cloudwatch_event_rule" "health_check_cloudwatch_event_rule" {
-  name = local.lambda_health_check_name
-  description = "Cron job for ${local.lambda_health_check_name}"
+  name                = local.lambda_health_check_name
+  description         = "Cron job for ${local.lambda_health_check_name}"
   schedule_expression = "rate(${var.lambda_health_check.time_between_runs_in_minutes} minutes)"
 
   tags = var.tags
@@ -53,24 +53,24 @@ resource "aws_cloudwatch_event_rule" "health_check_cloudwatch_event_rule" {
 
 resource "aws_cloudwatch_event_target" "health_check_assign_rule" {
   target_id = "lambda"
-  rule = aws_cloudwatch_event_rule.health_check_cloudwatch_event_rule.name
-  arn = aws_lambda_function.health_check_lambda.arn
+  rule      = aws_cloudwatch_event_rule.health_check_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.health_check_lambda.arn
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_check_foo" {
-  statement_id = "AllowExecutionFromCloudWatch"
-  action = "lambda:InvokeFunction"
-  principal = "events.amazonaws.com"
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  principal     = "events.amazonaws.com"
   function_name = aws_lambda_function.health_check_lambda.function_name
-  source_arn = aws_cloudwatch_event_rule.health_check_cloudwatch_event_rule.arn
+  source_arn    = aws_cloudwatch_event_rule.health_check_cloudwatch_event_rule.arn
 }
 
 data "archive_file" "health_check_lambda_zip" {
   depends_on = [
     null_resource.health_check_lambda_trigger
   ]
-  type = "zip"
-  source_dir = "./.tmp/lambda_health_check"
+  type        = "zip"
+  source_dir  = "./.tmp/lambda_health_check"
   output_path = "./.tmp/${var.lambda_health_check.function_name}.zip"
 }
 

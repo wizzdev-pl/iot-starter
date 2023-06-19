@@ -33,8 +33,8 @@ class DeviceAllApi(flask_restx.Resource):
         return create_success_response(data=device_schema.serialize(devices, many=True))
 
     @device_namespace.expect(device_schema.api_model)
-    @device_namespace.response(HTTPStatus.CREATED.real, "Device and thing was successfully created", device_schema.api_model)
-    @jwt_required
+    @device_namespace.response(HTTPStatus.CREATED.real, "Device and thing was successfully created", [device_schema.api_model])
+    @jwt_required()
     def post(self):
         """ Create new device and new thing """
         device_data = device_schema.loads_required(flask.request.data)
@@ -43,8 +43,8 @@ class DeviceAllApi(flask_restx.Resource):
 
         device = DeviceService.create_device(**device_data)
         device_data = device_schema.serialize(device)
-
         data = dict(device_data, **thing_certificates)
+
         return create_success_response(data=data)
 
 
@@ -58,7 +58,7 @@ class DeviceSelectedApi(flask_restx.Resource):
         return create_success_response(data=device_schema.serialize(device))
 
     @device_namespace.response(HTTPStatus.NO_CONTENT.real, "Device was successfully removed")
-    @jwt_required
+    @jwt_required()
     def delete(self, hash_key: str):
         """ Remove selected device """
         device = DeviceService.get(hash_key)
@@ -67,7 +67,7 @@ class DeviceSelectedApi(flask_restx.Resource):
 
     @device_namespace.expect(device_schema.api_model)
     @device_namespace.response(HTTPStatus.NO_CONTENT.real, "Device was successfully edited")
-    @jwt_required
+    @jwt_required()
     def put(self, hash_key: str):
         """ Edit selected device """
         device_data = device_schema.loads_required(flask.request.data)
@@ -90,7 +90,7 @@ class DeviceSelectedShadowApi(flask_restx.Resource):
 
     @device_namespace.expect(device_shadow_parser)
     @device_namespace.response(HTTPStatus.OK.real, "Selected device shadow")
-    @jwt_required
+    @jwt_required()
     def get(self, hash_key: str):
         """ Get classic shadow for selected device """
         try:

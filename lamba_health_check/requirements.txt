@@ -1,2 +1,2 @@
-sentry_sdk==0.17.4
-requests==2.24.0
+sentry_sdk==1.15.0
+requests==2.28.2
